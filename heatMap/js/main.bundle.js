@@ -185,7 +185,7 @@ function fillDates() {
     while (date.isBefore(curDate)) {
         dates.push({
             m: date.clone(),
-            dt: date.format('LLLL'),
+            dt: date.format('dd, LL'),
         });
         date.add(1, 'day');
     }
@@ -197,8 +197,10 @@ function fillTable(dates, container) {
         item.className = 'heat-item';
         item.classList.add(`heat-item-${Math.floor(Math.random() * 5)}`);
         item.setAttribute('title', dt);
-        if (m.get('date') === 1)
+        if (m.get('date') === 1) {
+            item.classList.add('first-day');
             item.appendChild(getMonth(m));
+        }
         if (index < 7)
             item.appendChild(getDay(m));
         container.appendChild(item);

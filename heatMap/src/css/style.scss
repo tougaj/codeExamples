@@ -1,59 +1,81 @@
 body {
-    font-family: sans-serif;
-    margin: 0;
+	font-family: sans-serif;
+	margin: 0;
 }
 
 .container-outer {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
 
-    .container {
-        $itemSize: 10px;
-        margin: auto;
-        position: relative;
-        display: grid;
-        grid-gap: 4px;
-        grid-auto-flow: column;
-        grid-template-rows: repeat(7, $itemSize);
-        // grid-template-columns: auto;
-        grid-auto-rows: $itemSize;
-        font-size: $itemSize;
-        padding-bottom: $itemSize*1.5;
-        padding-left: 20px;
-        // border: 1px solid red;
+	.container {
+		$itemSize: 10px;
+		margin: auto;
+		position: relative;
+		display: grid;
+		/* csslint ignore:start */
+		grid-gap: 4px;
+		/* csslint ignore:end */
+		grid-auto-flow: column;
+		grid-template-rows: repeat(7, $itemSize);
+		// grid-template-columns: auto;
+		grid-auto-rows: $itemSize;
+		font-size: $itemSize;
+		padding-top: $itemSize * 1.5;
+		padding-left: 20px;
+		// border: 1px solid red;
 
-        .heat-item {
-            border: 1px solid rgba(0, 0, 0, 0.12);
-            width: $itemSize;
-            height: $itemSize;
-            line-height: $itemSize;
+		.heat-item {
+			/* csslint ignore:start */
+			border: 1px solid rgba(0, 0, 0, 0.12);
+			/* csslint ignore:end */
+			width: $itemSize;
+			height: $itemSize;
+			line-height: $itemSize;
+			border-radius: 2px;
+			/* csslint ignore:start */
+			box-sizing: border-box;
+			/* csslint ignore:end */
 
-            .date-text {
-                position: absolute;
-                text-transform: capitalize;
-                white-space: nowrap;
+			.date-text {
+				position: absolute;
+				text-transform: capitalize;
+				white-space: nowrap;
+			}
 
-            }
+			.heat-month {
+				top: 0;
+				border-left: 1px solid #999;
+				padding-left: 0.25em;
+				margin-left: -1px;
+			}
 
-            .heat-month {
-                bottom: 0;
-            }
+			.heat-day {
+				left: 0;
+			}
 
-            .heat-day {
-                left: 0;
-            }
+			// &.first-day {
+			// 	border-color: gold;
+			// }
 
-            &.heat-item-0 {
-                background-color: rgba(0, 0, 0, 0.05);
-            }
+			&.heat-item-0 {
+				// background-color: rgba(0, 0, 0, 0.05);
+				background-color: #ebedf0;
+			}
 
-            @for $i from 1 through 4 {
-                &.heat-item-#{$i} {
-                    background-color: rgba(rgb(0, 100, 0), 0.25*$i);
-                }
+			@each $no, $color in (1: #9be9a8, 2: #40c463, 3: #30a14e, 4: #216e39) {
+				&.heat-item-#{$no} {
+					background-color: $color;
+				}
+			}
 
-            }
-        }
-    }
+			// @for $i from 1 through 4 {
+			// 	&.heat-item-#{$i} {
+			// 		/* csslint ignore:start */
+			// 		background-color: rgba(rgb(0, 100, 0), 0.25 * $i);
+			// 		/* csslint ignore:end */
+			// 	}
+			// }
+		}
+	}
 }
