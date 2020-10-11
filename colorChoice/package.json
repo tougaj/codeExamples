@@ -1,0 +1,24 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "styles": "gulp sass"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^4.0.2"
+  },
+  "dependencies": {
+    "browser-sync": "^2.26.12",
+    "gulp-autoprefixer": "^6.1.0",
+    "gulp-csslint": "^1.0.1",
+    "gulp-sass": "^4.1.0",
+    "gulp-typescript": "^5.0.1",
+    "typescript": "^3.9.7"
+  }
+}

@@ -1,0 +1,72 @@
+body
+	font-family: sans-serif
+	background-color: lighten(orange, 45%)
+	margin: 0
+
+$s: 100px
+
+.wrapper
+	display: flex
+	width: 100vw
+	height: 100vh
+
+.container
+	margin: auto
+	text-align: center
+	.selected-color
+		$size: 200px
+		width: $size
+		height: $size
+		border: 5px solid rgba(0,0,0,0.25)
+		border-radius: 5px
+		background-color: transparent
+		margin-top: 1em
+
+	$base-color: #eee
+	$size: 64px
+	a
+		font-size: $size / 3 * 2
+		color: black
+		text-shadow: 0 1px 1px white
+		display: inline-block
+		width: $size
+		height: $size
+		line-height: $size
+		text-align: center
+		text-decoration: none
+		font-weight: 700
+		border: 1px solid darken($base-color, 10%)
+		background: linear-gradient($base-color, darken($base-color, 10%))
+	.color-container
+		display: inline-block
+		position: relative
+		$color-box-size: 24px
+		$pad: 2px
+		.color-table
+			// display: none
+			opacity: 0
+			visibility: hidden
+			position: absolute
+			top: 135%
+			left: 50%
+			transform: translateX(-50%)
+			background-color: $base-color
+			border: 1px solid darken($base-color, 10%)
+			padding: $pad*2 $pad
+			white-space: nowrap
+			height: $color-box-size
+			transition: all 0.3s ease
+
+			.color-box
+				margin: 0 $pad
+				display: inline-block
+				width: $color-box-size
+				height: $color-box-size
+				cursor: pointer
+				border: 1px solid #eee
+				border: 1px solid rgba(0,0,0,0.2)
+
+			&.active
+				visibility: visible
+				top: 105%
+				opacity: 1

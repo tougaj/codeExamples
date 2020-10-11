@@ -1,0 +1,66 @@
+body {
+  font-family: sans-serif;
+  background-color: #fff6e6;
+  margin: 0; }
+
+.wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100vw;
+  height: 100vh; }
+
+.container {
+  margin: auto;
+  text-align: center; }
+  .container .selected-color {
+    width: 200px;
+    height: 200px;
+    border: 5px solid rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    background-color: transparent;
+    margin-top: 1em; }
+  .container a {
+    font-size: 42.66667px;
+    color: black;
+    text-shadow: 0 1px 1px white;
+    display: inline-block;
+    width: 64px;
+    height: 64px;
+    line-height: 64px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 700;
+    border: 1px solid #d5d5d5;
+    background: -webkit-gradient(linear, left top, left bottom, from(#eee), to(#d5d5d5));
+    background: linear-gradient(#eee, #d5d5d5); }
+  .container .color-container {
+    display: inline-block;
+    position: relative; }
+    .container .color-container .color-table {
+      opacity: 0;
+      visibility: hidden;
+      position: absolute;
+      top: 135%;
+      left: 50%;
+      -webkit-transform: translateX(-50%);
+              transform: translateX(-50%);
+      background-color: #eee;
+      border: 1px solid #d5d5d5;
+      padding: 4px 2px;
+      white-space: nowrap;
+      height: 24px;
+      -webkit-transition: all 0.3s ease;
+      transition: all 0.3s ease; }
+      .container .color-container .color-table .color-box {
+        margin: 0 2px;
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        border: 1px solid #eee;
+        border: 1px solid rgba(0, 0, 0, 0.2); }
+      .container .color-container .color-table.active {
+        visibility: visible;
+        top: 105%;
+        opacity: 1; }
