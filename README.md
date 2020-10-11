@@ -4,4 +4,4 @@
 
 ## Содержание
 
-- [Heat Map](https://github.com/tougaj/codeExamples/tree/main/heatMap) &mdash; пример оформаления годового Heat Map по какому-то показателю.
+- [Heat Map](https://github.com/tougaj/codeExamples/tree/main/heatMap) &mdash; пример оформления годового Heat Map по какому-то показателю.
