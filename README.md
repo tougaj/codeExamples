@@ -7,3 +7,4 @@
 -   [Color Choice](https://github.com/tougaj/codeExamples/tree/main/colorChoice) &mdash; пример реализации диалога выбора цвета.
 -   [CSS Flex](https://github.com/tougaj/codeExamples/tree/main/cssFlex) &mdash; пример макета страницы на flex.
 -   [Heat Map](https://github.com/tougaj/codeExamples/tree/main/heatMap) &mdash; пример оформления годового Heat Map по какому-то показателю.
+-   [Last Line Fade](https://github.com/tougaj/codeExamples/tree/main/lastLineFade) &mdash; пример реализации усечения многострочного текста стандартными средствами css и с применением **Line Clamp**.

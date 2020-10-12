@@ -1,0 +1,57 @@
+body {
+  line-height: 1.4;
+  font-size: 16px;
+  padding: 0;
+  margin: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  min-height: 100vh;
+  font-family: sans-serif; }
+
+.container {
+  margin: auto; }
+
+.fade-container {
+  font-size: 24px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row; }
+
+.without-line-clump .fade-item {
+  line-height: 1.4em;
+  max-height: 4.2em;
+  overflow: hidden;
+  position: relative; }
+  .without-line-clump .fade-item:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 1.4em;
+    width: 62%;
+    text-align: right;
+    background: -webkit-gradient(linear, left top, right top, from(rgba(248, 248, 248, 0)), color-stop(50%, #f8f8f8));
+    background: linear-gradient(to right, rgba(248, 248, 248, 0), #f8f8f8 50%); }
+
+.with-line-clump .fade-item {
+  display: -webkit-box;
+  /* csslint ignore:start */
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  /* csslint ignore:end */
+  overflow: hidden; }
+
+.fade-item-outer {
+  width: 25vw;
+  padding: 1em;
+  background: #f8f8f8;
+  -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
+          box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
+  border-radius: .5em; }
+  .fade-item-outer:not(:first-child) {
+    margin-left: 1em; }

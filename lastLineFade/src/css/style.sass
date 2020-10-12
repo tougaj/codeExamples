@@ -1,0 +1,53 @@
+body
+	line-height: 1.4
+	font-size: 16px
+	padding: 0
+	margin: 0
+	display: flex
+	min-height: 100vh
+	font-family: sans-serif
+
+.container
+	margin: auto
+
+.fade-container
+	font-size: 24px
+	display: flex
+	flex-direction: row
+
+$item-bg-color: #f8f8f8
+
+.without-line-clump
+	.fade-item
+		$lh: 1.4em
+		line-height: $lh
+		max-height: $lh * 3
+		overflow: hidden
+		position: relative
+		&:after
+			content: ''
+			position: absolute
+			bottom: 0
+			right: 0
+			height: $lh
+			width: 62%
+			text-align: right
+			background: linear-gradient(to right, rgba($item-bg-color, 0%), rgba($item-bg-color, 100%) 50%)
+
+.with-line-clump
+	.fade-item
+		display: -webkit-box;
+		/* csslint ignore:start */
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;		
+		/* csslint ignore:end */
+		overflow: hidden
+
+.fade-item-outer
+	width: 25vw
+	padding: 1em
+	background: $item-bg-color
+	box-shadow: 2px 2px 5px rgba(0,0,0,0.25)
+	border-radius: .5em
+	&:not(:first-child)
+		margin-left: 1em
