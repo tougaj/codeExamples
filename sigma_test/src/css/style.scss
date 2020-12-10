@@ -1,0 +1,21 @@
+body {
+	font-family: 'Roboto', sans-serif;
+	background-color: #fefbfa;
+	margin: 0;
+	padding: 0;
+}
+
+.container {
+	display: flex;
+	width: 100vw;
+	height: 100vh;
+}
+
+.diagram {
+	font-size: 1rem;
+	width: 320px;
+	height: 220px;
+	margin: auto;
+	border: 2px solid gray;
+	border-radius: 0.5rem;
+}

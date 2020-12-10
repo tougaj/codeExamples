@@ -10,3 +10,5 @@
 -   [Heat Map](https://github.com/tougaj/codeExamples/tree/main/heatMap) &mdash; пример оформления годового Heat Map по какому-то показателю.
 -   [Last Line Fade](https://github.com/tougaj/codeExamples/tree/main/lastLineFade) &mdash; пример реализации усечения многострочного текста стандартными средствами css и с применением **Line Clamp**.
 -   [Random Picture](https://github.com/tougaj/codeExamples/tree/main/randomPicture) &mdash; пример загрузки и вывода случайных изображений с ресурсов, предоставляющих соответствующий API.
+-   [Sigma Test](https://github.com/tougaj/codeExamples/tree/main/sigma_test) &mdash; пример построения диаграммы с использованием [sigmajs](http://sigmajs.org/).
+

@@ -1,0 +1,3 @@
+{
+    "extends"ten: "stylelint-config-standard"
+}
