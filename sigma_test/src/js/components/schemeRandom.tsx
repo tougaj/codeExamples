@@ -41,17 +41,20 @@ const SchemeRandom = ({}: ISchemeRandomProps) => {
 		const n2 = Math.floor(Math.random() * nodeLength);
 
 		if (n1 === n2) return;
+		const edgeWeight = Math.random();
 		return {
 			id: `e${id}`,
 			source: n1,
 			target: n2,
-			label: `${n1} = ${n2}`,
-			color: COLORS[Math.floor(Math.random() * COLORS.length)],
+			// label: `${n1} => ${n2}`,
+			label: `${(edgeWeight * 100).toFixed(1)} %`,
+			// color: COLORS[Math.floor(Math.random() * COLORS.length)],
+			color: `rgba(0,0,200,${edgeWeight})`,
 		};
 	};
 
 	useEffect(() => {
-		const NODE_COUNTS = 100;
+		const NODE_COUNTS = 50;
 		if (graph !== undefined) return;
 		const nodes: any[] = [];
 		for (let index = 0; index < NODE_COUNTS; index++) {
@@ -65,7 +68,7 @@ const SchemeRandom = ({}: ISchemeRandomProps) => {
 			const newEdge = getEdge(index, nodeLength);
 			if (newEdge === undefined) continue;
 			edges.push(newEdge);
-        }
+		}
 
 		setGraph({
 			nodes,
@@ -83,14 +86,16 @@ const SchemeRandom = ({}: ISchemeRandomProps) => {
 				graph={graph}
 				settings={{
 					// drawEdges: true,
-					// drawEdgeLabels: true,
+					drawEdgeLabels: true,
 					clone: false,
 					// labelThreshold: 1,
-					labelThreshold: 11,
+					labelThreshold: 15,
 					defaultNodeType: 'circle',
-					defaultEdgeType: 'tapered',
-					minNodeSize: 2,
-					maxNodeSize: 5,
+					// defaultEdgeType: 'tapered',
+					defaultEdgeType: 'arrow',
+					minNodeSize: 5,
+					maxNodeSize: 20,
+					minArrowSize: 10,
 					// minEdgeSize: 0.5,
 					// maxEdgeSize: 1,
 					// enableEdgeHovering: true,
@@ -103,16 +108,23 @@ const SchemeRandom = ({}: ISchemeRandomProps) => {
 				{/* <NodeShapes default="circle" /> */}
 				<RandomizeNodePositions />
 				<DragNodes />
-				<RelativeSize initialSize={2} />
+				<RelativeSize initialSize={8} />
 				{/* <NOverlap timeout={3000} duration={1000} /> */}
 				<ForceLink
-					timeout={3000}
-					easing="cubicInOut"
-					// scalingRatio={1000}
-					alignNodeSiblings
+					timeout={5000}
+					linLogMode={false}
+					// adjustSizes
 					barnesHutOptimize
-					barnesHutTheta={0.6}
-					iterationsPerRender={10}
+					// barnesHutTheta={0.6}
+					iterationsPerRender={200}
+					// maxIterations={5000}
+					autoStop
+					alignNodeSiblings
+					// randomize="globally"
+					easing="cubicInOut"
+					gravity={5}
+					slowDown
+					// scalingRatio={10}
 				/>
 			</Sigma>
 			<button onClick={refresh}>Refresh</button>
