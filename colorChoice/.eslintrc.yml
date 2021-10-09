@@ -9,7 +9,7 @@ rules:
     - warn
     - tab
   linebreak-style:
-    - error
+    - ignore
     - unix
   quotes:
     - error
