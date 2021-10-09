@@ -1,0 +1,1 @@
+При использовании VSCode можно использовать [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer).
