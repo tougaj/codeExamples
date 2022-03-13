@@ -24,5 +24,10 @@ const convertFiles = async () => {
 	console.log('All files converted');
 };
 
+const init = () => {
+	if (!fs.existsSync(OUTPUT_PATH)) fs.mkdirSync(OUTPUT_PATH);
+};
+
+init();
 convertFiles();
 // convertKmzToJson('Обстановка');

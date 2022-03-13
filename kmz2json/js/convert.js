@@ -34,4 +34,9 @@ const convertFiles = () => __awaiter(void 0, void 0, void 0, function* () {
     yield Promise.all(files.map((file) => convertKmzToJson(file)));
     console.log('All files converted');
 });
+const init = () => {
+    if (!fs_1.default.existsSync(OUTPUT_PATH))
+        fs_1.default.mkdirSync(OUTPUT_PATH);
+};
+init();
 convertFiles();
