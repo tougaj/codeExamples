@@ -1,4 +1,6 @@
 const Tesseract = require('tesseract.js');
+const fs = require('fs');
+const path = require('path');
 
 const workers = {};
 
@@ -14,6 +16,8 @@ const getWorker = async (language) => {
 };
 
 const recognizeFile = async (fileName, language) => {
+	console.log(`Recognizing ${fileName}`);
+
 	const startTime = new Date().getTime();
 
 	let worker = undefined;
@@ -31,10 +35,29 @@ const recognizeFile = async (fileName, language) => {
 	console.log(`Duration: ${(new Date().getTime() - startTime) / 1000} ms`);
 };
 
+const getImages = (dir) => {
+	const images = [];
+	const files = fs.readdirSync(dir);
+	files.forEach((file) => {
+		const filePath = path.join(dir, file);
+		const stat = fs.statSync(filePath);
+		if (stat.isFile()) {
+			images.push(filePath);
+		}
+	});
+	return images;
+};
+
 !(async () => {
-	await recognizeFile('./input/u0.png', 'ukr');
-	await recognizeFile('./input/u1.png', 'ukr');
-	await recognizeFile('./input/u2.png', 'ukr');
+	const images = getImages('./input');
+
+	for (const image of images) {
+		await recognizeFile(image, 'ukr');
+	}
+	// console.log(images);
+	// await recognizeFile('./input/u0.png', 'ukr');
+	// await recognizeFile('./input/u1.png', 'ukr');
+	// await recognizeFile('./input/u2.png', 'ukr');
 	// await recognizeFile('./input/u3.png', 'ukr');
 
 	for (const worker of Object.values(workers)) {
