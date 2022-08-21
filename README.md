@@ -14,3 +14,4 @@
 -   [Sigma Test](https://github.com/tougaj/codeExamples/tree/main/sigma_test) &mdash; пример построения диаграммы с использованием [sigmajs](http://sigmajs.org/).
 -   [kmz2json](https://github.com/tougaj/codeExamples/tree/main/kmz2json) &mdash; пример конвертирования файлов kmz (в него можно экспортировать информацию с карт google) в json.
 -   [tesseract](https://github.com/tougaj/codeExamples/tree/main/tesseract) &mdash; приклад роботи утиліти розпізнавання тексту, що міститься в зображенні.
+-   [mgrs](https://github.com/tougaj/codeExamples/tree/main/mgrs) &mdash; приклад конвертування координат mgrs в географічні координати.
