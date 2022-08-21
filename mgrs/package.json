@@ -1,0 +1,17 @@
+{
+  "name": "mgrs",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "csv-stringify": "^6.2.0",
+    "geodesy": "^2.4.0"
+  }
+}
