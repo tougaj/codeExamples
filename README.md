@@ -15,4 +15,4 @@
 -   [kmz2json](https://github.com/tougaj/codeExamples/tree/main/kmz2json) &mdash; пример конвертирования файлов kmz (в него можно экспортировать информацию с карт google) в json.
 -   [tesseract](https://github.com/tougaj/codeExamples/tree/main/tesseract) &mdash; приклад роботи утиліти розпізнавання тексту, що міститься в зображенні.
 -   [mgrs](https://github.com/tougaj/codeExamples/tree/main/mgrs) &mdash; приклад конвертування координат mgrs в географічні координати.
--   [mgrs](https://github.com/tougaj/codeExamples/tree/main/mammoth) &mdash; приклад конвертування файлу docx в файл html, в тому числі зі збереженням наявних в документі зображень.
+-   [mammoth](https://github.com/tougaj/codeExamples/tree/main/mammoth) &mdash; приклад конвертування файлу docx в файл html, в тому числі зі збереженням наявних в документі зображень.
