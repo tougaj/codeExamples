@@ -8,7 +8,6 @@ let imgDir = './img';
 const options = {
     convertImage: mammoth.images.inline(function(element) {
         return element.read("base64").then(function(imageBuffer) {
-            console.log(imageBuffer);
             const imgType = element.contentType.split('/').pop();
             const imgName = `image${imageCounter}.${imgType}`;
             const imgPath = path.join(imgDir, imgName);
