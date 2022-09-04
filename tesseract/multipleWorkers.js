@@ -48,9 +48,15 @@ const schedulersInit = async (languages) => {
 
 const getImageLikeObject = async (fileName) => {
 	const IMAGE_THRESHOLD = process.env.THRESHOLD || 80;
+	const base64 = fs.readFileSync(fileName, 'base64');
+	const buffer = Buffer.from(base64, 'base64');
+	const baseName = path.basename(fileName);
 
 	return new Promise((resolve, reject) => {
-		gm(fileName)
+		// Сюди можна напряму передавати шлях до файлу зображення fileName.
+		// Транслювання з base64 було необхідно для одного з проектів. Тож це тест.
+		// gm(fileName)
+		gm(buffer, baseName)
 			.threshold(IMAGE_THRESHOLD, true)
 			.toBuffer('PNG', function (err, buffer) {
 				// console.log(buffer);
