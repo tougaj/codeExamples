@@ -52,6 +52,10 @@ const getImageLikeObject = async (fileName) => {
 	const buffer = Buffer.from(base64, 'base64');
 	const baseName = path.basename(fileName);
 
+	gm(buffer, baseName).identify(function (err, data) {
+		if (!err) console.log(data.size);
+	});
+
 	return new Promise((resolve, reject) => {
 		// Сюди можна напряму передавати шлях до файлу зображення fileName.
 		// Транслювання з base64 було необхідно для одного з проектів. Тож це тест.
@@ -75,7 +79,9 @@ const getImageLikeObject = async (fileName) => {
 
 const recognizeFiles = async (scheduler, fileList) => {
 	const results = await Promise.all(
-		fileList.map(async (fileName) => scheduler.addJob('recognize', await getImageLikeObject(fileName)))
+		fileList.map(async (fileName) => {
+			return scheduler.addJob('recognize', await getImageLikeObject(fileName));
+		})
 	);
 	return results.map((r) => {
 		const text = r.data.text;
