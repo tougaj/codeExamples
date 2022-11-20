@@ -37,3 +37,4 @@ const groupedData = (0, utils_1.getGroupedData)(data);
 // console.log(groupedData);
 const measures = (0, utils_1.getMeasures)(PARTS_COUNT, partSize, groupedData);
 console.log('Measures', measures);
+//# sourceMappingURL=index.js.map

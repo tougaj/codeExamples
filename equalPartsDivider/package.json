@@ -4,7 +4,8 @@
 	"description": "",
 	"main": "dst/index.js",
 	"scripts": {
-		"start": "concurrently \"gulp\" \"nodemon dst/index.js\""
+		"start": "concurrently \"gulp\" \"nodemon dst/index.js\"",
+		"tsc": "tsc"
 	},
 	"keywords": [],
 	"author": "",

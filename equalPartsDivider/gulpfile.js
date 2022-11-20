@@ -11,7 +11,7 @@ const paths = {
 };
 
 function typeScript() {
-	const tsProject = ts.createProject('./src/tsconfig.json');
+	const tsProject = ts.createProject('./tsconfig.json');
 	const tsResult = gulp
 		.src(paths.server.src)
 		.pipe(plumber())

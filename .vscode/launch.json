@@ -1,0 +1,19 @@
+{
+	// Используйте IntelliSense, чтобы узнать о возможных атрибутах.
+	// Наведите указатель мыши, чтобы просмотреть описания существующих атрибутов.
+	// Для получения дополнительной информации посетите: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "equalPartsDivider Launch",
+			"skipFiles": ["<node_internals>/**"],
+			"program": "${workspaceFolder}/equalPartsDivider/src/index.ts",
+			"preLaunchTask": "equalPartsDivider tsc",
+			"outFiles": ["${workspaceFolder}/equalPartsDivider/dst/**/*.js"],
+			// "env": { "PARTS_COUNT": "4", "MAX_FILE_SIZE": "121" },
+			"cwd": "${workspaceFolder}/equalPartsDivider"
+		}
+	]
+}
