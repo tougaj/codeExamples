@@ -8,12 +8,14 @@ const MAX_FILE_SIZE = getNumberEnvironmentVariable('MAX_FILE_SIZE', 'maximum fil
 
 const data = getData(MAX_FILE_SIZE);
 const totalSize = data.reduce((prev, cur) => prev + cur);
-console.log(`Total size is ${totalSize} Mb`);
+console.log(`Total size is ${totalSize.toFixed(1)} Mb`);
 const partSize = totalSize / PARTS_COUNT;
-console.log(`Part size is ${partSize} Mb`);
+console.log(`Part size is ${partSize.toFixed(1)} Mb`);
 
 const groupedData = getGroupedData(data);
 // console.log(groupedData);
-const measures = getMeasures(PARTS_COUNT, partSize, groupedData);
+const [measures, capacity, deviation] = getMeasures(PARTS_COUNT, partSize, groupedData);
 
 console.log('Measures', measures);
+console.log('Capacity', capacity.map(Math.round));
+console.log('Deviation', deviation.map(Math.round));

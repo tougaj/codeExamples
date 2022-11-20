@@ -69,26 +69,34 @@ const getGroupedData = (data) => {
     return groupedData;
 };
 exports.getGroupedData = getGroupedData;
-const getMeasureItem = (maxSize, data, startDataIndex) => {
+const getMeasureItem = (desiredTopMeasure, data, startDataIndex) => {
     let curIndex = startDataIndex;
+    let deviation = Infinity;
     for (let index = startDataIndex; index < data.length; index++) {
-        if (maxSize < data[index].movingSize)
+        const newDeviation = data[index].movingSize - desiredTopMeasure;
+        if (Math.abs(deviation) < Math.abs(newDeviation))
             break;
+        // if (desiredTopMeasure < data[index].movingSize) break;
+        deviation = newDeviation;
         curIndex = index;
     }
-    return [curIndex, data[curIndex].mb];
+    return [curIndex, data[curIndex].mb, data[curIndex].movingSize, deviation];
 };
 const getMeasures = (partsCount, partSize, groupedData) => {
     const partsMeasurers = Array(partsCount)
         .fill(undefined)
         .map((_, index) => (index + 1) * partSize);
-    console.log('Parts measures', partsMeasurers);
+    // console.log('Parts measures', partsMeasurers);
     const measures = Array(partsCount).fill(0);
+    const capacity = Array(partsCount).fill(0);
+    const deviation = Array(partsCount).fill(0);
     let startDataIndex = 0;
     for (let index = 0; index < partsCount; index++) {
-        [startDataIndex, measures[index]] = getMeasureItem(partsMeasurers[index], groupedData, startDataIndex);
+        [startDataIndex, measures[index], capacity[index], deviation[index]] = getMeasureItem(partsMeasurers[index], groupedData, startDataIndex);
     }
-    return measures;
+    for (let index = capacity.length - 1; 0 < index; index--) {
+        capacity[index] = capacity[index] - capacity[index - 1];
+    }
+    return [measures, capacity, deviation];
 };
 exports.getMeasures = getMeasures;
-//# sourceMappingURL=utils.js.map

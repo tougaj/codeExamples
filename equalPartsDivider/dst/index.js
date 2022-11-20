@@ -30,11 +30,12 @@ const PARTS_COUNT = (0, utils_1.getNumberEnvironmentVariable)('PARTS_COUNT', "pa
 const MAX_FILE_SIZE = (0, utils_1.getNumberEnvironmentVariable)('MAX_FILE_SIZE', 'maximum file size');
 const data = (0, utils_1.getData)(MAX_FILE_SIZE);
 const totalSize = data.reduce((prev, cur) => prev + cur);
-console.log(`Total size is ${totalSize} Mb`);
+console.log(`Total size is ${totalSize.toFixed(1)} Mb`);
 const partSize = totalSize / PARTS_COUNT;
-console.log(`Part size is ${partSize} Mb`);
+console.log(`Part size is ${partSize.toFixed(1)} Mb`);
 const groupedData = (0, utils_1.getGroupedData)(data);
 // console.log(groupedData);
-const measures = (0, utils_1.getMeasures)(PARTS_COUNT, partSize, groupedData);
+const [measures, capacity, deviation] = (0, utils_1.getMeasures)(PARTS_COUNT, partSize, groupedData);
 console.log('Measures', measures);
-//# sourceMappingURL=index.js.map
+console.log('Capacity', capacity.map(Math.round));
+console.log('Deviation', deviation.map(Math.round));
