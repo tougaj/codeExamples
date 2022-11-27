@@ -100,3 +100,4 @@ const getMeasures = (partsCount, partSize, groupedData) => {
     return [measures, capacity, deviation];
 };
 exports.getMeasures = getMeasures;
+//# sourceMappingURL=utils.js.map

@@ -39,3 +39,4 @@ const [measures, capacity, deviation] = (0, utils_1.getMeasures)(PARTS_COUNT, pa
 console.log('Measures', measures);
 console.log('Capacity', capacity.map(Math.round));
 console.log('Deviation', deviation.map(Math.round));
+//# sourceMappingURL=index.js.map
