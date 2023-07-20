@@ -1,0 +1,22 @@
+{
+	"name": "linksfinder",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node js/index.js"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"cheerio": "^1.0.0-rc.12",
+		"gulp": "^4.0.2",
+		"gulp-typescript": "^6.0.0-alpha.1",
+		"typescript": "^5.1.6"
+	},
+	"devDependencies": {
+		"@types/node": "^20.4.2"
+	}
+}
