@@ -1,8 +1,8 @@
 const fs = require('fs');
 import * as cheerio from 'cheerio';
-const PAGE_TEMPLATE = 'https://nemez1da.ru/voennye-prestupniki/sotrudniki-sbu/sbu/page/';
+const PAGE_TEMPLATE = 'https://your-site/page/';
 const LINK_SELECTOR = '.simple-grid-grid-post a';
-const PAGE_COUNT = 101;
+const PAGE_COUNT = 141;
 
 const wait = (ms: number) => new Promise((response) => setTimeout(response, ms));
 
