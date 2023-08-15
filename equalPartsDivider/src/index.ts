@@ -3,6 +3,9 @@ import { getData, getGroupedData, getMeasures, getNumberEnvironmentVariable } fr
 
 dotenv.config();
 
+console.log('\nВміст файлу video.txt може бути отриманий за допомогою команди,\nяку необхідно запускати в каталозі video:\nfind -type f -exec stat -c %s {} \\; > ../video.txt\n')
+
+
 const PARTS_COUNT = getNumberEnvironmentVariable('PARTS_COUNT', "part's count");
 const MAX_FILE_SIZE = getNumberEnvironmentVariable('MAX_FILE_SIZE', 'maximum file size');
 

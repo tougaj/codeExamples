@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = __importStar(require("dotenv"));
 const utils_1 = require("./utils");
 dotenv.config();
+console.log('\nВміст файлу video.txt може бути отриманий за допомогою команди,\nяку необхідно запускати в каталозі video:\nfind -type f -exec stat -c %s {} \\; > ../video.txt\n');
 const PARTS_COUNT = (0, utils_1.getNumberEnvironmentVariable)('PARTS_COUNT', "part's count");
 const MAX_FILE_SIZE = (0, utils_1.getNumberEnvironmentVariable)('MAX_FILE_SIZE', 'maximum file size');
 const data = (0, utils_1.getData)(MAX_FILE_SIZE);
@@ -39,4 +40,3 @@ const [measures, capacity, deviation] = (0, utils_1.getMeasures)(PARTS_COUNT, pa
 console.log('Measures', measures);
 console.log('Capacity', capacity.map(Math.round));
 console.log('Deviation', deviation.map(Math.round));
-//# sourceMappingURL=index.js.map
