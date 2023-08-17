@@ -3,11 +3,13 @@
 """
 
 import queue
+import random
 import subprocess
 from threading import Thread
 from time import sleep
 
 q = queue.Queue()
+
 
 def process_item(item: str):
     """Процедура обробки елемента
@@ -20,6 +22,7 @@ def process_item(item: str):
     subprocess.run(command, check=True)
     print(f'🔷 After process {item}')
 
+
 def worker():
     """Функція треду обробки елементів
     """
@@ -27,6 +30,7 @@ def worker():
         item = q.get()
         process_item(item)
         q.task_done()
+
 
 def inserter():
     """Функція треду вставки елементів
@@ -37,6 +41,7 @@ def inserter():
         print(f'➕ Inserted into queue new_{item_no}')
         item_no += 1
         sleep(10)
+
 
 def main():
     """Основна функція програми
@@ -49,11 +54,22 @@ def main():
     for item in range(30):
         q.put(f'{item}')
 
+    # item_no = 0
+    # while True:
+    #     new_count = random.randrange(5, 10, 1)
+    #     for i in range(new_count):
+    #         new_item = f'new_{item_no}'
+    #         q.put(new_item)
+    #         print(f'➕ Inserted into queue {new_item}')
+    #         item_no += 1
+    #     sleep(15)
+
     Thread(target=inserter, daemon=True).start()
 
     # Block until all tasks are done.
     q.join()
     print('🏁 All work completed')
+
 
 if __name__ == '__main__':
     main()
