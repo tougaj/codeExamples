@@ -15,9 +15,14 @@
 				min-width: 0;
 			}
 			.body__text-container {
-				height: var(--video-dialog-text-height, 80vh);
+				height: var(--video-dialog-text-height);
 				min-height: var(--video-dialog-min-text-height);
 				flex: 0 0 var(--video-dialog-text-basis);
+			}
+			@media (min-width: 576px) {
+				.body__text-container {
+					--video-dialog-text-basis: 38vh;
+				}
 			}
 			@media (min-width: 992px) {
 				.body__text-container {
