@@ -14,25 +14,23 @@
 			.min-w-0 {
 				min-width: 0;
 			}
-			.body__container {
-				height: var(--video-dialog-body-height, 80vh);
-				min-height: var(--video-dialog-min-body-height);
-			}
-			.body__video-container {
-				flex: 0 0 var(--video-dialog-video-basis);
+			.body__text-container {
+				height: var(--video-dialog-text-height, 80vh);
+				min-height: var(--video-dialog-min-text-height);
+				flex: 0 0 var(--video-dialog-text-basis);
 			}
 			@media (min-width: 992px) {
-				.body__container {
-					--video-dialog-body-height: 50vh;
-					--video-dialog-min-body-height: 450px;
-					--video-dialog-video-basis: 62%;
+				.body__text-container {
+					--video-dialog-text-height: 50vh;
+					--video-dialog-min-text-height: 450px;
+					--video-dialog-text-basis: 38%;
 				}
 			}
 			@media (min-width: 1200px) {
-				.body__container {
-					--video-dialog-body-height: 62vh;
-					--video-dialog-min-body-height: 600px;
-					--video-dialog-video-basis: 70%;
+				.body__text-container {
+					--video-dialog-text-height: 62vh;
+					--video-dialog-min-text-height: 600px;
+					--video-dialog-text-basis: 30%;
 				}
 			}
 			.body__video-container-outer {
@@ -83,8 +81,8 @@
 							</h4>
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
-						<div class="modal-body body__container d-flex gap-3 flex-column flex-lg-row">
-							<div class="body__video-container vstack gap-2">
+						<div class="modal-body d-flex gap-3 flex-column flex-lg-row">
+							<div class="vstack gap-2">
 								<div class="body__video-container-outer text-bg-primary">
 									<div class="body__video-container-inner">
 										Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iusto, enim!
@@ -97,7 +95,7 @@
 									<div class="">Lorem, ipsum dolor sit</div>
 								</div>
 							</div>
-							<div class="text-bg-secondary p-2 overflow-auto">
+							<div class="body__text-container text-bg-secondary p-2 overflow-auto">
 								<p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Debitis, cumque?</p>
 								<p>
 									Lorem ipsum dolor sit amet consectetur adipisicing elit. Enim eaque illum quas harum unde, nam earum
