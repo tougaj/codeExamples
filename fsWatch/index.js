@@ -4,7 +4,7 @@ var watch = require('node-watch');
 
 const filePath = './test.txt';
 
-const watcher = watch(filePath, { recursive: false });
+const watcher = watch(filePath, { recursive: false, delay: 1000 });
 watcher.on('change', function(evt, name) {
 	console.log('✅ %s changed.', name);
 });
