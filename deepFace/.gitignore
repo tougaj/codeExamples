@@ -2,4 +2,5 @@
 *.jpg
 *.jpeg
 *.webp
-
+*.tar
+*.tar.gz
