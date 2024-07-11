@@ -61,7 +61,7 @@ for filename in file_list:
 	try:
 		face_objs = DeepFace.extract_faces(
 			img_path = file_path, 
-			detector_backend = 'centerface',
+			# detector_backend = 'centerface',
 			align = True,
 		)
 	except:
