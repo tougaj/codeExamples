@@ -58,6 +58,7 @@ for filename in file_list:
 	# (not_used, extension) = os.path.splitext(file_path)
 	# print(f'Found JPG file: {file_path}')
 
+	face_objs = None
 	try:
 		face_objs = DeepFace.extract_faces(
 			img_path = file_path, 
