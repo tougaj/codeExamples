@@ -6,6 +6,8 @@ import time
 from PIL import Image
 from pathlib import Path
 
+MIN_SIZE = 50
+
 def crop_face(img_path, face_data, output_path):
 	"""
 	Вирізає обличчя з зображення на основі координат і зберігає його в окремий файл.
@@ -22,6 +24,9 @@ def crop_face(img_path, face_data, output_path):
 	y = face_data['y']
 	w = face_data['w']
 	h = face_data['h']
+	if max(w,h) < MIN_SIZE:
+		print(f'⚠️  Face is to small {w}x{h}')
+		return
 
 	# Обчислення координат для вирізання
 	left = x
@@ -36,7 +41,7 @@ def crop_face(img_path, face_data, output_path):
 	try:
 		face_image.save(output_path)
 	except:
-		print(f'Error saving to {output_path}')
+		print(f'⚠️  Error saving to {output_path}')
 		pass
 	# print(f"Face image saved to {output_path}")
 
@@ -48,7 +53,8 @@ file_list = os.listdir(directory)
 list_len = len(file_list)
 errors_count = 0
 for filename in file_list:
-	print(f'Processing {i} from {list_len}')
+	if i % 20 == 0:
+		print(f'Processing {i+1} from {list_len}')
 	# Перевіряємо, чи файл має розширення .jpg
 	# if filename.lower().endswith('.jpg'):
 	file_path = os.path.join(directory, filename)
@@ -62,17 +68,18 @@ for filename in file_list:
 	try:
 		face_objs = DeepFace.extract_faces(
 			img_path = file_path, 
-			# detector_backend = 'centerface',
+			detector_backend = 'centerface',
 			align = True,
 		)
 	except:
 		errors_count += 1
-		print(f'Error by processing {basename}{extension}')
+		print(f'⚠️  No faces detected in {basename}{extension}')
 		pass
 	j = 0
 	if face_objs:
 		for face in face_objs:
-			output_path = f'./dest/{basename}_{i}_{j}{extension}'
+			# output_path = f'./dest/{basename}_{i}_{j}{extension}'
+			output_path = f'./dest/{basename}_{j}{extension}'
 			crop_face(file_path, face['facial_area'], output_path)
 			# print(face['facial_area'])
 			j += 1
@@ -80,4 +87,4 @@ for filename in file_list:
 
 end_time = time.time()
 elapsed_time = end_time - start_time
-print(f"Elapsed time: {elapsed_time:.4f} seconds with {errors_count} error")
+print(f"🏁 Elapsed time: {elapsed_time:.4f} seconds with {errors_count} error")

@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 
+import pandas as pd
 from deepface import DeepFace
 
+MAX_RESULT_COUNT = 40
+
 dfs = DeepFace.find(
-  img_path = "img.webp", 
+  img_path = "target.webp", 
   db_path = "./dest", 
   # detector_backend = 'VGG-Face',
   align = True,
 )
-print(dfs)
-# for f in dfs:
-#   print(f.identity.to_frame())
-  # print(f.identity[0], f.distance)
-  # print(f'{f.identity}{f.distance}')
+
+identity = dfs[0].identity.to_list()
+distance = dfs[0].distance.to_list()
+print(f'\nFound {len(identity)} matches\nPrinting first {MAX_RESULT_COUNT}\n')
+for i in range(min(len(identity), MAX_RESULT_COUNT)):
+  print(f'{identity[i]}\t{distance[i]}')
+
