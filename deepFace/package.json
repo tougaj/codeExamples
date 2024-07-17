@@ -1,12 +1,26 @@
 {
-  "name": "deepface",
-  "version": "1.0.0",
-  "main": "data.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": ""
+	"name": "deepface",
+	"version": "1.0.0",
+	"main": "data.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"dg": "concurrently \"gulp\" \"nodemon dst/vector_generator.js\""
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@faker-js/faker": "^8.4.1",
+		"@types/jest": "^29.5.12",
+		"@types/uuid": "^10.0.0",
+		"concurrently": "^8.2.2",
+		"gulp": "^5.0.0",
+		"gulp-plumber": "^1.2.1",
+		"gulp-sourcemaps": "^3.0.0",
+		"gulp-typescript": "^6.0.0-alpha.1",
+		"jest": "^29.7.0",
+		"typescript": "^5.4.5",
+		"uuid": "^10.0.0"
+	},
+	"description": ""
 }
