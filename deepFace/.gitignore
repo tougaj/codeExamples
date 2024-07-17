@@ -4,4 +4,4 @@
 *.webp
 *.tar
 *.tar.gz
-local.*
+test.json

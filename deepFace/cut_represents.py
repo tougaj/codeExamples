@@ -5,18 +5,26 @@ import os
 import time
 from PIL import Image
 from pathlib import Path
+import json
 
 MIN_SIZE = 50
+RECORDS_PER_FILE = 500
+
+def save_data(data, file_no):
+	with open(f'repr_faces_{file_no:02d}.json', 'w') as json_file:
+	    json.dump(result, json_file, indent=2)  # Параметр indent дозволяє зробити файл більш читабельним
+
 
 start_time = time.time()
-directory = './repr_faces'
+directory = './dest'
 i = 0
 file_list = os.listdir(directory)
 list_len = len(file_list)
 errors_count = 0
-result = {}
+result = []
+file_no = 0
 for filename in file_list:
-	if i % 20 == 0:
+	if i % 5 == 0:
 		print(f'Processing {i+1} from {list_len}')
 	# Перевіряємо, чи файл має розширення .jpg
 	# if filename.lower().endswith('.jpg'):
@@ -40,17 +48,16 @@ for filename in file_list:
 		pass
 	# j = 0
 	if face_objs:
-		result[basename] = face_objs[0]['embedding']
-	# if face_objs:
-	# 	for face in face_objs:
-	# 		# output_path = f'./dest/{basename}_{i}_{j}{extension}'
-	# 		output_path = f'./dest/{basename}_{j}{extension}'
-	# 		crop_face(file_path, face['facial_area'], output_path)
-	# 		# print(face['facial_area'])
-	# 		j += 1
+		result.append({'id': basename, 'face': face_objs[0]['embedding']})
 	i += 1
+	if i % RECORDS_PER_FILE == 0:
+		save_data(result, file_no)
+		result = [];
+		file_no += 1
 
-print(result)
+if len(result) != 0:
+	save_data(result, file_no)
+
 end_time = time.time()
 elapsed_time = end_time - start_time
 print(f"🏁 Elapsed time: {elapsed_time:.4f} seconds with {errors_count} error")

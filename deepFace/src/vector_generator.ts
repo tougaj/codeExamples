@@ -8,13 +8,13 @@ interface ISolrRecord {
 }
 
 const DIMENSIONS = 4;
-const COUNT = 10;
+const COUNT = 1000;
 
 const result: ISolrRecord[] = [];
 for (let i = 0; i < COUNT; i++) {
 	const face: number[] = [];
 	for (let j = 0; j < DIMENSIONS; j++) {
-		face.push(faker.number.float({ min: 0, max: 0.3, fractionDigits: 6 }));
+		face.push(Math.random() < 0.85 ? 0 : faker.number.float({ min: 0, max: 0.3, fractionDigits: 6 }));
 	}
 	result.push({ id: uuidv4(), face });
 }

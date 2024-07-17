@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-const { sources, target } = require('./local.data.js');
+const { sources, target } = require('./data.js');
 
 const result = [];
 
-const getEuclidDistance = (a, b) => {
-	sum = 0;
+const getEuclidDistance = (a: number[], b: number[]) => {
+	let sum = 0;
 	for (let index = 0; index < a.length; index++) {
 		sum += (a[index] - b[index]) * (a[index] - b[index]);
 	}
