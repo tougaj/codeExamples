@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const { sources, target } = require('./local.data.js');
 
 const result = [];
