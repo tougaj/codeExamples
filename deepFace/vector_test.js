@@ -13,6 +13,11 @@ const getEuclidDistance = (a, b) => {
 };
 
 for (const key in sources) {
+	// let zeros = 0;
+	// for (item of sources[key]){
+	// 	if (item === 0.0) zeros++;
+	// }
+	// console.log(`Zeros count: ${zeros}`);
 	// console.log(new Set(sources[key]));
 	// console.log(`Min: ${Math.min(...sources[key])}, Max: ${Math.max(...sources[key])}`);
 	result.push({ key, distance: getEuclidDistance(sources[key], target) });
