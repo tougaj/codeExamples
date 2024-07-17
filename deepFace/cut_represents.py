@@ -39,7 +39,8 @@ for filename in file_list:
 	try:
 		face_objs = DeepFace.represent(
 			img_path = file_path, 
-			detector_backend = 'centerface',
+			# detector_backend = 'centerface',
+			detector_backend = 'yolov8',
 			align = True,
 		)
 	except:

@@ -34,3 +34,6 @@
 # 	-H 'Content-type:application/json' \
 # 	--data-binary '{"add-field": {"name":"face", "type":"face_vector", "stored":true, "indexed": true}}' \
 # 	http://localhost:8983/solr/faces/schema
+
+
+# curl -X POST -H 'Content-type:application/json' --data-binary '{"delete": {"query": "*:*"}}' http://localhost:8983/solr/faces/update?commit=true
