@@ -21,7 +21,10 @@
 # 		"name":"face_vector",
 # 		"class":"solr.DenseVectorField",
 # 		"vectorDimension":"4096",
-# 		"similarityFunction":"euclidean"}}' \
+# 		"similarityFunction":"euclidean",
+# 		"knnAlgorithm":"hnsw",
+# 		"hnswMaxConnections":"1024",
+# 		"hnswBeamWidth":"1024"}}' \
 # 	http://localhost:8983/solr/faces/schema
 
 # curl \
