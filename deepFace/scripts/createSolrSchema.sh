@@ -23,7 +23,7 @@
 # 		"vectorDimension":"4096",
 # 		"similarityFunction":"euclidean",
 # 		"knnAlgorithm":"hnsw",
-# 		"hnswMaxConnections":"1024",
+# 		"hnswMaxConnections":"512",
 # 		"hnswBeamWidth":"1024"}}' \
 # 	http://localhost:8983/solr/faces/schema
 
