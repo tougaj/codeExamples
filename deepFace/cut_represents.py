@@ -49,7 +49,7 @@ for filename in file_list:
 		pass
 	# j = 0
 	if face_objs:
-		result.append({'id': basename, 'face': face_objs[0]['embedding']})
+		result.append({'id': basename+extension, 'face': face_objs[0]['embedding']})
 	i += 1
 	if i % RECORDS_PER_FILE == 0:
 		save_data(result, file_no)
