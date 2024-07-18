@@ -8,7 +8,7 @@ from pathlib import Path
 import json
 
 MIN_SIZE = 50
-RECORDS_PER_FILE = 500
+RECORDS_PER_FILE = 1000
 
 def save_data(data, file_no):
 	with open(f'repr_faces_{file_no:02d}.json', 'w') as json_file:
