@@ -14,11 +14,11 @@ RUN apt-get update && apt-get install -y \
     libsm6 \
     libxext6
 
-COPY ./requirements.txt ./
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-# RUN rm -r $HOME/.cache
+# COPY ./requirements.txt ./
+# RUN pip install --upgrade pip
+# RUN pip install -r requirements.txt
+# # RUN rm -r $HOME/.cache
 
-ARG APP_DIR="/app/deepface"
-RUN mkdir -p ${APP_DIR}
-WORKDIR ${APP_DIR}
+# ARG APP_DIR="/app/deepface"
+# RUN mkdir -p ${APP_DIR}
+# WORKDIR ${APP_DIR}
