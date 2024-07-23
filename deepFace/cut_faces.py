@@ -47,7 +47,7 @@ def crop_face(img_path, face_data, output_path):
 
 
 start_time = time.time()
-directory = './source'
+directory = './images'
 i = 0
 file_list = os.listdir(directory)
 list_len = len(file_list)
@@ -79,7 +79,7 @@ for filename in file_list:
 	if face_objs:
 		for face in face_objs:
 			# output_path = f'./dest/{basename}_{i}_{j}{extension}'
-			output_path = f'./dest/{basename}_{j}{extension}'
+			output_path = f'./faces/{basename}_{j}{extension}'
 			crop_face(file_path, face['facial_area'], output_path)
 			# print(face['facial_area'])
 			j += 1

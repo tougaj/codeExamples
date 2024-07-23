@@ -11,7 +11,7 @@ MIN_SIZE = 50
 RECORDS_PER_FILE = 1000
 
 def save_data(data, file_no):
-	with open(f'repr_faces_{file_no:02d}.json', 'w') as json_file:
+	with open(f'local.repr_{file_no:03d}.json', 'w') as json_file:
 	    json.dump(result, json_file, indent=2)  # Параметр indent дозволяє зробити файл більш читабельним
 
 
