@@ -8,7 +8,15 @@
 # Фактично в результаті даної команди створюється файл ./server/solr/faces/conf/configoverlay.json з наступним вмістом:
 # {"userProps":{"update.autoCreateFields":"false"}
 
+# Видалення всіх даних
 # curl -X POST -H 'Content-type:application/json' --data-binary '{"delete": {"query": "*:*"}}' http://localhost:8983/solr/faces/update?commit=true
+
+# Видалення полів та типів
+curl \
+	-X POST \
+	-H 'Content-type:application/json' \
+	--data-binary '{"delete-field": {"name":"realm"}}' \
+	http://localhost:8983/solr/faces/schema
 
 curl \
 	-X POST \
@@ -22,6 +30,7 @@ curl \
 	--data-binary '{"delete-field-type":{ "name":"face_vector" }}' \
 	http://localhost:8983/solr/faces/schema
 
+# Створення типів
 curl \
 	-X POST \
 	-H 'Content-type:application/json' \
@@ -34,6 +43,13 @@ curl \
 		"knnAlgorithm":"hnsw",
 		"hnswMaxConnections":"512",
 		"hnswBeamWidth":"3200"}}' \
+	http://localhost:8983/solr/faces/schema
+
+# Створення полів
+curl \
+	-X POST \
+	-H 'Content-type:application/json' \
+	--data-binary '{"add-field": {"name":"realm", "type":"string", "multiValued":false, "stored":true, "indexed": true, "required": true}}' \
 	http://localhost:8983/solr/faces/schema
 
 curl \

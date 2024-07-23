@@ -16,7 +16,7 @@ def save_data(data, file_no):
 
 
 start_time = time.time()
-directory = './dest'
+directory = './faces'
 i = 0
 file_list = os.listdir(directory)
 list_len = len(file_list)
@@ -49,7 +49,7 @@ for filename in file_list:
 		pass
 	# j = 0
 	if face_objs:
-		result.append({'id': basename+extension, 'face': face_objs[0]['embedding']})
+		result.append({'id': basename+extension, 'realm': 'moria', 'face': face_objs[0]['embedding']})
 	i += 1
 	if i % RECORDS_PER_FILE == 0:
 		save_data(result, file_no)
