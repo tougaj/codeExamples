@@ -7,7 +7,6 @@
 
 ```bash
 docker build -t deepface:latest .
-
 ```
 
 Для запуску контейнеру, який містить налаштоване середовище для роботи з deepFace, використовуйте наступну команду:
@@ -15,7 +14,18 @@ docker build -t deepface:latest .
 
 ```bash
 docker run -it --rm -v $PWD:/app/deepface deepface:latest bash
+```
 
+Для повної очистки всього використовуйте команду:
+
+```bash
+docker system prune -a
+```
+
+Для очистки кешу білдеру використовуйте команду:
+
+```bash
+docker builder prune
 ```
 
 ## Зміна місця зберігання даних Docker в Ubuntu
