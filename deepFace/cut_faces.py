@@ -63,11 +63,25 @@ if __name__ == '__main__':
                         default='./faces', help="Faces destination directory")
     parser.add_argument("-e", "--errors", type=str,
                         default='./errors', help="Errors directory")
+    # Тести показали, що використання anti-spoofing суттєво скорочує кількість знайдених фото,
+    # але за рахунок того, що нормальні фото чомусь не беруться, так що даний параметр
+    # має використовуватись тільки якщо він вам дійсно потрібен
+    parser.add_argument("-f", "--anti-spoofing", type=bool,
+                        default=False, help="Anti spoofing")
+    # Після багатьох тестів прийшов до висновку, що кращі результати показує retinaface,
+    # але вона працює дуже повільно. yolov8 працює, в принципі, добре, але в нього багато помилок.
+    # Так що поки за критерієм швидкість/якість краще всього показав себе centerface
+    parser.add_argument("-b", "--backend", type=str, choices=['centerface', 'retinaface', 'yolov8'],
+                        default='centerface', help="Detector backend")
     args = parser.parse_args()
     MIN_SIZE = args.size
     SOURCE_DIRECTORY = Path(args.source)
     DESTINATION_DIR = Path(args.destination)
     ERROR_DIR = Path(args.errors)
+    BACKEND = args.backend
+    ANTI_SPOOFING = args.anti_spoofing
+
+    print(args)
 
     create_errors_dir(ERROR_DIR)
     start_time = time.time()
@@ -87,21 +101,25 @@ if __name__ == '__main__':
         # (not_used, extension) = os.path.splitext(file_path)
         # print(f'Found JPG file: {file_path}')
 
+        file_name = f'{base_name}{extension}'
         face_objs = None
         try:
             face_objs = DeepFace.extract_faces(
                 img_path=file_path,
-                detector_backend='centerface',
+                detector_backend=BACKEND,
                 align=True,
+                anti_spoofing=ANTI_SPOOFING
             )
         except Exception as e:
             errors_count += 1
-            file_name = f'{base_name}{extension}'
             file_path.rename(ERROR_DIR / f'{file_name}')
-            print(f'⚠️  No faces detected in {file_name}. Moved to errors')
+            print(f'⚠️  No faces detected in {file_name}')
         face_no = 0
         if face_objs:
             for face in face_objs:
+                if ANTI_SPOOFING and not face.get("is_real"):
+                    print(f'Not real face in {file_name}')
+                    continue
                 out_path = DESTINATION_DIR / \
                     f'{base_name}_{face_no}{extension}'
                 crop_face(
