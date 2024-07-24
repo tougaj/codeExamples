@@ -55,7 +55,7 @@ def crop_face(img_path: Path, face_data: str, output_path: Path, min_size: int):
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument("-z", "--size", type=int,
+    parser.add_argument("-x", "--size", type=int,
                         default=50, help="Image min size")
     parser.add_argument("-s", "--source", type=str,
                         default='./images', help="Images source directory")
