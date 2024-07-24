@@ -7,7 +7,6 @@ from PIL import Image
 from pathlib import Path
 import json
 
-MIN_SIZE = 50
 RECORDS_PER_FILE = 1000
 
 def save_data(data, file_no):
