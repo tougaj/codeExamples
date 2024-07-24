@@ -5,6 +5,7 @@
 **/*.tar
 **/*.tar.gz
 **/*.json
+**/*.docx
 **/local.*
 node_modules
 venv

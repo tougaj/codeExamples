@@ -4,4 +4,5 @@
 *.webp
 *.tar
 *.tar.gz
+*.docx
 local.*
