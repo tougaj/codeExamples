@@ -7,8 +7,9 @@ MAX_RESULT_COUNT = 40
 
 dfs = DeepFace.find(
   img_path = "target.png", 
-  db_path = "./dest", 
-  detector_backend = 'centerface',
+  db_path = "./faces", 
+  detector_backend = 'yolov8',
+  # detector_backend = 'centerface',
   # detector_backend = 'retinaface',
   # model_name = 'VGG-Face',
   align = True,
