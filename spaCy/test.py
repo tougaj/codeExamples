@@ -8,6 +8,7 @@ import uk_core_news_lg
 # import uk_core_news_trf
 # from spacy import displacy
 
+# nlp = spacy.load("uk_core_news_lg")
 # nlp = uk_core_news_sm.load()
 nlp = uk_core_news_lg.load()
 # nlp = ru_core_news_lg.load()
