@@ -6,6 +6,7 @@ from time import time
 import uk_core_news_lg
 # import ru_core_news_lg
 # import uk_core_news_trf
+# from spacy import displacy
 
 # nlp = uk_core_news_sm.load()
 nlp = uk_core_news_lg.load()
@@ -20,4 +21,8 @@ print("--------------------------------------------------")
 for ent in doc.ents:
     print(ent.text, ent.start_char, ent.end_char, ent.label_)
 print("--------------------------------------------------")
+
+# displacy.serve(doc, style="dep")
+# displacy.serve(doc, style="ent", port=5001)
+
 print(f"Elapsed {toc-tic:.3f} seconds")
