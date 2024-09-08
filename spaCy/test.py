@@ -15,8 +15,34 @@ nlp = uk_core_news_lg.load()
 # nlp = uk_core_news_lg.load(disable=["parser"])
 # nlp = ru_core_news_lg.load()
 # nlp = uk_core_news_trf.load()
+
+
+# If you do not want the tokenizer to split on hyphens between letters, you can modify the existing infix definition from lang/punctuation.py
+from spacy.lang.char_classes import ALPHA, ALPHA_LOWER, ALPHA_UPPER
+from spacy.lang.char_classes import CONCAT_QUOTES, LIST_ELLIPSES, LIST_ICONS
+from spacy.util import compile_infix_regex
+
+# Modify tokenizer infix patterns
+infixes = (
+    LIST_ELLIPSES
+    + LIST_ICONS
+    + [
+        r"(?<=[0-9])[+\\-\\*^](?=[0-9-])",
+        r"(?<=[{al}{q}])\\.(?=[{au}{q}])".format(
+            al=ALPHA_LOWER, au=ALPHA_UPPER, q=CONCAT_QUOTES
+        ),
+        r"(?<=[{a}]),(?=[{a}])".format(a=ALPHA),
+        # ✅ Commented out regex that splits on hyphens between letters:
+        # r"(?<=[{a}])(?:{h})(?=[{a}])".format(a=ALPHA, h=HYPHENS),
+        r"(?<=[{a}0-9])[:<>=/](?=[{a}])".format(a=ALPHA),
+    ]
+)
+infix_re = compile_infix_regex(infixes)
+nlp.tokenizer.infix_finditer = infix_re.finditer
+
+
 tic = time()
-doc=nlp("Після удару РФ балістичними ракетами по місту Полтава міністр закордонних справ України Дмитро Кулеба закликав партнерів прискорити доставку новітніх систем ППО і посилювати здатність України протидіяти балістичним атакам ворога.")
+doc=nlp("Після удару РФ балістичними ракетами по місту Полтаві міністр закордонних справ України Дмитро Кулеба закликав партнерів прискорити доставку новітніх систем ППО і посилювати здатність України протидіяти балістичним атакам ворога.")
 toc = time()
 for token in doc:
     # print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_, token.shape_, token.is_alpha, token.is_stop, token.morph)
