@@ -39,7 +39,7 @@ infixes = (
 )
 infix_re = compile_infix_regex(infixes)
 nlp.tokenizer.infix_finditer = infix_re.finditer
-
+# For an overview of the default regular expressions, see lang/punctuation.py and language-specific definitions such as https://github.com/explosion/spaCy/blob/master/spacy/lang/en/punctuation.py
 
 tic = time()
 doc=nlp("Після удару РФ балістичними ракетами по місту Полтаві міністр закордонних справ України Дмитро Кулеба закликав партнерів прискорити доставку новітніх систем ППО і посилювати здатність України протидіяти балістичним атакам ворога.")
