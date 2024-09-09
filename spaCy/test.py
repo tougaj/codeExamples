@@ -44,6 +44,11 @@ nlp.tokenizer.infix_finditer = infix_re.finditer
 tic = time()
 doc=nlp("Після удару РФ балістичними ракетами по місту Полтаві міністр закордонних справ України Дмитро Кулеба закликав партнерів прискорити доставку новітніх систем ППО і посилювати здатність України протидіяти балістичним атакам ворога.")
 toc = time()
+
+for sent in doc.sents:
+    print(sent.text)
+print("--------------------------------------------------")
+
 for token in doc:
     # print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_, token.shape_, token.is_alpha, token.is_stop, token.morph)
     print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_, token.shape_, token.is_alpha, token.is_stop, token.head.text, [child for child in token.children])
