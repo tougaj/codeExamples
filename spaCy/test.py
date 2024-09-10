@@ -2,12 +2,16 @@
 
 # import spacy
 from time import time
+
 # import uk_core_news_sm
 import uk_core_news_lg
+from spacy.lang.char_classes import (ALPHA, ALPHA_LOWER, ALPHA_UPPER,
+                                     CONCAT_QUOTES, LIST_ELLIPSES, LIST_ICONS)
 # import ru_core_news_lg
 # import uk_core_news_trf
 # from spacy import displacy
-from spacy.symbols import nsubj, VERB
+from spacy.symbols import VERB, nsubj
+from spacy.util import compile_infix_regex
 
 # nlp = spacy.load("uk_core_news_lg")
 # nlp = uk_core_news_sm.load()
@@ -18,9 +22,6 @@ nlp = uk_core_news_lg.load()
 
 
 # If you do not want the tokenizer to split on hyphens between letters, you can modify the existing infix definition from lang/punctuation.py
-from spacy.lang.char_classes import ALPHA, ALPHA_LOWER, ALPHA_UPPER
-from spacy.lang.char_classes import CONCAT_QUOTES, LIST_ELLIPSES, LIST_ICONS
-from spacy.util import compile_infix_regex
 
 # Modify tokenizer infix patterns
 infixes = (
@@ -42,7 +43,7 @@ nlp.tokenizer.infix_finditer = infix_re.finditer
 # For an overview of the default regular expressions, see lang/punctuation.py and language-specific definitions such as https://github.com/explosion/spaCy/blob/master/spacy/lang/en/punctuation.py
 
 tic = time()
-doc=nlp("Після удару РФ балістичними ракетами по місту Полтаві міністр закордонних справ України Дмитро Кулеба закликав партнерів прискорити доставку новітніх систем ППО і посилювати здатність України протидіяти балістичним атакам ворога.")
+doc = nlp("Після удару РФ балістичними ракетами по місту Полтаві міністр закордонних справ України Дмитро Кулеба закликав партнерів прискорити доставку новітніх систем ППО і посилювати здатність України протидіяти балістичним атакам ворога.")
 toc = time()
 
 for sent in doc.sents:
@@ -51,9 +52,11 @@ print("--------------------------------------------------")
 
 for token in doc:
     # print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_, token.shape_, token.is_alpha, token.is_stop, token.morph)
-    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_, token.shape_, token.is_alpha, token.is_stop, token.head.text, [child for child in token.children])
+    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_, token.shape_,
+          token.is_alpha, token.is_stop, token.head.text, [child for child in token.children])
     if token.n_lefts or token.n_rights:
-        print('⛓️‍', [t.text for t in token.lefts], token.text, [t.text for t in token.rights])
+        print('⛓️‍', [t.text for t in token.lefts],
+              token.text, [t.text for t in token.rights])
 print("--------------------------------------------------")
 
 # root = [token for token in doc if token.head == token][0]
