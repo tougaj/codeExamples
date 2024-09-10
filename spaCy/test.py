@@ -55,8 +55,8 @@ def print_tokens(doc, with_lr=True):
         print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_, token.shape_,
               token.is_alpha, token.is_stop, token.head.text, [child for child in token.children])
         if with_lr and (token.n_lefts or token.n_rights):
-            print('⛓️‍', [t.text for t in token.lefts],
-                  token.text, [t.text for t in token.rights])
+            print('⛓️‍', [t.text for t in token.lefts], '<-',
+                  token.text, '->', [t.text for t in token.rights])
     print("--------------------------------------------------")
 
 
@@ -73,14 +73,14 @@ nlp = uk_core_news_lg.load()
 # nlp = ru_core_news_lg.load()
 # nlp = uk_core_news_trf.load()
 
-adjust_tokenizer(nlp)
+# adjust_tokenizer(nlp)
 
 tic = time()
 doc = nlp(get_source_text())
 toc = time()
 
 print_sentences(doc)
-print_tokens(doc, False)
+print_tokens(doc, True)
 print_entities(doc)
 
 
