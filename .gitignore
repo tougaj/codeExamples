@@ -106,3 +106,4 @@ dist
 venv
 .venv
 __pycache__
+local.*
