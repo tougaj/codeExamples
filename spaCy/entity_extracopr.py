@@ -80,3 +80,42 @@ if current_entity:
 # Виводимо результат
 for ent in merged_entities:
     print(ent.text, ent.lemma_, ent.start_char, ent.end_char, ent.label_)
+
+# Можна так:import spacy
+# from spacy.tokens import Span
+
+# # Функція для об'єднання сутностей
+# def merge_entities(doc):
+#     merged_ents = []
+#     current_ent = None
+
+#     for ent in doc.ents:
+#         if current_ent is None:
+#             current_ent = ent
+#         else:
+#             if current_ent.label_ == ent.label_ and (ent.start_char - current_ent.end_char) <= 1:
+#                 # Оновлюємо сутність
+#                 current_ent = Span(doc, current_ent.start, ent.end, label=current_ent.label_)
+#             else:
+#                 # Додаємо попередню сутність
+#                 merged_ents.append(current_ent)
+#                 current_ent = ent
+
+#     # Додаємо останню сутність
+#     if current_ent:
+#         merged_ents.append(current_ent)
+
+#     # Оновлюємо сутності в документі
+#     doc.ents = merged_ents
+#     return doc
+
+# # Завантажуємо модель SpaCy
+# nlp = spacy.load("en_core_web_sm")
+
+# # Додаємо компонент у pipeline
+# nlp.add_pipe(merge_entities, after="ner")
+
+# # Тестування
+# doc = nlp("Barack Obama was the 44th President of the United States.")
+# for ent in doc.ents:
+#     print(ent.text, ent.lemma_, ent.start_char, ent.end_char, ent.label_)
