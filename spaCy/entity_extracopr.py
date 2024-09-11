@@ -53,6 +53,30 @@ for token in doc:
           f'ent_type={token.ent_type_}' if token.ent_type_ else '', token.is_upper, token.is_title)
 print("--------------------------------------------------")
 
+# for ent in doc.ents:
+#     print(ent.text, ent.lemma_, ent.start_char, ent.end_char, ent.label_)
+# print("--------------------------------------------------")
+merged_entities = []
+current_entity = None
+
 for ent in doc.ents:
+    if current_entity is None:
+        current_entity = ent
+    else:
+        # Перевірка на однаковий label і чи можна об'єднати (різниця 0 або 1)
+        if current_entity.label_ == ent.label_ and (ent.start_char - current_entity.end_char) <= 1:
+            # Оновлюємо текст, end_char для об'єднаної сутності
+            current_entity = spacy.tokens.Span(
+                doc, current_entity.start, ent.end, label=current_entity.label_)
+        else:
+            # Додаємо поточну сутність у список
+            merged_entities.append(current_entity)
+            current_entity = ent
+
+# Не забудьте додати останню сутність після циклу
+if current_entity:
+    merged_entities.append(current_entity)
+
+# Виводимо результат
+for ent in merged_entities:
     print(ent.text, ent.lemma_, ent.start_char, ent.end_char, ent.label_)
-print("--------------------------------------------------")
