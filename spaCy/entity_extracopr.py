@@ -3,6 +3,8 @@ import spacy
 # from spacy.lang.uk import Ukrainian
 
 nlp = spacy.load("uk_core_news_lg")
+# nlp = spacy.load("en_core_web_lg")
+# nlp = spacy.load("ru_core_news_lg")
 # ruler = nlp.add_pipe("entity_ruler", before="ner")
 ruler = nlp.add_pipe("entity_ruler", config={"overwrite_ents": True})
 patterns = [
@@ -43,11 +45,11 @@ doc = nlp('Група таких-собі комунальників з Іван
 for token in doc:
     print('🔷', token.text, token.lemma_, token.pos_, token.dep_, token.shape_, token.is_stop,
           f'ent_type={token.ent_type_}' if token.ent_type_ else '', token.is_upper, token.is_title)
-print("--------------------------------------------------")
+print("-------------------------")
 
 for ent in doc.ents:
-    print(ent.text, ent.lemma_, ent.start_char, ent.end_char, ent.label_)
-print("--------------------------------------------------")
+    print('🔶', ent.text, ent.lemma_, ent.start_char, ent.end_char, ent.label_)
+print("-------------------------")
 
 # merged_entities = []
 # current_entity = None
@@ -72,7 +74,8 @@ print("--------------------------------------------------")
 
 # # Виводимо результат
 # for ent in merged_entities:
-#     print(ent.text, ent.lemma_, ent.start_char, ent.end_char, ent.label_)
+#     print('🔶', ent.text, ent.lemma_, ent.start_char, ent.end_char, ent.label_)
+
 
 # Можна так:import spacy
 # from spacy.tokens import Span
