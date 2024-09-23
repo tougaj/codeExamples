@@ -36,11 +36,6 @@ patterns = [
         ]
     },
 ]
-# patterns = [{"label": "LOC", "pattern": [
-#     {"LEMMA": "оборонний"}, {"LEMMA": "споруда"}]}]
-# ruler.add_patterns(patterns)
-# [{"label": "ORG", "pattern": "Apple"}]
-#             {"label": "GPE", "pattern": [{"LOWER": "san"}, {"LOWER": "francisco"}]}]
 ruler.add_patterns(patterns)
 doc = nlp('Група таких-собі комунальників з Івано-Франківська вирушила на Донеччину для будівництва оборонних споруд. Про співробітників підприємства Водоканал-Сервіс розпитаємо в наших кореспондентів Жанни Дутчак-Малиновської та Степана Боброва.')
 
