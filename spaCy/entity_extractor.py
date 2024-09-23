@@ -25,16 +25,16 @@ patterns = [
             {"TEXT": "-"},
             {"ENT_TYPE": "ORG"},
         ]
-    }
-    #     {
-    #         "label": "PER",
-    #         "pattern": [
-    #             {"DEP": "flat:title", "OP": "?"},
-    #             {"DEP": "flat:name"},
-    #             {"TEXT": "-"},
-    #             {"DEP": "flat:name"}
-    #         ]
-    #     },
+    },
+    {
+        "label": "PER",
+        "pattern": [
+            {"ENT_TYPE": "PER", "OP": "?"},
+            {"ENT_TYPE": "PER"},
+            {"TEXT": "-"},
+            {"ENT_TYPE": "PER"}
+        ]
+    },
 ]
 # patterns = [{"label": "LOC", "pattern": [
 #     {"LEMMA": "оборонний"}, {"LEMMA": "споруда"}]}]
