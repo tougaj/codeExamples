@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import spacy
 
 # from spacy.lang.uk import Ukrainian
