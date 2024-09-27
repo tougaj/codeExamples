@@ -5,6 +5,14 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "Отладчик Python: Текущий файл",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${file}",
+			"console": "integratedTerminal",
+			"cwd": "${fileDirname}"
+		},
+		{
 			"type": "node",
 			"request": "launch",
 			"name": "equalPartsDivider Launch",
