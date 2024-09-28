@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-import re
+# import re
 from pathlib import Path
+from time import time
 
 import spacy
+from langdetect import detect
 
 directory_path = Path('./texts')
 
@@ -22,11 +24,20 @@ def clean_text(text: str):
     return result.strip()
 
 
+tic = time()
+count = 0
 for file in directory_path.iterdir():
     if file.is_file():
         with open(file, 'r', encoding='utf-8') as file:
             plain_text = file.read()
-            joined_text = re.sub(r"\n+", ' ', plain_text)
+            if detect(plain_text) != 'uk':
+                continue
+            joined_text = ' '.join(plain_text.split("\n"))
             cleaned_text = clean_text(joined_text)
-            print(f"{file.name}\n{'-'*20}\n{cleaned_text}\n")
+            print(cleaned_text)
+            count += 1
+            # print(f"{file.name}\n{'-'*20}\n{cleaned_text}\n")
     # break
+toc = time()
+elapsed = toc-tic
+# print(f"🏁 Elapsed time {elapsed:.2f} ({elapsed/count:.3f} sec per article)")
