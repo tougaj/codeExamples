@@ -1,0 +1,5 @@
+transformers[sentencepiece]
+nltk
+sacremoses
+tensorflow
+tf-keras
