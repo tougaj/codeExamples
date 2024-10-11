@@ -38,5 +38,5 @@ if 'error' in output:
 for sentence in output:
     print(sentence['translation_text'])
 print('-'*50)
-print(f"{len(sentences)} sentences have been translated " \
-    f"{toc-tic:.2f} seconds ({(toc-tic)/len(sentences):.2f} sec/sentence)")
+print(f"{len(sentences)} sentences have been translated "
+      f"{toc-tic:.2f} seconds ({(toc-tic)/len(sentences):.2f} sec/sentence)")
