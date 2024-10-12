@@ -2,7 +2,7 @@
 
 from transformers import pipeline
 import nltk
-# nltk.download('punkt')  # Завантажуємо необхідні дані для токенізації
+nltk.download('punkt_tab')  # Завантажуємо необхідні дані для токенізації
 from nltk.tokenize import sent_tokenize
 from time import time
 
