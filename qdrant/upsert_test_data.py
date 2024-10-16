@@ -3,7 +3,7 @@
 import sys
 import uuid
 from os import environ as env
-from time import time
+from time import sleep, time
 
 import numpy as np
 from dotenv import find_dotenv, load_dotenv
@@ -49,7 +49,7 @@ client.update_collection(
 
 BATCH_SIZE = 1000
 
-for _ in tqdm(range(10)):
+for _ in tqdm(range(100)):
     current_time = int(time()*1e6)
     ids = [str(uuid.uuid4()) for i in range(BATCH_SIZE)]
     vectors = rg.random((BATCH_SIZE, 512))*10-5
@@ -66,11 +66,19 @@ for _ in tqdm(range(10)):
     #     ],
     # )
 
-    client.upsert(
-        collection_name=COLLECTION_NAME,
-        points=models.Batch(ids=ids, payloads=payloads, vectors=vectors,),
-        wait=True
-    )
+    success = False
+    while not success:
+        try:
+            client.upsert(
+                collection_name=COLLECTION_NAME,
+                points=models.Batch(
+                    ids=ids, payloads=payloads, vectors=vectors,),
+                wait=True
+            )
+            success = True
+        except Exception as e:
+            print(e)
+            sleep(5)
 
 client.update_collection(
     collection_name=COLLECTION_NAME,
