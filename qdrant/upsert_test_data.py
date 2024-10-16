@@ -39,13 +39,16 @@ if not client.collection_exists(COLLECTION_NAME):
         collection_name=COLLECTION_NAME,
         vectors_config=models.VectorParams(
             size=512, distance=models.Distance.EUCLID, on_disk=True),
+        optimizers_config=models.OptimizersConfigDiff(
+            indexing_threshold=0,
+        ),
     )
     print(f"Collection {COLLECTION_NAME} created")
 
-client.update_collection(
-    collection_name=COLLECTION_NAME,
-    optimizer_config=models.OptimizersConfigDiff(indexing_threshold=0),
-)
+# client.update_collection(
+#     collection_name=COLLECTION_NAME,
+#     optimizer_config=models.OptimizersConfigDiff(indexing_threshold=0),
+# )
 
 BATCH_SIZE = 1000
 
