@@ -64,9 +64,9 @@ for _ in tqdm(range(250)):
     current_time = int(time()*1e6)
     # ids = [str(uuid.uuid4()) for i in range(BATCH_SIZE)]
     vectors = rg.random((BATCH_SIZE, VECTOR_SIZE))*10-5
-    payloads = [{"moria_id": f"moria_id_{current_time}_{i}"}
+    payloads = [{"realm": "moria", "id": f"moria_id_{current_time}_{i}"}
                 for i in range(BATCH_SIZE)]
-    ids = [str(uuid.uuid5(NAMESPACE, p['moria_id'])) for p in payloads]
+    ids = [str(uuid.uuid5(NAMESPACE, p['id'])) for p in payloads]
 
     # client.upsert(
     #     collection_name=COLLECTION_NAME,
