@@ -31,6 +31,7 @@ rg = np.random.default_rng()
 client = QdrantClient(
     url=QDRANT_SERVER,
     api_key=API_KEY,
+    timeout=60
 )
 print(f"Connected to server {QDRANT_SERVER}")
 
@@ -38,7 +39,11 @@ if not client.collection_exists(COLLECTION_NAME):
     result = client.create_collection(
         collection_name=COLLECTION_NAME,
         vectors_config=models.VectorParams(
-            size=512, distance=models.Distance.EUCLID, on_disk=True),
+            size=512,
+            distance=models.Distance.EUCLID,
+            on_disk=True,
+            datatype=models.Datatype.FLOAT16
+        ),
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=0,
         ),
@@ -52,7 +57,7 @@ if not client.collection_exists(COLLECTION_NAME):
 
 BATCH_SIZE = 1000
 
-for _ in tqdm(range(100)):
+for _ in tqdm(range(250)):
     current_time = int(time()*1e6)
     ids = [str(uuid.uuid4()) for i in range(BATCH_SIZE)]
     vectors = rg.random((BATCH_SIZE, 512))*10-5
@@ -76,7 +81,7 @@ for _ in tqdm(range(100)):
                 collection_name=COLLECTION_NAME,
                 points=models.Batch(
                     ids=ids, payloads=payloads, vectors=vectors,),
-                wait=True
+                wait=True,
             )
             success = True
         except Exception as e:
