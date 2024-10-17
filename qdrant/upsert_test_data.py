@@ -10,6 +10,9 @@ from dotenv import find_dotenv, load_dotenv
 from qdrant_client import QdrantClient, models
 from tqdm import tqdm
 
+VECTOR_SIZE = 512
+NAMESPACE = uuid.NAMESPACE_URL  # або створіть свій власний UUID
+
 ENV_FILE = find_dotenv()
 if ENV_FILE:
     load_dotenv(ENV_FILE)
@@ -39,10 +42,10 @@ if not client.collection_exists(COLLECTION_NAME):
     result = client.create_collection(
         collection_name=COLLECTION_NAME,
         vectors_config=models.VectorParams(
-            size=512,
+            size=VECTOR_SIZE,
             distance=models.Distance.EUCLID,
             on_disk=True,
-            datatype=models.Datatype.FLOAT16
+            # datatype=models.Datatype.FLOAT16
         ),
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=0,
@@ -59,17 +62,18 @@ BATCH_SIZE = 1000
 
 for _ in tqdm(range(250)):
     current_time = int(time()*1e6)
-    ids = [str(uuid.uuid4()) for i in range(BATCH_SIZE)]
-    vectors = rg.random((BATCH_SIZE, 512))*10-5
+    # ids = [str(uuid.uuid4()) for i in range(BATCH_SIZE)]
+    vectors = rg.random((BATCH_SIZE, VECTOR_SIZE))*10-5
     payloads = [{"moria_id": f"moria_id_{current_time}_{i}"}
                 for i in range(BATCH_SIZE)]
+    ids = [str(uuid.uuid5(NAMESPACE, p['moria_id'])) for p in payloads]
 
     # client.upsert(
     #     collection_name=COLLECTION_NAME,
     #     points=[
     #         models.PointStruct(
     #             id=str(uuid.uuid4()),
-    #             vector=np.random.uniform(-5, 5, 512).tolist(),
+    #             vector=np.random.uniform(-5, 5, VECTOR_SIZE).tolist(),
     #         ),
     #     ],
     # )
