@@ -36,7 +36,18 @@ vector = (rg.random(512)*10-5).tolist()
 
 tic = time()
 hits = client.query_points(
-    collection_name=COLLECTION_NAME, query=vector, limit=5, search_params=models.SearchParams(hnsw_ef=128), timeout=300).points
+    collection_name=COLLECTION_NAME,
+    query=vector,
+    limit=5,
+    search_params=models.SearchParams(
+        hnsw_ef=128,
+        quantization=models.QuantizationSearchParams(
+            ignore=False,
+            rescore=True,
+            oversampling=2.0,
+        )
+    ),
+    timeout=300).points
 toc = time()
 
 

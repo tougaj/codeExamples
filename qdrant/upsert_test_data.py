@@ -47,6 +47,13 @@ if not client.collection_exists(COLLECTION_NAME):
             on_disk=True,
             # datatype=models.Datatype.FLOAT16
         ),
+        quantization_config=models.ScalarQuantization(
+            scalar=models.ScalarQuantizationConfig(
+                type=models.ScalarType.INT8,
+                quantile=0.99,
+                always_ram=True,
+            ),
+        ),
         optimizers_config=models.OptimizersConfigDiff(
             indexing_threshold=0,
         ),
