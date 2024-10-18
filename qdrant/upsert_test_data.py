@@ -18,9 +18,9 @@ if ENV_FILE:
     load_dotenv(ENV_FILE)
 
 API_KEY = env.get('QDRANT_API_KEY')
-if API_KEY is None:
-    print("You need define Qdrant api-key!")
-    sys.exit(1)
+# if API_KEY is None:
+#     print("You need define Qdrant api-key!")
+#     sys.exit(1)
 QDRANT_SERVER = env.get('QDRANT_SERVER')
 if QDRANT_SERVER is None:
     print("You need define Qdrant server!")
@@ -52,11 +52,6 @@ if not client.collection_exists(COLLECTION_NAME):
         ),
     )
     print(f"Collection {COLLECTION_NAME} created")
-
-# client.update_collection(
-#     collection_name=COLLECTION_NAME,
-#     optimizer_config=models.OptimizersConfigDiff(indexing_threshold=0),
-# )
 
 BATCH_SIZE = 1000
 
@@ -91,10 +86,5 @@ for _ in tqdm(range(250)):
         except Exception as e:
             print(e)
             sleep(5)
-
-client.update_collection(
-    collection_name=COLLECTION_NAME,
-    optimizer_config=models.OptimizersConfigDiff(indexing_threshold=20000),
-)
 
 print('🏁 Upload completed')
