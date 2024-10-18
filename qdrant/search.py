@@ -6,7 +6,7 @@ from time import time
 
 import numpy as np
 from dotenv import find_dotenv, load_dotenv
-from qdrant_client import QdrantClient
+from qdrant_client import QdrantClient, models
 
 ENV_FILE = find_dotenv()
 if ENV_FILE:
@@ -36,7 +36,7 @@ vector = (rg.random(512)*10-5).tolist()
 
 tic = time()
 hits = client.query_points(
-    collection_name=COLLECTION_NAME, query=vector, limit=5, timeout=60).points
+    collection_name=COLLECTION_NAME, query=vector, limit=5, search_params=models.SearchParams(hnsw_ef=128), timeout=60).points
 toc = time()
 
 
