@@ -55,7 +55,7 @@ if not client.collection_exists(COLLECTION_NAME):
 
 BATCH_SIZE = 1000
 
-for _ in tqdm(range(250)):
+for _ in tqdm(range(1000)):
     current_time = int(time()*1e6)
     # ids = [str(uuid.uuid4()) for i in range(BATCH_SIZE)]
     vectors = rg.random((BATCH_SIZE, VECTOR_SIZE))*10-5
