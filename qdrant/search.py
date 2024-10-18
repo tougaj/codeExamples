@@ -13,9 +13,9 @@ if ENV_FILE:
     load_dotenv(ENV_FILE)
 
 API_KEY = env.get('QDRANT_API_KEY')
-if API_KEY is None:
-    print("You need define Qdrant api-key!")
-    sys.exit(1)
+# if API_KEY is None:
+#     print("You need define Qdrant api-key!")
+#     sys.exit(1)
 QDRANT_SERVER = env.get('QDRANT_SERVER')
 if QDRANT_SERVER is None:
     print("You need define Qdrant server!")
