@@ -2,15 +2,19 @@
 
 import whisper
 import json
+from datetime import timedelta
+from time import time
 # import pprint
 
 model = whisper.load_model("turbo")
+tic = time()
 result = model.transcribe(
     "test.mp4",
     language=None,       # Автоматичне визначення мов
     task="transcribe",   # Завдання: транскрипція
     verbose=True         # Виведення прогресу
 )
+toc = time()
 
 # Збереження в файл JSON
 with open("result.json", "w", encoding="utf-8") as f:
@@ -22,3 +26,5 @@ print("Результат записано у файл result.json")
 
 for segment in result["segments"]:
     print(f"[{segment['start']:.2f}s - {segment['end']:.2f}s]: ({segment.get('language')}) {segment['text']}")
+
+print(f'⏱️ Elapsed time: {str(timedelta(seconds=round(toc - tic)))}')
