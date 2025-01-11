@@ -8,8 +8,8 @@ from easynmt import EasyNMT
 from tqdm import tqdm
 from utils import TextCleaner, detect_language
 
-# model = EasyNMT('opus-mt')
-model = EasyNMT('m2m_100_1.2B')
+model = EasyNMT('opus-mt')
+# model = EasyNMT('m2m_100_1.2B')
 
 
 # import nltk
@@ -38,7 +38,7 @@ def process_json_files(directory):
     files = [f for f in os.listdir(directory) if f.endswith(".json")]
 
     # Проходження по файлах з відображенням прогресу
-    for file in tqdm(files, desc="Processing JSON files"):
+    for file in tqdm(files, desc="Translating"):
         file_path = os.path.join(directory, file)
 
         try:
