@@ -1,4 +1,5 @@
 nltk
 langid
+langdetect
 sacremoses
 easynmt

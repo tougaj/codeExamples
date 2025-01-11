@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
+from nltk.tokenize import sent_tokenize, word_tokenize
+import nltk
 import datetime as dt
 from time import time
+
 from easynmt import EasyNMT
+
 # model = EasyNMT('opus-mt')
 model = EasyNMT('m2m_100_1.2B')
 
-import nltk
+
 nltk.download('punkt_tab')
-from nltk.tokenize import sent_tokenize, word_tokenize
 
 # text = """The essence of a thriving economy is grounded in adherence to free-market principles and a level playing field for all. The proposed $14.9 billion acquisition of U.S. Steel by Japan-based Nippon Steel presents a test case for the free market. Unfortunately, it is mired in a political controversy that threatens to overshadow its prospective economic benefits.
 # At the heart of the matter is a clear divergence from standard procedural integrity. Recent developments reveal an unsettling trend toward the politicization of the Committee on Foreign Investment in the United States. This trend has been spearheaded by President Joe Biden’s premature critique of the deal. His comments, suggesting a preference for maintaining U.S. Steel as an “American steel company,” have sparked concerns among free-market conservatives. They argue that such political interference could derail a thorough, unbiased review by CFIUS, whose mandate is to evaluate the implications of such foreign investments purely on national security grounds.
