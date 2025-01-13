@@ -3,3 +3,4 @@ langid
 langdetect
 sacremoses
 easynmt
+tqdm
