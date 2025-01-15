@@ -8,8 +8,8 @@ from easynmt import EasyNMT
 from tqdm import tqdm
 from utils import TextCleaner, detect_language
 
-model = EasyNMT('opus-mt')
-# model = EasyNMT('m2m_100_1.2B')
+# model = EasyNMT('opus-mt')
+model = EasyNMT('m2m_100_1.2B')
 
 
 # import nltk
