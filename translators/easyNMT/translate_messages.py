@@ -54,6 +54,8 @@ def process_json_files(directory):
 
             cleaned_title = TextCleaner(data['title']).remove_unnecessary_symbols().get_stripped_text()
             data['translated_title'] = model.translate(cleaned_title, target_lang='uk')
+            # Якщо виникає помилка про недостатність пам'яті, можна зменшити розмір пакетів обробки (batch size)
+            # data['translated_title'] = model.translate(cleaned_title, target_lang='uk', batch_size=1)
 
             data['translated_body'] = model.translate(cleaned_body, target_lang='uk')
 
