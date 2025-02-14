@@ -6,7 +6,7 @@ from typing import TypedDict
 
 from easynmt import EasyNMT
 from tqdm import tqdm
-from utils import TextCleaner, detect_language
+from utils import TextCleaner
 
 # model = EasyNMT('opus-mt')
 model = EasyNMT('m2m_100_1.2B')
@@ -46,11 +46,14 @@ def process_json_files(directory):
             with open(file_path, "r", encoding="utf-8") as f:
                 data: Message = json.load(f)
 
-            language, cleaned_body = detect_language(data['body'])
+            cleaned_body = TextCleaner(data['body']).remove_unnecessary_symbols().get_stripped_text()
+            # Я вирішив визначати мову також за допомогою EasyNMT (бо переводити буде саме він)
+            language = model.language_detection(cleaned_body)
+            # language, cleaned_body = detect_language(data['body'])
+            if not language is None:
+                data['language'] = language.upper()
             if language is None or language in ['uk', 'ru']:
                 continue
-
-            data['language'] = language.upper()
 
             cleaned_title = TextCleaner(data['title']).remove_unnecessary_symbols().get_stripped_text()
             data['translated_title'] = model.translate(cleaned_title, target_lang='uk')
