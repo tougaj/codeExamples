@@ -35,7 +35,8 @@ class TextCleaner:
     re_pseudo_tag_pattern = re.compile(r'‹/?[a-z]+(?: [^›]*)?›')
     re_html_tag_pattern = re.compile(r'<\/?[a-z][^>]*>')
     re_url_pattern = re.compile(r'https?://\S+|www\.\S+')
-    re_multiple_spaces = re.compile(r'\s+')
+    re_multiple_spaces = re.compile(r'[^\S\n]+')
+    # re_multiple_spaces = re.compile(r'(?!\n)\s+') # Можна використовувати і такий RE
 
     def __init__(self, text: str):
         self.text = text
