@@ -37,7 +37,7 @@ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out c
 
 ## Налаштування файлу конфігурації **rabbitmq.conf**
 
-Файл **rabbitmq.conf** містить рекомендовані налаштування
+Файл **rabbitmq.conf** містить рекомендовані налаштування. За необхідності правки конфігурації скопіюйте його в файл **local.rabbitmq.conf** та зробіть відповідні правки в **local.docker_run.sh**.
 
 ## Налаштування контейнера
 
