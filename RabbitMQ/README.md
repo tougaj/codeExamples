@@ -1,10 +1,51 @@
 # Приклад роботи з RabbitMQ
 
+## Установка та запуск
+
+### За допомогою **apt**
+
+Для установки виконайте наступні команди:
+
+```bash
+sudo apt update
+sudo apt install rabbitmq-server
+# Перед запуском додайте необхідні файли конфігурації та сертифікати (див. далі)
+sudo systemctl start rabbitmq-server
+sudo systemctl enable rabbitmq-server
+
+# Перевірка статуса
+sudo systemctl status rabbitmq-server
+
+# RabbitMQ comes with a web-based management interface that makes it easier to monitor and manage your RabbitMQ server. To enable this plugin, run the following commands:
+sudo rabbitmq-plugins enable rabbitmq_management
+sudo systemctl restart rabbitmq-server
+# If you enabled the RabbitMQ management plugin, you can access the web interface by opening your web browser and navigating to the following [URL](http://localhost:15672/)
+```
+
+При встановленні з **apt** сервер автоматично запускається, тому змінити `default_user` та `default_pass` не вийде, тому треба додати нового користувача та видалити користувача **guest**:
+
+```bash
+sudo rabbitmqctl add_user 'test' 'test'
+sudo rabbitmqctl set_user_tags test administrator
+sudo rabbitmqctl list_users
+sudo rabbitmqctl set_permissions -p / test ".*" ".*" ".*"
+sudo rabbitmqctl delete_user 'guest'
+
+```
+
+### Використання **Docker**
+
+- Скопіюйте файл **docker_run.sh** в файл **local.docker_run.sh**
+- Замініть в новому файлі:
+
+  - <your_user> на логін для свого користувача по замовчанню, який можна згенерувати за допомогою:
+  - <your_password> на пароль свого користувача по замовчанню, який можна згенерувати за допомогою:
+
 ## Генерація сертифікатів TLS
 
 ### Простий спосіб
 
-Створимо **кореневий сертифікат (CA)** та підпишемо серверні і клієнтські сертифікати.  
+Створимо **кореневий сертифікат (CA)** та підпишемо серверні і клієнтські сертифікати.
 
 ```sh
 mkdir -p certs && cd certs
@@ -30,31 +71,38 @@ openssl req -new -key client.key -out client.csr -subj "/CN=client"
 openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.crt -days 3650
 ```
 
-Тепер у нас є файли:  
-- `ca.crt` (кореневий сертифікат)  
-- `server.crt`, `server.key` (серверний сертифікат)  
-- `client.crt`, `client.key` (клієнтський сертифікат)  
+Тепер у нас є файли:
+
+- `ca.crt` (кореневий сертифікат)
+- `server.crt`, `server.key` (серверний сертифікат)
+- `client.crt`, `client.key` (клієнтський сертифікат)
 
 ## Налаштування файлу конфігурації **rabbitmq.conf**
 
-Файл **rabbitmq.conf** містить рекомендовані налаштування. За необхідності правки конфігурації скопіюйте його в файл **local.rabbitmq.conf** та зробіть відповідні правки в **local.docker_run.sh**.
+Файл **rabbitmq.conf** містить рекомендовані налаштування.
 
-## Налаштування контейнера
+Якщо інсталяція виконана за допомогою **apt**, скопіюйте цей файл в каталог **/etc/rabbitmq/rabbitmq.conf** та відредагуйте його для своїх потреб. Обов'язково змініть значення налаштувань `default_user `, та `default_pass`!
 
-- Скопіюйте файл **docker_run.sh** в файл **local.docker_run.sh**
-- Замініть в новому файлі:
+Якщо використовується **Docker**, то скопіюйте файл конфігурації **rabbitmq.conf** в файл **local.rabbitmq.conf** та зробіть відповідні правки в **local.docker_run.sh**.
 
-	+ <your_user> на логін для свого користувача по замовчанню, який можна згенерувати за допомогою:
-	```bash
-	openssl rand -base64 16 | tr -d '/+='
-	```
-	+ <your_password> на пароль свого користувача по замовчанню, який можна згеренувати за допомогою:
-	```bash
-	apg -a 1 -n 1 -m 32 -E "#'\"\`$"
-	# Деякі символи не використовуються, щоб не перйматись щодо їх екранування
-	```
+## Примітки
 
-> Для логіна та пароля також можна використати:
-> ```bash
-> uuidgen | tr '[:upper:]' '[:lower:]'
-> ```
+### Генерація логіна та пароля
+
+Логін можна згенерувати наступною командою:
+
+```bash
+openssl rand -base64 16 | tr -d '/+='
+```
+
+Пароль можна згенерувати наступною командою (деякі символи не використовуються, щоб не перейматись щодо їх екранування):
+
+```bash
+apg -a 1 -n 1 -m 32 -E "#'\"\`$\&"
+```
+
+Для генерації логіна та пароля також можна використати UUID:
+
+```bash
+uuidgen | tr '[:upper:]' '[:lower:]'
+```

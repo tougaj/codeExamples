@@ -6,14 +6,15 @@
 # Для створення паролю може використовуватись команда:
 # apg -a 1 -n 1 -m 32 -E "#'\"\`$"
 
-mkdir -p $PWD/mnesia
+mkdir -p $PWD/rabbitmq_data
 
 # З використанням TLS та аутентифікацією за допомогою користувача за замовчанням
 docker run -d --rm --name rabbitmq \
 	-p 5671:5671 -p 15672:15672 \
+	--hostname <your_host> \
 	-e RABBITMQ_DEFAULT_USER="<your_user>" \
 	-e RABBITMQ_DEFAULT_PASS="<your_password>" \
 	-v $PWD/certs:/etc/rabbitmq/ssl \
 	-v $PWD/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf \
-	-v $PWD/mnesia:/var/lib/rabbitmq/mnesia \
-	rabbitmq:4-management
+	-v $PWD/rabbitmq_data:/var/lib/rabbitmq \
+	rabbitmq:4.0-management
