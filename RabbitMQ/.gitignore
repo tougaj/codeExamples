@@ -1,2 +1,4 @@
-certs/
 mnesia/
+client/
+server/
+testca/
