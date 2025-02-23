@@ -2,10 +2,17 @@
 from random import randint
 import ssl
 import socket
-
+from dotenv import load_dotenv
 import pika
+import os
+
+# Завантаження змінних з файлу .env
+load_dotenv()
 
 QUEUE_NAME = 'test'
+HOST = os.getenv('REMOTE_HOST', '127.0.0.1')
+SERVER_HOSTNAME = os.getenv('SERVER_HOSTNAME', socket.gethostname())
+PORT = int(os.getenv('PORT', '5671'))
 
 # Налаштування SSL
 context = ssl.create_default_context(cafile="./testca/ca_certificate.pem")
@@ -13,12 +20,11 @@ context.load_cert_chain(certfile="./client/client_certificate.pem", keyfile="./c
 
 credentials = pika.PlainCredentials("test", "test")
 # Тут в якості server_hostname необхідно використати вивід команди hostname
-hostname = socket.gethostname()
 params = pika.ConnectionParameters(
-    host='127.0.0.1',
-    port=5671,
+    host=HOST,
+    port=PORT,
     credentials=credentials,
-    ssl_options=pika.SSLOptions(context, server_hostname=hostname)
+    ssl_options=pika.SSLOptions(context, server_hostname=SERVER_HOSTNAME)
 )
 connection = pika.BlockingConnection(params)
 channel = connection.channel()

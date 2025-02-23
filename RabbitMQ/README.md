@@ -115,32 +115,60 @@ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out c
 - `server.crt`, `server.key` (серверний сертифікат)
 - `client.crt`, `client.key` (клієнтський сертифікат)
 
+### TLS Certificate and Private Key Rotation
+
+This description has taken from [official documentation](https://www.rabbitmq.com/docs/ssl#rotation).
+
+Server TLS certificates (public keys) and private keys have expiration dates and will need to be replaced (rotated) every so often.
+
+The replacement process involves the following steps:
+
+- Replace the files on disk
+- Clear the certificate and private key store cache on the node
+
+Without the second step, the new certificate/key pair will be used by the node after a period of time, as the TLS implementation in the runtimes purges its certificate store cache.
+
+#### Replacing Certificate and Private Key Files on Disk
+
+Simply replace the server certificate, server private key and (if needed) the certificate authority bundle files with their new versions.
+
+#### Clearing the Certificate and Private Key Store Cache
+
+```bash
+rabbitmqctl eval -n [target-node@hostname] 'ssl:clear_pem_cache().'
+```
+
 ## Налаштування
 
 ### Копіювання сертифікатів
 
-Створіть в каталозі **/etc/rabbitmq** каталог **tls**, в якому будуть зберігатись сертифікати сервера, та змініть його власника:
+Створіть у каталозі **/etc/rabbitmq** підкаталог **tls**, у якому зберігатимуться сертифікати сервера, і змініть його власника:
 
 ```bash
-pwd
-# /etc/rabbitmq
-mkdir tls
-chown rabbitmq:rabbitmq tls
+mkdir -p /etc/rabbitmq/tls
+chown rabbitmq:rabbitmq /etc/rabbitmq/tls
 ```
 
-Скопіюйте в новостворений каталог **/etc/rabbitmq/tls** файли сертифікатів, створених вище:
+Скопіюйте до каталогу **/etc/rabbitmq/tls** файли сертифікатів, створені раніше:
 
-- **./testca/ca_certificate.pem**;
-- **./server/server_certificate.pem**;
-- **./server/private_key.pem**.
+- **./testca/ca_certificate.pem** — сертифікат центру сертифікації (CA);
+- **./server/server_certificate.pem** — сертифікат сервера RabbitMQ;
+- **./server/private_key.pem** — приватний ключ сервера.
 
-Після цього _ОБОВ'ЯЗКОВО_ змініть власника скопійованих файлів (в іншому випадку сервер не запуститься, тому що файл **private_key.pem** має специфічні права доступу):
+Після копіювання _ОБОВ'ЯЗКОВО_ змініть власника цих файлів, оскільки сервер не запуститься, якщо файл **private_key.pem** матиме некоректні права доступу:
 
 ```bash
-pwd
-# /etc/rabbitmq/tls
-chown rabbitmq:rabbitmq *
+chown rabbitmq:rabbitmq /etc/rabbitmq/tls/*
+chmod 600 /etc/rabbitmq/tls/private_key.pem
 ```
+
+Також переконайтеся, що каталог **tls** має правильні права доступу:
+
+```bash
+chmod 750 /etc/rabbitmq/tls
+```
+
+Ці налаштування забезпечать безпечне зберігання сертифікатів і правильну роботу RabbitMQ.
 
 ### Налаштування файлу конфігурації **rabbitmq.conf**
 
@@ -157,6 +185,18 @@ chown rabbitmq:rabbitmq rabbitmq.conf
 ```
 
 Якщо використовується **Docker**, то скопіюйте файл конфігурації **rabbitmq.conf** в файл **local.rabbitmq.conf** та зробіть відповідні правки в **local.docker_run.sh**.
+
+### Змінні середовища
+
+Для налаштування параметрів сервера, на якому запущено RabbitMQ, можна використовувати такі змінні середовища:
+
+- **REMOTE_HOST** — IP-адреса або доменне ім'я сервера (за замовчуванням `"127.0.0.1"`).
+- **SERVER_HOSTNAME** — хостове ім'я, для якого було згенеровано сертифікати сервера та клієнта (за замовчуванням визначається через `socket.gethostname()`).
+- **PORT** — порт, на якому працює RabbitMQ (за замовчуванням `5671`).
+
+Щоб задати власні значення цих змінних середовища, скопіюйте файл **dot.env** у **.env** і вкажіть необхідні параметри. Вони будуть використані під час запуску скриптів.
+
+Якщо RabbitMQ запущено на віддаленому сервері, переконайтеся, що клієнт використовує відповідні сертифікати, згенеровані на цьому сервері. Без них клієнт не зможе встановити безпечне з'єднання.
 
 ## Примітки
 
