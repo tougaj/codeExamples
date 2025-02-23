@@ -89,6 +89,12 @@ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out c
 
 Якщо інсталяція виконана за допомогою **apt**, скопіюйте цей файл в каталог **/etc/rabbitmq/rabbitmq.conf** та відредагуйте його для своїх потреб. Обов'язково змініть значення налаштувань `default_user `, та `default_pass`!
 
+Крім того, можна змінити власника для файлу налаштувань:
+
+```bash
+chown rabbitmq:rabbitmq rabbitmq.conf
+```
+
 Якщо використовується **Docker**, то скопіюйте файл конфігурації **rabbitmq.conf** в файл **local.rabbitmq.conf** та зробіть відповідні правки в **local.docker_run.sh**.
 
 ## Примітки

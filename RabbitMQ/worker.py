@@ -14,12 +14,12 @@ def main():
     channel = connection.channel()
 
     channel.queue_declare(queue=QUEUE_NAME, durable=True)
-    print(' [*] Waiting for messages. To exit press CTRL+C')
+    print(' 📩 Waiting for messages. To exit press CTRL+C')
 
     def callback(ch, method, properties, body):
-        print(f" [x] Received {body.decode()}")
+        print(f" 📨 Received '{body.decode()}'")
         time.sleep(body.count(b'.'))
-        print(" [x] Done")
+        print(" ✅ Done")
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     channel.basic_qos(prefetch_count=1)
@@ -28,10 +28,10 @@ def main():
     try:
         channel.start_consuming()
     except KeyboardInterrupt:
-        print('Interrupted')
+        print('⛔ Interrupted')
     finally:
         connection.close()  # закриваємо з'єднання після завершення
-        print('Connection closed')
+        print('🔒 Connection closed')
 
 
 if __name__ == '__main__':
