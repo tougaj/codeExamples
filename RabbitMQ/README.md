@@ -83,7 +83,34 @@ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out c
 - `server.crt`, `server.key` (серверний сертифікат)
 - `client.crt`, `client.key` (клієнтський сертифікат)
 
-## Налаштування файлу конфігурації **rabbitmq.conf**
+## Налаштування
+
+### Копіювання сертифікатів
+
+Створіть в каталозі **/etc/rabbitmq** каталог **tls**, в якому будуть зберігатись сертифікати сервера, та змініть його власника:
+
+```bash
+pwd
+# /etc/rabbitmq
+mkdir tls
+chown rabbitmq:rabbitmq tls
+```
+
+Скопіюйте в новостворений каталог **/etc/rabbitmq/tls** файли сертифікатів, створених вище:
+
+- **./testca/ca_certificate.pem**;
+- **./server/server_certificate.pem**;
+- **./server/private_key.pem**.
+
+Після цього _ОБОВ'ЯЗКОВО_ змініть власника скопійованих файлів (в іншому випадку сервер не запуститься, тому що файл **private_key.pem** має специфічні права доступу):
+
+```bash
+pwd
+# /etc/rabbitmq/tls
+chown rabbitmq:rabbitmq *
+```
+
+### Налаштування файлу конфігурації **rabbitmq.conf**
 
 Файл **rabbitmq.conf** містить рекомендовані налаштування.
 
@@ -92,6 +119,8 @@ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out c
 Крім того, можна змінити власника для файлу налаштувань:
 
 ```bash
+pwd
+# /etc/rabbitmq
 chown rabbitmq:rabbitmq rabbitmq.conf
 ```
 
