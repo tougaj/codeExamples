@@ -65,3 +65,20 @@ basicConstraints = CA:false
 keyUsage = digitalSignature,keyEncipherment
 extendedKeyUsage = 1.3.6.1.5.5.7.3.1
 EOF
+
+# Тут можна додати в кінці
+
+# subjectAltName = @alt_names
+
+# [ alt_names ]
+# IP.1 = 127.0.0.1
+
+# Замість 127.0.0.1 можна додати ip-адресу Вашого серверу, після цього можна буде використати для з'єднання:
+# params = pika.ConnectionParameters(
+#     host='127.0.0.1',
+#     port=5671,
+#     credentials=credentials,
+#     ssl_options=pika.SSLOptions(context)
+# )
+# Інакше треба при з'єднанні обов'язково вказувати при з'єднанні:
+# ssl_options=pika.SSLOptions(context, server_hostname='<your_hostname>')

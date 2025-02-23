@@ -49,6 +49,38 @@ sudo rabbitmqctl delete_user 'guest'
 
 Для зручності при створенні сертифікатів можна використовувати скрипти **cert.XX.init.sh**.
 
+В файлі **cert.00.init.sh** при генерації openssl.cnf можна додати в кінець:
+
+```ini
+subjectAltName = @alt_names
+
+[ alt_names ]
+IP.1 = 127.0.0.1
+# Тут замість 127.0.0.1 можна додати ip-адресу Вашого серверу
+```
+
+Після цього можна буде використати для з'єднання:
+
+```python
+params = pika.ConnectionParameters(
+    host='127.0.0.1',
+    port=5671,
+    credentials=credentials,
+    ssl_options=pika.SSLOptions(context)
+)
+```
+
+Інакше треба при з'єднанні обов'язково вказувати при з'єднанні назву хоста, для якого генерувався сертифікат:
+
+```python
+params = pika.ConnectionParameters(
+    host='127.0.0.1',
+    port=5671,
+    credentials=credentials,
+    ssl_options=pika.SSLOptions(context, server_hostname='<your_hostname>')
+)
+```
+
 ### Простий спосіб (не певен, що найкращій)
 
 Створимо **кореневий сертифікат (CA)** та підпишемо серверні і клієнтські сертифікати.
