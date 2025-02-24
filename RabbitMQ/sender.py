@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-from random import randint
-import ssl
-import socket
-from dotenv import load_dotenv
-import pika
 import os
+import socket
+import ssl
+from random import randint
+
+import pika
+from dotenv import load_dotenv
 
 # Завантаження змінних з файлу .env
 load_dotenv()
@@ -22,6 +23,7 @@ credentials = pika.PlainCredentials("test", "test")
 # Тут в якості server_hostname необхідно використати вивід команди hostname
 params = pika.ConnectionParameters(
     host=HOST,
+    virtual_host='/',
     port=PORT,
     credentials=credentials,
     ssl_options=pika.SSLOptions(context, server_hostname=SERVER_HOSTNAME)
