@@ -40,6 +40,34 @@ async function getConnection() {
 	return await pool.getConnection();
 }
 
+async function withConnection(callback) {
+	const connection = await getConnection();
+
+	try {
+		const result = await callback(connection);
+		await connection.commit();
+		console.log('✅ Transaction commit');
+		return result;
+	} catch (err) {
+		await connection.rollback();
+		console.log('❌ Transaction rollback');
+		throw err;
+	} finally {
+		await connection.close(); // повернення в пул
+	}
+}
+
+async function selectWithConnection() {
+	await withConnection(async (connection) => {
+		const result = await connection.execute(
+			`select * from v_person p where p.person_id < :id`,
+			[10] // bind value for :id
+		);
+		console.log(result.rows);
+		return result;
+	});
+}
+
 async function select() {
 	const connection = await getConnection();
 	try {
@@ -71,7 +99,7 @@ async function update() {
 
 await select();
 await update();
-await select();
+await selectWithConnection();
 closePool();
 
 process.on('SIGINT', async () => {
