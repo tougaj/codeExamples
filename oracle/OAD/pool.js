@@ -40,21 +40,38 @@ async function getConnection() {
 	return await pool.getConnection();
 }
 
-async function run() {
+async function select() {
 	const connection = await getConnection();
 	try {
 		const result = await connection.execute(
 			`select * from v_person p where p.person_id < :id`,
 			[10] // bind value for :id
 		);
-
 		console.log(result.rows);
 	} finally {
 		await connection.close();
 	}
 }
 
-await run();
+async function update() {
+	const connection = await getConnection();
+	try {
+		const result = await connection.execute(
+			'update d_person set PERSON_CODE=:code where person_id=:id',
+			{ code: 'A12', id: 2 }
+			// ['C11', 2] // bind value for :id
+		);
+		console.log(result);
+		// await connection.commit();
+		await connection.rollback();
+	} finally {
+		await connection.close();
+	}
+}
+
+await select();
+await update();
+await select();
 closePool();
 
 process.on('SIGINT', async () => {
