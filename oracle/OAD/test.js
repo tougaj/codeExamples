@@ -25,4 +25,4 @@ async function run() {
 run();
 
 // Виклик:
-// USER_NAME=<user> USER_PASSWORD="pwd" WALLET_PASSWORD="wallet_pwd" CONNECTION_STRING="conn" WALLET_LOCATION="path" node test.js
+// USER_NAME=user USER_PASSWORD="pwd" WALLET_PASSWORD="wallet_pwd" CONNECTION_STRING="conn" WALLET_LOCATION="path" node test.js
