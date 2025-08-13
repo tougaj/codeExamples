@@ -1,3 +1,4 @@
+import session from "express-session";
 import express from "express";
 import { sso } from "node-expose-sspi";
 import path from 'path';
@@ -9,7 +10,15 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.use('/api/{*splat}', sso.auth());
+app.use(session({
+    name: 'cra_session',
+    secret: "secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {maxAge: 20000}
+}));
+
+app.use('/api/{*splat}', sso.auth({useSession: true}));
 
 // app.get("/login", (req, res) => {
 //     const user = getUser(req);
