@@ -72,3 +72,7 @@ trainer = Trainer(
 )
 
 trainer.train()
+
+# Зберігаємо модель і токенайзер у локальну папку
+model.save_pretrained("./my_rubric_model")
+tokenizer.save_pretrained("./my_rubric_model")
