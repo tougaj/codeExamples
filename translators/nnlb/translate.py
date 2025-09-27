@@ -10,6 +10,8 @@ import torch
 import warnings
 from typing import Optional
 
+torch.cuda.empty_cache()
+
 # Приховуємо попередження для чистоти виводу
 warnings.filterwarnings("ignore")
 
@@ -47,7 +49,7 @@ class NLLBToUkrainianTranslator:
         print(f"Токен '{test_token}' → ID: {token_id}")
         print(f"UNK ID: {self.tokenizer.unk_token_id}")
         print(f"Чи підтримується? {token_id != self.tokenizer.unk_token_id}")
-                
+
     def get_language_mapping(self):
         """
         Повний маппінг ISO кодів на NLLB коди для моделі facebook/nllb-200-3.3B
@@ -531,33 +533,33 @@ def main():
         print("-" * 50)
     
     # Інтерактивний режим
-    print(f"\n🎯 Інтерактивний режим перекладу")
-    print("Введіть текст будь-якою підтримуваною мовою")
-    print("(або 'exit' для виходу)")
+    # print(f"\n🎯 Інтерактивний режим перекладу")
+    # print("Введіть текст будь-якою підтримуваною мовою")
+    # print("(або 'exit' для виходу)")
     
-    while True:
-        try:
-            text = input("\n📝 Введіть текст: ").strip()
-            if text.lower() in ['exit', 'quit', 'вихід']:
-                break
+    # while True:
+    #     try:
+    #         text = input("\n📝 Введіть текст: ").strip()
+    #         if text.lower() in ['exit', 'quit', 'вихід']:
+    #             break
                 
-            if not text:
-                continue
+    #         if not text:
+    #             continue
             
-            # Запитуємо чи вказати мову вручну
-            manual_lang = input("🔤 Вказати мову вручну? (Enter для автовизначення): ").strip()
-            source_lang = manual_lang if manual_lang else None
+    #         # Запитуємо чи вказати мову вручну
+    #         manual_lang = input("🔤 Вказати мову вручну? (Enter для автовизначення): ").strip()
+    #         source_lang = manual_lang if manual_lang else None
                 
-            print("🔄 Перекладаємо на українську...")
-            translation, detected_lang = translator.translate_to_ukrainian(text, source_lang)
+    #         print("🔄 Перекладаємо на українську...")
+    #         translation, detected_lang = translator.translate_to_ukrainian(text, source_lang)
             
-            print(f"🔍 Мова джерела: {detected_lang}")
-            print(f"🇺🇦 Український переклад: {translation}")
+    #         print(f"🔍 Мова джерела: {detected_lang}")
+    #         print(f"🇺🇦 Український переклад: {translation}")
             
-        except KeyboardInterrupt:
-            break
-        except Exception as e:
-            print(f"❌ Помилка: {e}")
+    #     except KeyboardInterrupt:
+    #         break
+    #     except Exception as e:
+    #         print(f"❌ Помилка: {e}")
     
     print("\n👋 Дякую за використання українського перекладача!")
     print("🇺🇦 Слава Україні!")
