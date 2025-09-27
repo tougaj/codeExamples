@@ -28,20 +28,26 @@ class NLLBToUkrainianTranslator:
         
         self.model_name = "facebook/nllb-200-3.3B"
         
-        # Завантажуємо токенізатор та модель
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        # Важливо: use_fast=False для коректної роботи з мовними токенами
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=False)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_name)
         
-        # Перевіряємо доступність CUDA
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model.to(self.device)
         
-        # Цільова мова - українська
         self.target_lang = 'ukr_Cyrl'
         
-        print(f"✅ Модель завантажена успішно! Використовуємо: {self.device}")
+        # Перевірка завантаження мов
+        lang_tokens = [t for t in self.tokenizer.additional_special_tokens if t.startswith(">>")]
+        print(f"✅ Завантажено {len(lang_tokens)} мовних токенів")
         print(f"🇺🇦 Цільова мова: Українська ({self.target_lang})")
-        
+
+        test_token = ">>por_Latn<<"
+        token_id = self.tokenizer.convert_tokens_to_ids(test_token)
+        print(f"Токен '{test_token}' → ID: {token_id}")
+        print(f"UNK ID: {self.tokenizer.unk_token_id}")
+        print(f"Чи підтримується? {token_id != self.tokenizer.unk_token_id}")
+                
     def get_language_mapping(self):
         """
         Повний маппінг ISO кодів на NLLB коди для моделі facebook/nllb-200-3.3B
@@ -424,55 +430,65 @@ class NLLBToUkrainianTranslator:
     def translate_to_ukrainian(self, text: str, source_lang: Optional[str] = None, max_length: int = 400) -> tuple:
         """
         Перекладає текст на українську мову
-        
-        Args:
-            text (str): Текст для перекладу
-            source_lang (str, optional): Код мови джерела (якщо не вказано - автовизначення)
-            max_length (int): Максимальна довжина перекладу
-        
-        Returns:
-            tuple: (переклад, визначена_мова)
         """
         try:
-            # Визначаємо мову джерела якщо не вказана
-            if not source_lang:
+            if not text.strip():
+                return "", "unknown"
+
+            # Визначаємо мову, якщо не задано
+            if source_lang is None:
                 source_lang = self.detect_language(text)
                 print(f"🔍 Визначено мову: {source_lang}")
-            
-            # Якщо текст вже українською - повертаємо як є
+            else:
+                # Якщо користувач ввів ISO-код (наприклад, 'en'), конвертуємо в NLLB
+                mapping = self.get_language_mapping()
+                if source_lang in mapping:
+                    source_lang = mapping[source_lang]
+                elif source_lang not in self.get_all_nllb_codes():
+                    # Якщо це не ISO і не NLLB — спробуємо вважати, що це NLLB
+                    pass  # залишаємо як є
+
+            # Якщо вже українська — повертаємо
             if source_lang == self.target_lang:
                 return text, source_lang
-            
-            # Перевіряємо чи підтримується мова
-            if source_lang not in self.tokenizer.lang_code_to_id:
-                return f"❌ Мова '{source_lang}' не підтримується моделлю", source_lang
-            
-            # Підготовка тексту
-            inputs = self.tokenizer(text, return_tensors="pt").to(self.device)
-            
-            # Встановлюємо токен цільової мови (українська)
-            forced_bos_token_id = self.tokenizer.lang_code_to_id[self.target_lang]
-            
-            # Генерація перекладу
+
+            # Перевірка: чи існує токен мови джерела?
+            src_token = f">>{source_lang}<<"
+            src_token_id = self.tokenizer.convert_tokens_to_ids(src_token)
+            if src_token_id == self.tokenizer.unk_token_id:
+                return f"❌ Невідома мова джерела: '{source_lang}'", source_lang
+
+            # Перевірка: чи існує токен цільової мови?
+            tgt_token = f">>{self.target_lang}<<"
+            tgt_token_id = self.tokenizer.convert_tokens_to_ids(tgt_token)
+            if tgt_token_id == self.tokenizer.unk_token_id:
+                return f"❌ Невідома цільова мова: '{self.target_lang}'", source_lang
+
+            # Формуємо вхідний текст з префіксом мови
+            input_text = f"{src_token} {text}"
+            inputs = self.tokenizer(
+                input_text,
+                return_tensors="pt",
+                padding=True,
+                truncation=True,
+                max_length=512
+            ).to(self.device)
+
+            # Генерація
             with torch.no_grad():
                 generated_tokens = self.model.generate(
                     **inputs,
-                    forced_bos_token_id=forced_bos_token_id,
+                    forced_bos_token_id=tgt_token_id,
                     max_length=max_length,
-                    num_beams=5,
+                    num_beams=4,
                     length_penalty=1.0,
                     early_stopping=True,
-                    do_sample=True,
-                    temperature=0.7
+                    do_sample=False  # для детермінованого результату
                 )
-            
-            # Декодування результату
-            translation = self.tokenizer.batch_decode(
-                generated_tokens, skip_special_tokens=True
-            )[0]
-            
+
+            translation = self.tokenizer.decode(generated_tokens[0], skip_special_tokens=True)
             return translation, source_lang
-            
+
         except Exception as e:
             return f"❌ Помилка перекладу: {str(e)}", source_lang or "unknown"
 
