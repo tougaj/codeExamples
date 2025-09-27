@@ -1,0 +1,14 @@
+torch
+transformers
+tokenizers
+sentencepiece
+langdetect
+
+
+# torch>=1.9.0
+# transformers>=4.21.0
+# tokenizers>=0.13.0
+# sentencepiece>=0.1.97
+
+# Бібліотеки для визначення мови (опційно - встановити одну з них)
+# langdetect>=1.0.9
