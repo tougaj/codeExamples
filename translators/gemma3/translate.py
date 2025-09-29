@@ -4,10 +4,24 @@
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
+import os
+import sys
 
-tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-4b-it")
+# Замініть 'hf_xxx...' на ваш реальний токен з https://huggingface.co/settings/tokens
+token_var_name = "HF_TOKEN"
+hf_token = os.getenv(token_var_name)
+if hf_token is None:
+    print(f"Помилка: змінна оточення '{token_var_name}' не визначена.", file=sys.stderr)
+    sys.exit(1)
+
+print(f"Використовується токен: {hf_token}")
+
+model = "google/gemma-3-4b-it"
+
+tokenizer = AutoTokenizer.from_pretrained(model, token=hf_token)
 model = AutoModelForCausalLM.from_pretrained(
-    "google/gemma-3-4b-it",
+    model,
+    token=hf_token,
     device_map="auto",
     torch_dtype=torch.bfloat16,
 )
@@ -19,16 +33,16 @@ Ein Regionaljet mit 53 Passagieren und Crewmitgliedern schoss auf dem Roanoke-Bl
 inputs = tokenizer(input_text, return_tensors="pt")
 
 # ✅ ПРАВИЛЬНЕ переміщення на GPU (якщо є CUDA)
-# if torch.cuda.is_available():
-#     inputs = inputs.to("cuda")
-#     model = model.to("cuda")
+if torch.cuda.is_available():
+    inputs = inputs.to("cuda")
+    model = model.to("cuda")
 
 # # ✅ ПРАВИЛЬНА генерація з параметрами
 with torch.no_grad():
     outputs = model.generate(
         inputs.input_ids,                    # ✅ Правильний доступ до input_ids
         attention_mask=inputs.attention_mask, # ✅ Додаємо attention_mask
-        max_new_tokens=200,                  # ✅ Достатньо токенів для перекладу
+        max_new_tokens=300,                  # ✅ Достатньо токенів для перекладу
         temperature=0.1,                     # ✅ Низька температура для точності
         do_sample=True,                      # ✅ Увімкнути семплінг
         repetition_penalty=1.1,              # ✅ Уникнути повторів
