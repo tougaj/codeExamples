@@ -47,31 +47,45 @@ model = AutoModelForCausalLM.from_pretrained(
 # Своєю чергою президент Франції Еммануель Макрон закликав НАТО збивати російські дрони. Він вважає, що дрони, які порушують повітряний простір європейських країн, "йдуть на великий ризик".
 # "Вони (дрони - УНІАН) можуть бути знищені, і крапка. Ми тут не для того, щоб давати повне попередження. Ми зробимо те, що повинні зробити, щоб зберегти цілісність нашого повітряного простору і територіальну цілісність", - підкреслив Макрон."""
 
-input_text="""A milliárdosok szolidaritási vagyonadójáról nyújtott be törvényjavaslatot a parlamentnek Tordai Bence, független országgyűlési képviselő. A dokumentum szerint az „adó mértéke az adóalap egymilliárd forint feletti részének 1 százaléka 10 milliárd forintig, az ezt meghaladó rész 2 százaléka 100 milliárd forintig, majd az ezt meghaladó rész 3 százaléka 1000 milliárd forintig, végül az 1000 milliárd forintot meghaladó rész 98 százaléka”. Az utolsó lépcső meglehetősen durva, mivel az ezermilliárd fölötti összeg 98 százalékát kellene befizetni adónak – idézi a hvg.hu.
+input_text="""Кинески пијаниста Хајоу Џонс наступиће премијерно у Београду 11. октобра (20 ч.) у Установи културе Гварнеријус. За први сусрет са београдском публиком пијаниста ће извести дела великана класике Баха, Моцарта, Шопена и Листа.
 
-Ilyen ember az országban jelenleg csak egy van a Forbes listája szerint, Mészáros Lőrinc, akinek a vagyonát a lap 1749,1 milliárd forintra becsülte. Ez alapján 763 milliárd forintot kellene befizetnie, már ha elfogadná az Országgyűlés a javaslatot.
+Како је најављено, Џанг ће наступити у оквиру циклуса концерата светских звезда и виртуоза класике, који Гварнеријус од 2023. године реализује у сарадњи са аустријско-руским виолинистом Јуријем Ревичем, преноси Танјуг.
 
-Tordai törvényjavaslata szerint a vagyonadót azoknak a magyar állampolgároknak kellene fizetni, akinek a saját tulajdonú, életvitelszerű tartózkodásra szolgáló ingatlanán túli nettó vagyona meghaladja az egymilliárd forintot. A dokumentumban felsorolta, mi minden tartozna bele a vagyonalapba: ilyen a hazai és külföldi ingatlan, ingóság, műkincs, értékpapír, vagyoni értékű jog, bankbetét, készpénz, valamint a Magyarországon vagy külföldön bejegyzett gazdasági társaság, vállalkozás, kapcsolt vállalkozások tulajdonrésze.
-
-Az ellenzéki politikus úgy véli, a vagyonadót a megélhetési válság következményeinek enyhítésére kellene fordítani, így a közszféra utóbbi években jelentős reálbércsökkenést elszenvedett dolgozóinak – például az egészségügyi, szociális, kulturális, önkormányzati szférában dolgozók – béremelésére, szociális juttatásokra, célzott nyugdíjemelésre, valamint a méltányos ökológiai átállás finanszírozására.
-
-A vagyonadó kérdését az elmúlt hónapokban a Tisza Párt dobta be választási ígéretként. Az ellenzéki párt 1 százalékos adót vetne ki minden 5 milliárd forintot meghaladó vagyonra. A vagyonadó minden vagyontárgyra kiterjedne majd, beleértve a nagyértékű ingóságokat (jacht, magánrepülő, festmény, sportkocsi), ingatlanokat, a céges vagyont és a külföldön található vagyontárgyakat is."""
+„Џанг важи за једног од водећих пијаниста своје генерације, цењен због виртуозности и изражајне музикалности. Светску пажњу привукао је ЦД-ом 'Моцарт', снимљеним са Хајделбершким симфонијским оркестром, који је изабран и за звучни запис Нетфликс серије 'La Casa de Papel'“, навели су из Гварнеријуса."""
 
 # Повідомлення в форматі діалогу
+# messages = [
+#     {"role": "user", "content": (
+#         """Ти – система для сумаризації новин. Отримуєш текст статті з сайту новин будь-якою мовою.
+# Твоє завдання – створити коротке резюме українською мовою, яке:
+# - передає головні тези та основні факти статті
+# - зазначає ключових учасників події (якщо вони є)
+# - відображає час, місце та причину подій (за наявності)
+# - уникає другорядних деталей і цитат, що не змінюють сенс
+# - зберігає нейтральний та інформативний стиль без оцінок
+# - формулює відповідь у 3–5 реченнях.\n"""
+#         "Текст для сумаризації:\n\n"
+#         f"{input_text}"
+#     )}
+# ]
 messages = [
     {"role": "user", "content": (
-        """Ти – система для сумаризації новин. Отримуєш текст статті з сайту новин будь-якою мовою.
-Твоє завдання – створити коротке резюме українською мовою, яке:
-- передає головні тези та основні факти статті
-- зазначає ключових учасників події (якщо вони є)
-- відображає час, місце та причину подій (за наявності)
-- уникає другорядних деталей і цитат, що не змінюють сенс
-- зберігає нейтральний та інформативний стиль без оцінок
-- формулює відповідь у 3–5 реченнях."""
+        """Ти — система створення стислих новинних резюме.
+Отримуєш текст статті з новинного джерела будь-якою мовою.
+Твоє завдання — підготувати коротке резюме українською мовою (3–5 речень), дотримуючись таких правил:
+
+1. **Передай головний зміст точно й стисло** — зосередься на ключових фактах, подіях і тезах.
+2. Якщо в тексті є ці дані, **зазнач основних учасників, місце, час і причину події.**
+3. **Уникай** другорядних деталей, прикладів, цитат, оцінних суджень і емоційного тону.
+4. Дотримуйся **нейтрального, об’єктивного та інформативного стилю.**
+5. Використовуй **природну, зрозумілу й граматично правильну** українську мову.
+6. **У відповіді подай лише резюме** — без коментарів, пояснень, заголовків або форматування.
+"""
         "Текст для сумаризації:\n\n"
         f"{input_text}"
     )}
 ]
+
 # messages = [
 #     {"role": "user", "content": (
 #         """Ти — професійний перекладач українською мовою.
@@ -80,7 +94,27 @@ messages = [
 # - Де доречно, застосовуй форматування Markdown (заголовки, списки, виділення тощо)
 # - Замінюй лапки на українські («...»), зберігаючи їх правильне використання
 # - Уникай кальки з іншої мови — добирай відповідники, які відповідають українському стилю
-#  -У відповіді надай лише перекладений текст без додаткових коментарів."""
+# - У відповіді надай лише перекладений текст без додаткових коментарів.
+# - Уникай використання заголовків в переведеному тексті, якщо їх немає в оригіналі.\n"""
+#         "Текст для перекладу:\n\n"
+#         f"{input_text}"
+#     )}
+# ]
+# messages = [
+#     {"role": "user", "content": (
+#         """Ти — професійний перекладач української мови.
+# Твоє завдання — перекласти отриманий текст українською **точно за змістом**, але **природно й виразно за формою**, дотримуючись таких правил:
+# 1. Використовуй **граматично правильну, природну та стилістично доречну** українську мову.
+# 2. **Не перекладай дослівно.** Уникай кальок, штучних зворотів і буквальних конструкцій — замінюй їх на природні українські відповідники або ідіоматичні вирази.
+# 3. Використовуй українські лапки **«...»** замість іноземних варіантів („...“, "...", ‘...’ тощо), дотримуючись правил пунктуації.
+# 4. За потреби застосовуй **форматування Markdown**:
+#    * заголовки (`#`, `##`),
+#    * списки,
+#    * **жирний** або *курсивний* текст,
+#    * цитати тощо.
+# 5. Не додавай пояснень, коментарів, приміток чи службових фраз.
+# 6. **У відповіді подавай лише перекладений текст.**
+# """
 #         "Текст для перекладу:\n\n"
 #         f"{input_text}"
 #     )}
@@ -102,8 +136,8 @@ max_new_tokens = max(100, estimated_tokens)  # обмеження
 with torch.no_grad():
     outputs = model.generate(
         **inputs,
-        # max_new_tokens=max_new_tokens, # translation
-        max_new_tokens=300, # summarize
+        max_new_tokens=max_new_tokens, # translation
+        # max_new_tokens=300, # summarize
         # early_stopping=True,          # ← додаємо
         temperature=0.1,
         do_sample=True,
