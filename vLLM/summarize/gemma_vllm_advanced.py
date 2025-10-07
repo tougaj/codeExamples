@@ -12,13 +12,15 @@ from vllm import LLM, SamplingParams
 from common import texts
 
 # 🔧 Ініціалізація моделі
-MODEL_NAME = "google/gemma-3-4b-it"
+# MODEL_NAME = "google/gemma-3-4b-it"
+MODEL_NAME = "google/gemma-3-12b-it"
 
 llm = LLM(
     model=MODEL_NAME,
     trust_remote_code=True,
-    max_model_len=8192,
-    gpu_memory_utilization=0.9,
+    max_model_len=1024,
+    # max_model_len=8192,
+    gpu_memory_utilization=0.95,
     tensor_parallel_size=1,  # для мульти-GPU збільш це значення
 )
 
@@ -33,7 +35,7 @@ SUMMARIZATION_CONFIGS = {
     "precise": SamplingParams(
         temperature=0.2,  # дуже детерміновано
         top_p=0.85,
-        max_tokens=200,
+        max_tokens=400,
         presence_penalty=0.6,
         frequency_penalty=0.4,
         stop=["</summary>", "\n\n\n", "Текст:"],
@@ -41,7 +43,7 @@ SUMMARIZATION_CONFIGS = {
     "balanced": SamplingParams(
         temperature=0.5,  # баланс креативності та точності
         top_p=0.9,
-        max_tokens=300,
+        max_tokens=600,
         presence_penalty=0.5,
         frequency_penalty=0.3,
         stop=["</summary>", "\n\n\n"],
@@ -49,7 +51,7 @@ SUMMARIZATION_CONFIGS = {
     "creative": SamplingParams(
         temperature=0.8,  # більш креативні резюме
         top_p=0.95,
-        max_tokens=400,
+        max_tokens=800,
         presence_penalty=0.3,
         frequency_penalty=0.2,
         stop=["</summary>", "\n\n\n"],
