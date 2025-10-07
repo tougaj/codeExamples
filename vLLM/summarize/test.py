@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from vllm import LLM, SamplingParams
-from transformers import AutoTokenizer
 import time
-import os
-import sys
 from typing import Optional
+
+from transformers import AutoTokenizer
+from vllm import LLM, SamplingParams
+
 from common import texts
 
 model = "google/gemma-3-4b-it"

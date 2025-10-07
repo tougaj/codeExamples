@@ -3,11 +3,13 @@
 Простіший підхід, рекомендується для більшості випадків
 """
 
-from vllm import LLM, SamplingParams
-from transformers import AutoTokenizer
-from typing import List
-from common import texts
 import time
+from typing import List
+
+from transformers import AutoTokenizer
+from vllm import LLM, SamplingParams
+
+from common import texts
 
 MODEL_NAME = "google/gemma-3-4b-it"
 # MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.1"
