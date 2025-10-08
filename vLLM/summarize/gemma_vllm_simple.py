@@ -10,6 +10,7 @@ from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
 
 from common import news_headlines, texts
+import json
 
 # MODEL_NAME = "google/gemma-2-2b-it"
 MODEL_NAME = "google/gemma-3-4b-it"
@@ -32,6 +33,9 @@ llm = LLM(
     # max_num_batched_tokens_prefill=8192,  # розмір чанків для prefill
     dtype="auto",  # автовизначення (float16/bfloat16)
 )
+# Дозволяє побачити параметри моделі, зокрема квантизацію
+print(json.dumps(llm.llm_engine.model_config.__dict__, indent=2, default=str))
+print(json.dumps(llm.llm_engine.engine_config.__dict__, indent=2, default=str))
 
 # 📝 Отримання токенайзера з vLLM
 # tokenizer = llm.get_tokenizer()
