@@ -1,0 +1,22 @@
+# 🤖 Конфігурація моделі
+MODEL_NAME=google/gemma-3-4b-it
+# MODEL_NAME=google/gemma-2-2b-it
+# MODEL_NAME=google/gemma-3-12b-it
+# MODEL_NAME=mistralai/Mistral-7B-Instruct-v0.1
+
+# 📏 Параметри моделі
+MAX_MODEL_LEN=8192
+GPU_MEMORY_UTILIZATION=0.9
+TENSOR_PARALLEL_SIZE=1
+MAX_NUM_SEQS=15
+SWAP_SPACE=8
+
+# ⚡ Оптимізації
+ENABLE_PREFIX_CACHING=true
+ENABLE_CHUNKED_PREFILL=true
+DTYPE=auto
+
+# 🌐 Параметри сервера
+HOST=0.0.0.0
+PORT=8000
+RELOAD=false
