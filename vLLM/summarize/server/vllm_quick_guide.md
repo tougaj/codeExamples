@@ -26,7 +26,7 @@ chmod +x start_vllm_server.sh
 
 ### Варіант B: Пряма команда
 ```bash
-vllm serve google/gemma-2-4b-it \
+vllm serve google/gemma-3-4b-it \
     --host 0.0.0.0 \
     --port 8000 \
     --trust-remote-code \
@@ -36,7 +36,7 @@ vllm serve google/gemma-2-4b-it \
 
 ### Варіант C: З авторизацією
 ```bash
-vllm serve google/gemma-2-4b-it \
+vllm serve google/gemma-3-4b-it \
     --host 0.0.0.0 \
     --port 8000 \
     --api-key "your-secret-api-key-here" \
@@ -67,7 +67,7 @@ curl http://localhost:8000/v1/models
 curl http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "google/gemma-2-4b-it",
+    "model": "google/gemma-3-4b-it",
     "messages": [
       {
         "role": "user",
@@ -84,7 +84,7 @@ curl http://localhost:8000/v1/chat/completions \
 curl http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "google/gemma-2-4b-it",
+    "model": "google/gemma-3-4b-it",
     "messages": [{"role": "user", "content": "Резюме про Python"}],
     "stream": true
   }'
@@ -163,7 +163,7 @@ After=network.target
 Type=simple
 User=your_user
 WorkingDirectory=/path/to/your/project
-ExecStart=/usr/local/bin/vllm serve google/gemma-2-4b-it --host 0.0.0.0 --port 8000
+ExecStart=/usr/local/bin/vllm serve google/gemma-3-4b-it --host 0.0.0.0 --port 8000
 Restart=always
 
 [Install]
@@ -181,7 +181,7 @@ sudo systemctl status vllm
 ```dockerfile
 FROM vllm/vllm-openai:latest
 
-ENV MODEL_NAME=google/gemma-2-4b-it
+ENV MODEL_NAME=google/gemma-3-4b-it
 ENV PORT=8000
 
 CMD ["vllm", "serve", "${MODEL_NAME}", "--host", "0.0.0.0", "--port", "${PORT}"]
@@ -218,25 +218,25 @@ nvidia-smi
 netstat -tulpn | grep 8000
 
 # Зменш використання пам'яті
-vllm serve google/gemma-2-4b-it --gpu-memory-utilization 0.7
+vllm serve google/gemma-3-4b-it --gpu-memory-utilization 0.7
 ```
 
 ### Out of Memory
 ```bash
 # Використай квантизацію
-vllm serve google/gemma-2-4b-it --quantization awq
+vllm serve google/gemma-3-4b-it --quantization awq
 
 # Або зменш max-model-len
-vllm serve google/gemma-2-4b-it --max-model-len 4096
+vllm serve google/gemma-3-4b-it --max-model-len 4096
 ```
 
 ### Повільна генерація
 ```bash
 # Увімкни prefix caching
-vllm serve google/gemma-2-4b-it --enable-prefix-caching
+vllm serve google/gemma-3-4b-it --enable-prefix-caching
 
 # Або збільш batch size
-vllm serve google/gemma-2-4b-it --max-num-seqs 256
+vllm serve google/gemma-3-4b-it --max-num-seqs 256
 ```
 
 ---

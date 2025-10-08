@@ -48,9 +48,9 @@ Jedno jest pewne — premiera filmu "Szczęsny" nie tylko odsłoniła nowe oblic
 集中修施工的20天里，大秦铁路每天停运180分钟，将累计完成成段更换钢轨107.438公里、成段更换轨枕1.57万根，大机捣固线路519.408公里等任务，以及隧道整治、电缆更新、接触网维护等施工。
 
 大同工务段线路科业务主管杨磊说，此次施工，国铁太原局共调集捣固车、清筛车等大型施工机械67组，挖掘机等小型机械114台，以及施工人员10000余名，人、机投入较去年均有增加。通过精细化人机协同、多工种立体式作业，此次集中修有望实现施工质量和效率的进一步提升。""",
-    "Hányok maguktól – üzente Kocsis Máté K. Endrének",
-    "Prezydent poprze Szymona Hołownię na stanowisku w ONZ? Zbigniew Bogucki mówi, co może się wydarzyć",
-    "Telefon Tymka milczał od kilku dni. Finał poszukiwań 16-latka",
+    # "Hányok maguktól – üzente Kocsis Máté K. Endrének",
+    # "Prezydent poprze Szymona Hołownię na stanowisku w ONZ? Zbigniew Bogucki mówi, co może się wydarzyć",
+    # "Telefon Tymka milczał od kilku dni. Finał poszukiwań 16-latka",
 ]
 
 news_headlines = [
