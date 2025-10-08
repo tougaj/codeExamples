@@ -4,7 +4,7 @@
 """
 
 import time
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
@@ -68,7 +68,7 @@ class GemmaSummarizer:
         self.llm = llm_instance
         self.tokenizer = tokenizer_instance
 
-    def create_chat_messages(self, text: str, custom_instruction: str = None) -> List[Dict]:
+    def create_chat_messages(self, text: str, custom_instruction: Optional[str] = None) -> List[Dict]:
         """
         Створення повідомлень для chat template
         """
@@ -112,7 +112,7 @@ class GemmaSummarizer:
         self,
         texts: List[str],
         config: str = "balanced",
-        custom_instruction: str = None,
+        custom_instruction: Optional[str] = None,
         show_progress: bool = True
     ) -> List[Dict]:
         """

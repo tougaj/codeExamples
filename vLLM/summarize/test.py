@@ -9,8 +9,16 @@ from vllm import LLM, SamplingParams
 from common import texts
 
 model = "google/gemma-3-4b-it"
+# model = "google/gemma-3-12b-it"
 # model = "mistralai/Mistral-7B-Instruct-v0.1"
-llm = LLM(model=model)
+llm = LLM(model=model,
+          max_model_len=8192,  # максимальна довжина контексту
+          gpu_memory_utilization=0.95,  # можна більше, бо одна модель
+          swap_space=8,  # GB swap на CPU (якщо не вистачить VRAM)
+          # ⚡PREFIX CACHING - ключова оптимізація!
+          enable_prefix_caching=True,  # кешує системний промпт
+          enable_chunked_prefill=True,  # ефективна обробка довгих промптів
+          )
 # tokenizer = llm.get_tokenizer()
 tokenizer = AutoTokenizer.from_pretrained(model)
 
@@ -18,8 +26,8 @@ tokenizer = AutoTokenizer.from_pretrained(model)
 def process(
     prompt: str,
     text: str,
-    max_new_tokens: Optional[int] = None,
-    temperature: Optional[float] = 0.1,
+    max_new_tokens: Optional[int] = 8192,
+    temperature=0.1,
 ):
     messages_list = [
         {
@@ -41,7 +49,7 @@ def process(
         # Українська трохи довша за французьку → множимо на 1.3
         estimated_tokens = int(word_count * 3) + 20  # + буфер
         max_new_tokens = max(100, estimated_tokens)  # обмеження
-    # print(f"Max tokens: {max_new_tokens}")
+    print(f"📟 Max tokens: {max_new_tokens}")
 
     sampling_params = SamplingParams(
         temperature=temperature, top_p=0.95, max_tokens=max_new_tokens, n=1
@@ -162,6 +170,7 @@ JSON з:
 
 
 for text in texts:
-    # translate(text)
-    summarize(text, 300)
+    translate(text)
+    # summarize(text, 300)
     # complex_processing(text)
+    print('-'*50)
