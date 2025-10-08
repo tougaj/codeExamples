@@ -9,7 +9,7 @@ from typing import List
 from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
 
-from common import texts
+from common import news_headlines, texts
 
 # MODEL_NAME = "google/gemma-2-2b-it"
 MODEL_NAME = "google/gemma-3-4b-it"

@@ -52,3 +52,16 @@ Jedno jest pewne — premiera filmu "Szczęsny" nie tylko odsłoniła nowe oblic
     "Prezydent poprze Szymona Hołownię na stanowisku w ONZ? Zbigniew Bogucki mówi, co może się wydarzyć",
     "Telefon Tymka milczał od kilku dni. Finał poszukiwań 16-latka",
 ]
+
+news_headlines = [
+    "Global Climate Summit Reaches Historic Agreement on Emissions Reduction",  # English
+    "Війна в Україні: нові санкції проти Росії підтримали країни G7",        # Ukrainian
+    "La France annonce un nouveau plan pour la transition énergétique",       # French
+    "Deutschland beschließt Atomausstieg bis Ende des Jahres",               # German
+    "España registra récord de turismo en verano pese a la inflación",       # Spanish
+    "イタリア、地中海での難民救助活動を強化",                                # Japanese
+    "السعودية تطلق مشروعًا ضخمًا لبناء مدينة ذكية تحت اسم 'ذا لاين'",      # Arabic
+    "Бразилия борется с масштабными лесными пожарами в Амазонии",            # Russian
+    "Polonia introduce nuove misure per sostenere l’industria energetica",   # Italian
+    "한국, 인공지능 기반 교육 시스템 전국 확대 계획 발표"                   # Korean
+]
