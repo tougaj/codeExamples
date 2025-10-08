@@ -76,7 +76,7 @@ SUMMARIZATION_CONFIGS = {
         frequency_penalty=0.4,
         stop=["</summary>", "\n\n\n", "Текст:"],
         # Для spec decoding можна додати:
-        use_beam_search=False,  # beam search несумісний зі spec decoding
+        # use_beam_search=False,  # beam search несумісний зі spec decoding
     ),
     "balanced": SamplingParams(
         temperature=0.5,
@@ -108,7 +108,7 @@ class GemmaSpeculativeSummarizer:
         self.total_tokens_generated = 0
         self.total_time = 0.0
 
-    def create_chat_messages(self, text: str, custom_instruction: str = None) -> List[Dict]:
+    def create_chat_messages(self, text: str, custom_instruction: Optional[str] = None) -> List[Dict]:
         """Створення повідомлень для chat template"""
         default_instruction = """Створи стисле резюме наступного тексту українською мовою. 
 Резюме має бути чітким, інформативним та не перевищувати 3-4 речення."""
@@ -137,7 +137,7 @@ class GemmaSpeculativeSummarizer:
         self,
         texts: List[str],
         config: str = "balanced",
-        custom_instruction: str = None,
+        custom_instruction: Optional[str] = None,
         show_progress: bool = True,
         show_speedup: bool = True,
     ) -> List[Dict]:
