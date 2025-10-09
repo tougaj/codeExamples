@@ -48,7 +48,7 @@ PORT=8000
 
 ```bash
 # Встанови RELOAD=true в .env або:
-RELOAD=true python main.py
+RELOAD=true uv run fastAPI/main.py
 
 # Або через uvicorn напряму:
 uv run uvicorn fastAPI.main:app --reload --host 0.0.0.0 --port 8000
@@ -92,13 +92,14 @@ GET /health
 ```
 
 **Відповідь:**
+
 ```json
 {
-  "status": "healthy",
-  "model_loaded": true,
-  "model_name": "google/gemma-3-4b-it",
-  "max_model_len": 8192,
-  "gpu_memory_utilization": 0.9
+	"status": "healthy",
+	"model_loaded": true,
+	"model_name": "google/gemma-3-4b-it",
+	"max_model_len": 8192,
+	"gpu_memory_utilization": 0.9
 }
 ```
 
@@ -109,37 +110,36 @@ POST /translate
 ```
 
 **Запит:**
+
 ```json
 {
-  "texts": [
-    "Hello world! This is a test.",
-    "Machine learning is amazing."
-  ],
-  "sampling_params": {
-    "temperature": 0.1,
-    "top_p": 0.9,
-    "max_tokens": 8192
-  }
+	"texts": ["Hello world! This is a test.", "Machine learning is amazing."],
+	"sampling_params": {
+		"temperature": 0.1,
+		"top_p": 0.9,
+		"max_tokens": 8192
+	}
 }
 ```
 
 **Відповідь:**
+
 ```json
 {
-  "results": [
-    {
-      "text": "Привіт, світ! Це тест.",
-      "finish_reason": "stop",
-      "input_tokens": 45,
-      "output_tokens": 12
-    }
-  ],
-  "total_texts": 2,
-  "processing_time": 1.2345,
-  "avg_input_tokens": 42.5,
-  "avg_output_tokens": 10.5,
-  "total_input_tokens": 85,
-  "total_output_tokens": 21
+	"results": [
+		{
+			"text": "Привіт, світ! Це тест.",
+			"finish_reason": "stop",
+			"input_tokens": 45,
+			"output_tokens": 12
+		}
+	],
+	"total_texts": 2,
+	"processing_time": 1.2345,
+	"avg_input_tokens": 42.5,
+	"avg_output_tokens": 10.5,
+	"total_input_tokens": 85,
+	"total_output_tokens": 21
 }
 ```
 
@@ -150,15 +150,14 @@ POST /summarize
 ```
 
 **Запит:**
+
 ```json
 {
-  "texts": [
-    "Long article text here..."
-  ],
-  "sampling_params": {
-    "temperature": 0.5,
-    "max_tokens": 400
-  }
+	"texts": ["Long article text here..."],
+	"sampling_params": {
+		"temperature": 0.5,
+		"max_tokens": 400
+	}
 }
 ```
 
@@ -169,15 +168,14 @@ POST /generate
 ```
 
 **Запит:**
+
 ```json
 {
-  "texts": [
-    "Розкажи мені про штучний інтелект"
-  ],
-  "sampling_params": {
-    "temperature": 0.7,
-    "max_tokens": 512
-  }
+	"texts": ["Розкажи мені про штучний інтелект"],
+	"sampling_params": {
+		"temperature": 0.7,
+		"max_tokens": 512
+	}
 }
 ```
 
@@ -188,14 +186,13 @@ POST /generate-raw
 ```
 
 **Запит:**
+
 ```json
 {
-  "texts": [
-    "Complete this sentence: The future of AI is"
-  ],
-  "sampling_params": {
-    "temperature": 0.8
-  }
+	"texts": ["Complete this sentence: The future of AI is"],
+	"sampling_params": {
+		"temperature": 0.8
+	}
 }
 ```
 
@@ -248,18 +245,18 @@ print(response.json())
 
 Всі параметри опціональні, мають значення за замовчанням:
 
-| Параметр | За замовчанням | Діапазон | Опис |
-|----------|---------------|----------|------|
-| `temperature` | 0.7 | 0.0 - 2.0 | Креативність (↑ = більше варіативності) |
-| `top_p` | 0.9 | 0.0 - 1.0 | Nucleus sampling |
-| `max_tokens` | 512 | 1 - 8192 | Макс. токенів у відповіді |
-| `presence_penalty` | 0.0 | -2.0 - 2.0 | Штраф за повторення концепцій |
-| `frequency_penalty` | 0.0 | -2.0 - 2.0 | Штраф за повторення слів |
-| `stop` | null | - | Список стоп-токенів |
+| Параметр            | За замовчанням | Діапазон   | Опис                                    |
+| ------------------- | -------------- | ---------- | --------------------------------------- |
+| `temperature`       | 0.7            | 0.0 - 2.0  | Креативність (↑ = більше варіативності) |
+| `top_p`             | 0.9            | 0.0 - 1.0  | Nucleus sampling                        |
+| `max_tokens`        | 512            | 1 - 8192   | Макс. токенів у відповіді               |
+| `presence_penalty`  | 0.0            | -2.0 - 2.0 | Штраф за повторення концепцій           |
+| `frequency_penalty` | 0.0            | -2.0 - 2.0 | Штраф за повторення слів                |
+| `stop`              | null           | -          | Список стоп-токенів                     |
 
 ## ⚙️ Змінні оточення (.env)
 
-| Змінна | За замовчанням | Опис |
-|--------|---------------|------|
-| `MODEL_NAME` | google/gemma-3-4b-it | Назва або шлях до моделі |
-| `MAX_MODEL_LEN` | 8192 | Макс. довжина контексту |
+| Змінна          | За замовчанням       | Опис                     |
+| --------------- | -------------------- | ------------------------ |
+| `MODEL_NAME`    | google/gemma-3-4b-it | Назва або шлях до моделі |
+| `MAX_MODEL_LEN` | 8192                 | Макс. довжина контексту  |
