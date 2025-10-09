@@ -3,6 +3,7 @@
 Простіший підхід, рекомендується для більшості випадків
 """
 
+# import json
 import time
 from typing import List
 
@@ -10,7 +11,6 @@ from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
 
 from common import news_headlines, texts
-import json
 
 # MODEL_NAME = "google/gemma-2-2b-it"
 MODEL_NAME = "google/gemma-3-4b-it"
@@ -23,7 +23,7 @@ llm = LLM(
     # trust_remote_code=True,
     max_model_len=8192,  # максимальна довжина контексту for 4b
     # max_model_len=900,  # максимальна довжина контексту for 12b
-    gpu_memory_utilization=0.9,  # використання GPU пам'яті
+    gpu_memory_utilization=0.5,  # використання GPU пам'яті
     tensor_parallel_size=1,  # для мульти-GPU збільш це значення
     # dtype="bfloat16"
     max_num_seqs=15,  # максимум паралельних запитів (10 + запас)
@@ -34,8 +34,7 @@ llm = LLM(
     dtype="auto",  # автовизначення (float16/bfloat16)
 )
 # Дозволяє побачити параметри моделі, зокрема квантизацію
-print(json.dumps(llm.llm_engine.model_config.__dict__, indent=2, default=str))
-print(json.dumps(llm.llm_engine.engine_config.__dict__, indent=2, default=str))
+# print(json.dumps(llm.llm_engine.model_config.__dict__, indent=2, default=str))
 
 # 📝 Отримання токенайзера з vLLM
 # tokenizer = llm.get_tokenizer()
