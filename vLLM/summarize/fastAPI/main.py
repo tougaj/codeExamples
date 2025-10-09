@@ -6,7 +6,7 @@
 import os
 import time
 from contextlib import asynccontextmanager
-from typing import List, Optional
+from typing import List, Optional, cast
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, status
@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, field_validator
 from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
+from vllm.config.model import ModelDType
 
 # Завантаження змінних оточення
 load_dotenv()
@@ -30,8 +31,8 @@ class SamplingParamsRequest(BaseModel):
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
     top_p: float = Field(default=0.9, ge=0.0, le=1.0)
     max_tokens: int = Field(default=512, ge=1, le=8192)
-    presence_penalty: float = Field(default=0.0, ge=-2.0, le=2.0)
-    frequency_penalty: float = Field(default=0.0, ge=-2.0, le=2.0)
+    presence_penalty: float = Field(default=0.5, ge=-2.0, le=2.0)
+    frequency_penalty: float = Field(default=0.3, ge=-2.0, le=2.0)
     stop: Optional[List[str]] = Field(default=None)
 
 
@@ -141,6 +142,7 @@ def prepare_translation_prompt(text: str) -> str:
         }
     ]
 
+    assert tokenizer is not None, "⛔ Tokenizer is not defined"
     return tokenizer.apply_chat_template(
         messages, tokenize=False, add_generation_prompt=True
     )
@@ -166,6 +168,7 @@ def prepare_summary_prompt(text: str) -> str:
         }
     ]
 
+    assert tokenizer is not None, "⛔ Tokenizer is not defined"
     return tokenizer.apply_chat_template(
         messages, tokenize=False, add_generation_prompt=True
     )
@@ -180,6 +183,7 @@ def prepare_chat_prompt(text: str) -> str:
         }
     ]
 
+    assert tokenizer is not None, "⛔ Tokenizer is not defined"
     return tokenizer.apply_chat_template(
         messages, tokenize=False, add_generation_prompt=True
     )
@@ -199,17 +203,41 @@ def validate_text_length(text: str, max_model_len: int) -> None:
 
 def create_sampling_params(params: Optional[SamplingParamsRequest]) -> SamplingParams:
     """Створення SamplingParams з опціональних параметрів"""
-    if params is None:
-        params = SamplingParamsRequest()
+    # створюємо об’єкт з дефолтними значеннями
+    default_params = SamplingParamsRequest()
 
-    return SamplingParams(
-        temperature=params.temperature,
-        top_p=params.top_p,
-        max_tokens=params.max_tokens,
-        presence_penalty=params.presence_penalty,
-        frequency_penalty=params.frequency_penalty,
-        stop=params.stop,
-    )
+    if params is not None:
+        # оновлюємо лише ті поля, які явно передані
+        updated_data = default_params.model_dump()
+        updated_data.update({
+            k: v for k, v in params.model_dump(exclude_unset=True).items()
+        })
+        merged_params = SamplingParamsRequest(**updated_data)
+    else:
+        merged_params = default_params
+
+    return SamplingParams(**merged_params.model_dump())
+    # return SamplingParams(
+    #     temperature=merged_params.temperature,
+    #     top_p=merged_params.top_p,
+    #     max_tokens=merged_params.max_tokens,
+    #     presence_penalty=merged_params.presence_penalty,
+    #     frequency_penalty=merged_params.frequency_penalty,
+    #     stop=merged_params.stop,
+    # )
+# def create_sampling_params(params: Optional[SamplingParamsRequest]) -> SamplingParams:
+#     """Створення SamplingParams з опціональних параметрів"""
+#     if params is None:
+#         params = SamplingParamsRequest()
+
+#     return SamplingParams(
+#         temperature=params.temperature,
+#         top_p=params.top_p,
+#         max_tokens=params.max_tokens,
+#         presence_penalty=params.presence_penalty,
+#         frequency_penalty=params.frequency_penalty,
+#         stop=params.stop,
+#     )
 
 
 async def generate_texts(
@@ -230,6 +258,7 @@ async def generate_texts(
                 )
 
         # Генерація
+        assert llm is not None, "⛔ LLM is not defined"
         outputs = llm.generate(texts, sampling_params)
 
         # Обробка результатів
@@ -308,7 +337,7 @@ async def lifespan(app: FastAPI):
     ENABLE_CHUNKED_PREFILL = (
         os.getenv("ENABLE_CHUNKED_PREFILL", "true").lower() == "true"
     )
-    DTYPE = os.getenv("DTYPE", "auto")
+    DTYPE = cast(ModelDType, os.getenv("DTYPE", "auto"))
 
     print("🔧 Ініціалізація vLLM моделі...")
     print(f"📦 Модель: {MODEL_NAME}")
@@ -383,9 +412,7 @@ async def translate(request: TextRequest):
 
     # Параметри за замовчанням для перекладу
     if request.sampling_params is None:
-        request.sampling_params = SamplingParamsRequest(
-            temperature=0.1, top_p=0.9, max_tokens=8192
-        )
+        request.sampling_params = SamplingParamsRequest(temperature=0.1, top_p=0.9, max_tokens=8192)
 
     sampling_params = create_sampling_params(request.sampling_params)
     max_model_len = int(os.getenv("MAX_MODEL_LEN", "8192"))
@@ -407,13 +434,7 @@ async def summarize(request: TextRequest):
 
     # Параметри за замовчанням для резюме
     if request.sampling_params is None:
-        request.sampling_params = SamplingParamsRequest(
-            temperature=0.5,
-            top_p=0.9,
-            max_tokens=400,
-            presence_penalty=0.5,
-            frequency_penalty=0.3,
-        )
+        request.sampling_params = SamplingParamsRequest(temperature=0.5, top_p=0.9, max_tokens=400)
 
     sampling_params = create_sampling_params(request.sampling_params)
     max_model_len = int(os.getenv("MAX_MODEL_LEN", "8192"))

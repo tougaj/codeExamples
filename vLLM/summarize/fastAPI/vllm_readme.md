@@ -51,7 +51,7 @@ PORT=8000
 RELOAD=true python main.py
 
 # Або через uvicorn напряму:
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uv run uvicorn fastAPI.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Production режим
