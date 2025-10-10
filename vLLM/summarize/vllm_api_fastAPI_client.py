@@ -11,6 +11,7 @@ from typing import Dict, List, Optional
 import requests
 
 from common import news_headlines, texts
+from fastAPI.main import BatchResponse, SamplingParamsRequest, TextRequest
 
 PORT = 8000
 SERVER_ADDRESS = f"http://localhost:{PORT}"
@@ -72,11 +73,16 @@ def check_health() -> bool:
 
 def print_results(texts: list[str], results: requests.Response, route: str):
     if results.status_code == 200:
-        data = results.json()
-        for i, (result, text) in enumerate(zip(data['results'], texts), 1):
+        raw_data = results.json()
+        # Потім валідуємо його як BatchResponse
+        data: BatchResponse = BatchResponse.model_validate(raw_data)
+        for i, (result, text) in enumerate(zip(data.results, texts), 1):
             print(f"📄 Текст #{i}: {text[:50]}")
-            print(f"✨ {route}: {result['text']}")
-            print(f"✳️ Причина зупинки: {result['finish_reason']}\n")
+            print(f"Tokens: input — {result.input_tokens}, output — {result.output_tokens}")
+            print(f"✨ {route}: {result.text}")
+            print(f"✳️ Причина зупинки: {result.finish_reason}\n")
+        print(f"Total input tokens: {data.total_input_tokens}, total output tokens: {data.total_output_tokens}")
+        print(f"⏱️ Processing time: {data.processing_time:.2f} секунд ({data.processing_time/data.total_texts:.3f} sec/text)\n")
     else:
         print(f"Помилка: {results.status_code}, {results.text}")
 
@@ -84,14 +90,11 @@ def print_results(texts: list[str], results: requests.Response, route: str):
 def process(texts: list[str], route: str):
     print(f"{route}\n{'-'*30}")
     start_time = time.time()
-    results = requests.post(f"{SERVER_ADDRESS}/{route}", json={
-        "texts": texts,
-        # "sampling_params": {
-        #     "temperature": 0.7,
-        #     "top_p": 0.9,
-        #     "max_tokens": 8192
-        # }
-    })
+    data: TextRequest = TextRequest(
+        texts=texts,
+        sampling_params=SamplingParamsRequest(temperature=0.7, top_p=0.9, max_tokens=8192)
+    )
+    results = requests.post(f"{SERVER_ADDRESS}/{route}", json=data.model_dump())
     end_time = time.time()
     print_results(texts, results, route)
     print(f"⏱️ Відповідь зайняла {end_time - start_time:.4f} секунд\n")
