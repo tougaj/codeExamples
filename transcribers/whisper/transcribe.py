@@ -9,7 +9,7 @@ from time import time
 model = whisper.load_model("turbo")
 tic = time()
 result = model.transcribe(
-    "test.mp4",
+    "test.webm",
     language=None,       # Автоматичне визначення мов
     task="transcribe",   # Завдання: транскрипція
     verbose=True         # Виведення прогресу
