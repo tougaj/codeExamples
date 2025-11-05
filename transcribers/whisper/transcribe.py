@@ -16,7 +16,7 @@ def format_timestamp(seconds: float) -> str:
     minutes, secs = divmod(total_seconds, 60)
     hours, minutes = divmod(minutes, 60)
     # Ми використовуємо лише хвилини та секунди, бо приклад не має годин
-    return f"{minutes:02d}:{secs:02d}.{milliseconds:03d}"
+    return f"{hours:02d}:{minutes:02d}:{secs:02d}.{milliseconds:03d}"
 
 
 def main():
