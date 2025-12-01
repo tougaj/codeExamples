@@ -5,6 +5,121 @@ from time import time
 import sys
 from pprint import pprint
 
+# Multiplier (Рішення 3): простіший, фіксовані коефіцієнти (1.05, 1.08, 1.10)
+def calculate_metrics(relevant_scores, all_scores):
+    """
+    Обчислює avg та count з урахуванням бонусу за кількість категорій.
+    
+    Args:
+        relevant_scores: список скорів вище threshold
+        all_scores: всі скори (для fallback)
+    
+    Returns:
+        tuple: (avg, count)
+    """
+    if relevant_scores:
+        max_score = relevant_scores[0]
+        count = len(relevant_scores)
+        
+        # Комбінований score: max + бонус за кількість
+        if count >= 5:
+            avg = min(max_score * 1.10, 1.0)
+        elif count >= 4:
+            avg = min(max_score * 1.08, 1.0)
+        elif count >= 3:
+            avg = min(max_score * 1.05, 1.0)
+        else:
+            avg = max_score
+    else:
+        # Fallback: якщо нічого не пройшло поріг, беремо топ-3
+        avg = sum(all_scores[:3]) / min(len(all_scores), 3) if all_scores else 0
+        count = 0  # позначаємо, що це fallback
+    
+    return avg, count
+
+# Bonus (Рішення 2): гнучкіший, враховує значення кожної категорії, а не тільки кількість
+def calculate_metrics_with_bonus(relevant_scores, all_scores):
+    """
+    Обчислює avg та count з урахуванням бонусу за додаткові категорії.
+    
+    Базовий score = max, але кожна додаткова релевантна категорія дає бонус.
+    
+    Args:
+        relevant_scores: список скорів вище threshold
+        all_scores: всі скори (для fallback)
+    
+    Returns:
+        tuple: (avg, count)
+    """
+    if relevant_scores:
+        base_score = relevant_scores[0]  # максимальний
+        count = len(relevant_scores)
+        
+        # Бонус за кожну додаткову релевантну категорію (зменшується)
+        bonus = 0
+        for i, score in enumerate(relevant_scores[1:], start=1):
+            # Кожна наступна дає менший бонус: 3%, 2%, 1.5%, 1%, 0.75%...
+            bonus += score * (0.03 / i)
+        
+        avg = min(base_score + bonus, 1.0)  # не більше 1.0
+    else:
+        # Fallback: якщо нічого не пройшло поріг, беремо топ-3
+        avg = sum(all_scores[:3]) / min(len(all_scores), 3) if all_scores else 0
+        count = 0  # позначаємо, що це fallback
+    
+    return avg, count
+
+def calculate_metrics_combined(relevant_scores, all_scores):
+    """
+    Обчислює метрики з комбінованим підходом.
+    
+    Повертає combined score як avg (для сумісності) та додаткові метрики.
+    
+    Args:
+        relevant_scores: список скорів вище threshold
+        all_scores: всі скори (для fallback)
+    
+    Returns:
+        tuple: (avg, count, max_score, true_avg)
+            - avg: комбінований скор (використовується як основний)
+            - count: кількість релевантних категорій (0 якщо fallback)
+            - max_score: максимальний скор (для додаткових перевірок)
+            - true_avg: справжнє середнє арифметичне (для додаткових перевірок)
+    """
+    if relevant_scores:
+        max_score = relevant_scores[0]
+        count = len(relevant_scores)
+        true_avg = sum(relevant_scores) / len(relevant_scores)
+        
+        # Комбінований score: max + бонус за кількість
+        if count >= 5:
+            combined_score = max_score * 1.10
+        elif count >= 4:
+            combined_score = max_score * 1.08
+        elif count >= 3:
+            combined_score = max_score * 1.05
+        else:
+            combined_score = max_score
+        
+        # Обмежуємо максимум 1.0
+        avg = min(combined_score, 1.0)
+        
+    else:
+        # Fallback: якщо нічого не пройшло поріг, беремо топ-3
+        if all_scores:
+            top_3 = all_scores[:3]
+            avg = sum(top_3) / len(top_3)
+            max_score = all_scores[0]
+            true_avg = avg
+        else:
+            avg = 0
+            max_score = 0
+            true_avg = 0
+        
+        count = 0  # позначаємо fallback
+    
+    return avg, count, max_score, true_avg
+
 model = "MoritzLaurer/mDeBERTa-v3-base-mnli-xnli"
 classifier = pipeline("zero-shot-classification", model=model, tokenizer=model)
 # classifier = pipeline("zero-shot-classification", model="vicgalle/xlm-roberta-large-xnli-anli")
@@ -167,13 +282,15 @@ relevant_desired = [s for s in desired_scores if s > RELEVANCE_THRESHOLD]
 relevant_unwanted = [s for s in unwanted_scores if s > RELEVANCE_THRESHOLD]
 
 # Середні та кількість
-if relevant_desired:
-    avg_desired = sum(relevant_desired) / len(relevant_desired)
-    count_desired = len(relevant_desired)
-else:
-    # Fallback: якщо нічого не пройшло поріг, беремо топ-3
-    avg_desired = sum(desired_scores[:3]) / min(len(desired_scores), 3) if desired_scores else 0
-    count_desired = 0  # позначаємо, що це fallback
+# if relevant_desired:
+#     avg_desired = sum(relevant_desired) / len(relevant_desired)
+#     count_desired = len(relevant_desired)
+# else:
+#     # Fallback: якщо нічого не пройшло поріг, беремо топ-3
+#     avg_desired = sum(desired_scores[:3]) / min(len(desired_scores), 3) if desired_scores else 0
+#     count_desired = 0  # позначаємо, що це fallback
+avg_desired, count_desired = calculate_metrics(relevant_desired, desired_scores)
+avg_unwanted, count_unwanted = calculate_metrics(relevant_unwanted, unwanted_scores)
 
 if relevant_unwanted:
     avg_unwanted = sum(relevant_unwanted) / len(relevant_unwanted)
