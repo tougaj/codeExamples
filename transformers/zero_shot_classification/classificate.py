@@ -2,6 +2,8 @@
 
 from transformers import pipeline
 from time import time
+import sys
+from pprint import pprint
 
 model = "MoritzLaurer/mDeBERTa-v3-base-mnli-xnli"
 classifier = pipeline("zero-shot-classification", model=model, tokenizer=model)
@@ -58,6 +60,15 @@ unwanted_labels = [
 ]
 all_labels = desired_labels + unwanted_labels
 
+# tic = time()
+# sequences = [sequence_to_classify] * 10
+# results = classifier(sequences, all_labels, multi_label=True)
+# toc = time()
+# pprint(results)
+# print('-'*50)
+# print(f"Classification took {toc-tic:.2f} seconds")
+# sys.exit()
+
 tic = time()
 result = classifier(sequence_to_classify, all_labels, multi_label=True)
 toc = time()
@@ -66,7 +77,6 @@ print(result["sequence"])
 print('-'*50)
 for label, score in zip(result["labels"], result["scores"]):
 	print(f"{label}:\t{score}")
-
 print('-'*50)
 # 1 варіант (мій)
 # max_unwanted = max(score for label, score in zip(result["labels"], result["scores"]) if label in unwanted_labels)
