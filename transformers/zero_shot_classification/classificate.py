@@ -12,8 +12,13 @@ classifier = pipeline("zero-shot-classification", model=model, tokenizer=model)
 
 # sequence_to_classify = "НАТО має намір збільшити кількість боєздатних бригад 131. Водночас заплановано вп'ятеро наростити кількість наземних підрозділів ППО."
 sequence_to_classify = """
-ÖFB will Verbandswechsel von U17-Stars verhindern [premium] (de)
-Österreichs Fußball-U17-Nationalteam hat mit dem Finaleinzug bei der WM in Doha für Furore gesorgt. Spiele, Tore und die Chance, Weltmeister zu werden, rüttelten jedoch nicht nur dieses Land wach. Denn es sind auch einige Spieler im ÖFB-Team dabei, deren familiäre Wurzeln im Ausland liegen. Damit besteht die Gefahr, dass dem Fußballverband so manches Talent aus dem Kreis der Vizeweltmeister noch verloren gehen könnte.
+Київ отримає 85 сучасних автобусів та 8 трамваїв, частина вже вийшла на маршрути, - Кличко
+
+В рамках угоди з Європейським інвестиційним банком за Проєктом "Міський громадський транспорт України" Київ отримає 85 сучасних автобусів. 20 з них вже вийшли на маршрути міста.
+
+Як пише РБК-Україна, про це повідомив мер Києва Віталій Кличко.
+
+"Столиця продовжує оновлення рухомого складу громадського транспорту. Навіть у такі складні часи місто дбає про комфорт мешканців", - зазначив Віталій Кличко.
 """
 desired_labels = [
     "politics",
@@ -22,18 +27,21 @@ desired_labels = [
     "finance",
     "business",
     "war",
-    "military conflict",
+    "military conflicts",
     "science",
     "technology",
     "health policy",
     "public health",
     "climate change",
-    "environment",
+    # "environment",
+    "environmental issues",
     "education policy",
     "human rights",
     "crime",
-    "disasters",
+    # "disasters",
     "infrastructure",
+    "power industry",
+    "energy sector",
     "sports politics",          # ⚡ додано
     "legal affairs",            # ⚡ додано
     "court decisions",          # ⚡ додано
@@ -50,6 +58,7 @@ unwanted_labels = [
     "recipes",
     "lifestyle",
     "fashion",
+    # "style",
     "sports",                   # загальний спорт (результати матчів)
     "viral content",
     "humor",
@@ -75,8 +84,8 @@ toc = time()
 
 print(result["sequence"])
 print('-'*50)
-for label, score in zip(result["labels"], result["scores"]):
-	print(f"{label}:\t{score}")
+for label, score in list(zip(result["labels"], result["scores"]))[:15]:
+    print(f"{label}:\t{score:.3f}")
 print('-'*50)
 # 1 варіант (мій)
 # max_unwanted = max(score for label, score in zip(result["labels"], result["scores"]) if label in unwanted_labels)
@@ -178,26 +187,34 @@ else:
 if count_unwanted >= 3 and avg_unwanted > 0.90 and avg_desired < 0.75:
     # Багато високих unwanted
     keep_article = False
+    print("✔️ 1 choice")
 elif max_unwanted > 0.90 and max_unwanted > max_desired + 0.20:
     # ⚡ НОВА УМОВА: Явне домінування unwanted (різниця >20%)
     keep_article = False
+    print("✔️ 2 choice")
 elif count_unwanted > 0 and count_unwanted > count_desired and avg_unwanted > 0.95 and (avg_unwanted - avg_desired) > 0.15:
     # Екстремальне домінування unwanted
     keep_article = False
+    print("✔️ 3 choice")
 elif count_desired >= 2 and max_desired > 0.75 and avg_desired > 0.70 and (avg_unwanted < 0.90 or avg_desired >= avg_unwanted * 0.95):
     # Мінімум 2 сильні desired категорії
     keep_article = True
+    print("✔️ 4 choice")
 elif count_desired > 0 and avg_desired > 0.75 and avg_desired >= avg_unwanted * 0.90:
     # Високі desired + конкурентоспроможність
     keep_article = True
+    print("✔️ 5 choice")
 elif count_desired == 0 and count_unwanted == 0:
     # Обидва у fallback режимі
     keep_article = max_desired > 0.60 and avg_desired >= avg_unwanted
+    # keep_article = avg_desired >= avg_unwanted
+    print("✔️ 6 choice")
 else:
     # Сіра зона
     keep_article = (max_desired > 0.60 and 
                    max_desired >= max_unwanted * 0.85 and
                    (avg_desired >= avg_unwanted * 0.85 or count_desired > count_unwanted))
+    print("✔️ 7 choice")
 
 print(f"Max:  desired={max_desired:.3f} | unwanted={max_unwanted:.3f}")
 # print(f"Top-{TOP_N} avg: desired={avg_desired:.3f} | unwanted={avg_unwanted:.3f}")
