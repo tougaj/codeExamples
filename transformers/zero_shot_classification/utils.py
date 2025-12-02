@@ -1,3 +1,4 @@
+from time import time
 from typing import Any, Dict, List, cast
 
 from transformers import pipeline
@@ -21,7 +22,7 @@ desired_labels = [
     "human rights",
     "crime",
     # "disasters",
-    "infrastructure",
+    "infrastructure issues",
     "power industry",
     "energy sector",
     "sports politics",          # ⚡ додано
@@ -199,19 +200,23 @@ def calculate_metrics_combined(relevant_scores, all_scores):
     return avg, count, max_score, true_avg
 
 
-def classify_messages(messages: List[str], original: List[str]):
-    model = "MoritzLaurer/mDeBERTa-v3-base-mnli-xnli"
-    # model = "vicgalle/xlm-roberta-large-xnli-anli"
-    classifier = pipeline("zero-shot-classification", model=model, tokenizer=model)
+def classify_messages(messages: List[str], original: List[str]) -> float:
+    # model = "MoritzLaurer/mDeBERTa-v3-base-mnli-xnli"
+    # classifier = pipeline("zero-shot-classification", model=model, tokenizer=model)
+    RELEVANCE_THRESHOLD = 0.70
+
+    model = "vicgalle/xlm-roberta-large-xnli-anli"
+    classifier = pipeline("zero-shot-classification", model=model, tokenizer="xlm-roberta-large")
+
     # classifier = pipeline("zero-shot-classification", model="joeddav/xlm-roberta-large-xnli") # 16 мов
 
+    tic = time()
     results = classifier(messages, all_labels, multi_label=True)
+    toc = time()
     if results is None:
         raise ValueError("")
 
     for result, origin in zip(results, original):
-        if not result:
-            continue
         result = cast(Dict[str, Any], result)
         if origin:
             print(origin)
@@ -219,13 +224,10 @@ def classify_messages(messages: List[str], original: List[str]):
         print(result["sequence"])
         print('-'*50)
         for label, score in list(zip(result["labels"], result["scores"]))[:15]:
-            print(f"{label}:\t{score:.3f}")
+            print(f"{"🟢" if label in desired_labels else "🔴"} {label}:\t{score:.3f}")
         print('-'*50)
 
         # 4 варіант. Thresdhold
-        # Параметри
-        RELEVANCE_THRESHOLD = 0.70
-
         # Отримуємо всі скори
         desired_scores = sorted([score for label, score in zip(result["labels"], result["scores"])
                                 if label in desired_labels], reverse=True)
@@ -281,6 +283,7 @@ def classify_messages(messages: List[str], original: List[str]):
             keep_article = True
             print("✔️ 4 choice")
         elif count_desired > 0 and avg_desired > 0.75 and avg_desired >= avg_unwanted * 0.90:
+            # elif count_desired > 0 and avg_desired > 0.75 and avg_desired >= avg_unwanted * 0.95:
             # Високі desired + конкурентоспроможність
             keep_article = True
             print("✔️ 5 choice")
@@ -297,9 +300,9 @@ def classify_messages(messages: List[str], original: List[str]):
                             (avg_desired >= avg_unwanted * 0.85 or count_desired > count_unwanted))
             print("✔️ 7 choice")
 
-        print(f"Max:  desired={max_desired:.3f} | unwanted={max_unwanted:.3f}")
+        print(f"Max: desired={max_desired:.3f} | unwanted={max_unwanted:.3f}")
         # print(f"Top-{TOP_N} avg: desired={avg_desired:.3f} | unwanted={avg_unwanted:.3f}")
-        print(f"Relevance-{RELEVANCE_THRESHOLD} avg: desired={avg_desired:.3f} | unwanted={avg_unwanted:.3f}")
+        print(f"Relevance - {RELEVANCE_THRESHOLD} avg: desired={avg_desired:.3f} | unwanted={avg_unwanted:.3f}")
         print(f"Ratio: {avg_desired / (avg_unwanted + 0.01):.3f}")
         # print(f"Top desired: {[f'{s:.2f}' for s in desired_scores]}")
         # print(f"Top unwanted: {[f'{s:.2f}' for s in unwanted_scores]}")
@@ -307,6 +310,7 @@ def classify_messages(messages: List[str], original: List[str]):
         print(f"Unwanted: {[f'{s:.2f}' for s in relevant_unwanted]}")
         print(f"{"✅" if keep_article else "❌"} Keep article is {keep_article}")
         print('\n'+'*'*50+'\n')
+    return toc-tic
 
 
 # 1 варіант (мій)

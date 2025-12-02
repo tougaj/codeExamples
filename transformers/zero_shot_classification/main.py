@@ -52,12 +52,8 @@ def main():
         return
     data = get_data_for_classification(original_messages)
     print(f"Found {len(data)} messages")
-    tic = time()
-    classify_messages(data, [(m.get("translated_body") or "")[:500]+'...' for m in original_messages])
-    toc = time()
-    print('-'*50)
-    time_delta = toc-tic
-    print(f"Classification took {time_delta:.2f} seconds ({time_delta/messages_count:.2f} sec/msg)")
+    execution_time = classify_messages(data, [(m.get("translated_body") or "")[:500]+'...' for m in original_messages])
+    print(f"⏱️ Classification took {execution_time:.2f} seconds ({execution_time/messages_count:.2f} sec/msg)")
 
 
 if __name__ == "__main__":
