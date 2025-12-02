@@ -289,8 +289,8 @@ relevant_unwanted = [s for s in unwanted_scores if s > RELEVANCE_THRESHOLD]
 #     # Fallback: якщо нічого не пройшло поріг, беремо топ-3
 #     avg_desired = sum(desired_scores[:3]) / min(len(desired_scores), 3) if desired_scores else 0
 #     count_desired = 0  # позначаємо, що це fallback
-avg_desired, count_desired = calculate_metrics(relevant_desired, desired_scores)
-avg_unwanted, count_unwanted = calculate_metrics(relevant_unwanted, unwanted_scores)
+avg_desired, count_desired = calculate_metrics_with_bonus(relevant_desired, desired_scores)
+avg_unwanted, count_unwanted = calculate_metrics_with_bonus(relevant_unwanted, unwanted_scores)
 
 if relevant_unwanted:
     avg_unwanted = sum(relevant_unwanted) / len(relevant_unwanted)
