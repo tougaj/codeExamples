@@ -127,13 +127,10 @@ classifier = pipeline("zero-shot-classification", model=model, tokenizer=model)
 
 # sequence_to_classify = "НАТО має намір збільшити кількість боєздатних бригад 131. Водночас заплановано вп'ятеро наростити кількість наземних підрозділів ППО."
 sequence_to_classify = """
-Київ отримає 85 сучасних автобусів та 8 трамваїв, частина вже вийшла на маршрути, - Кличко
-
-В рамках угоди з Європейським інвестиційним банком за Проєктом "Міський громадський транспорт України" Київ отримає 85 сучасних автобусів. 20 з них вже вийшли на маршрути міста.
-
-Як пише РБК-Україна, про це повідомив мер Києва Віталій Кличко.
-
-"Столиця продовжує оновлення рухомого складу громадського транспорту. Навіть у такі складні часи місто дбає про комфорт мешканців", - зазначив Віталій Кличко.
+Зеленский с супругой прибыли в Дублин: их встретил премьер Ирландии. Видео
+Президент Украины Владимир Зеленский во вторник, 2 декабря, прибыл с первым визитом в Ирландию. Вместе с ним в Дублин прибыла и первая леди Елена Зеленская.
+Об этом сообщает ирландский телеканал RTE. Глава государства и первая леди проведут ряд правительственных встреч.Визит Зеленских в Ирландию
+Согласно данным мониторингового авиаресурса AirNav, президентский самолет Airbus A319 UR-ABA государственной украинской авиакомпании Ukraine Air Enterprise в 22:47 по ирландскому времени (00:47 по киевск
 """
 desired_labels = [
     "politics",
@@ -202,6 +199,7 @@ print('-'*50)
 for label, score in list(zip(result["labels"], result["scores"]))[:15]:
     print(f"{label}:\t{score:.3f}")
 print('-'*50)
+
 # 1 варіант (мій)
 # max_unwanted = max(score for label, score in zip(result["labels"], result["scores"]) if label in unwanted_labels)
 # max_desired = max(score for label, score in zip(result["labels"], result["scores"]) if label in desired_labels)
@@ -289,16 +287,20 @@ relevant_unwanted = [s for s in unwanted_scores if s > RELEVANCE_THRESHOLD]
 #     # Fallback: якщо нічого не пройшло поріг, беремо топ-3
 #     avg_desired = sum(desired_scores[:3]) / min(len(desired_scores), 3) if desired_scores else 0
 #     count_desired = 0  # позначаємо, що це fallback
+
+# if relevant_unwanted:
+#     avg_unwanted = sum(relevant_unwanted) / len(relevant_unwanted)
+#     count_unwanted = len(relevant_unwanted)
+# else:
+#     # Fallback: якщо нічого не пройшло поріг, беремо топ-3
+#     avg_unwanted = sum(unwanted_scores[:3]) / min(len(unwanted_scores), 3) if unwanted_scores else 0
+#     count_unwanted = 0  # позначаємо, що це fallback
+
 avg_desired, count_desired = calculate_metrics_with_bonus(relevant_desired, desired_scores)
 avg_unwanted, count_unwanted = calculate_metrics_with_bonus(relevant_unwanted, unwanted_scores)
 
-if relevant_unwanted:
-    avg_unwanted = sum(relevant_unwanted) / len(relevant_unwanted)
-    count_unwanted = len(relevant_unwanted)
-else:
-    # Fallback: якщо нічого не пройшло поріг, беремо топ-3
-    avg_unwanted = sum(unwanted_scores[:3]) / min(len(unwanted_scores), 3) if unwanted_scores else 0
-    count_unwanted = 0  # позначаємо, що це fallback
+# avg_desired, count_desired = calculate_metrics(relevant_desired, desired_scores)
+# avg_unwanted, count_unwanted = calculate_metrics(relevant_unwanted, unwanted_scores)
 
 # Логіка фільтрації
 if count_unwanted >= 3 and avg_unwanted > 0.90 and avg_desired < 0.75:
@@ -323,7 +325,8 @@ elif count_desired > 0 and avg_desired > 0.75 and avg_desired >= avg_unwanted * 
     print("✔️ 5 choice")
 elif count_desired == 0 and count_unwanted == 0:
     # Обидва у fallback режимі
-    keep_article = max_desired > 0.60 and avg_desired >= avg_unwanted
+    # keep_article = max_desired > 0.60 and avg_desired >= avg_unwanted
+    keep_article = max_desired > 0.50 and avg_desired >= avg_unwanted
     # keep_article = avg_desired >= avg_unwanted
     print("✔️ 6 choice")
 else:
