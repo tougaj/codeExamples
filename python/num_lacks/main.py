@@ -1,22 +1,29 @@
+from pprint import pprint
+
 data = """
-22
+28
 23
 25
-28
 29
 32
+22
 """
 
 existing_numbers = [int(x) for x in data.split()]
+min_number = min(existing_numbers)
+max_number = max(existing_numbers)
 
-for index in range(existing_numbers[0], existing_numbers[-1]+1):
+print('Initial data\n'+ '-'*20)
+pprint(existing_numbers)
+print(f"min: {min_number}, max: {max_number}")
+print()
+
+lacks: list[int] = []
+# Мінімальний та максимальний номери вже, очевидно, присутні
+for index in range(min_number+1, max_number):
     if index in existing_numbers:
         continue
-    print(index)
+    lacks.append(index)
 
-# total = 0
-# for line in data.split():
-#     h, m, s = map(int, line.split(":"))
-#     total += h*3600 + m*60 + s
-
-# print(f"{total//3600}:{(total%3600)//60:02d}:{total%60:02d}")
+print('Lack numbers\n'+ '-'*20)
+pprint(lacks)
