@@ -139,7 +139,8 @@ def calculate_metrics_with_bonus(relevant_scores, all_scores):
             # Кожна наступна дає менший бонус: 3%, 2%, 1.5%, 1%, 0.75%...
             bonus += score * (0.03 / i)
 
-        avg = min(base_score + bonus, 1.0)  # не більше 1.0
+        # avg = min(base_score + bonus, 1.0)  # не більше 1.0
+        avg = base_score + bonus
     else:
         # Fallback: якщо нічого не пройшло поріг, беремо топ-3
         avg = sum(all_scores[:3]) / min(len(all_scores), 3) if all_scores else 0
