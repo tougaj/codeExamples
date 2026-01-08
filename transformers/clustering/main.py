@@ -1,5 +1,7 @@
 from sentence_transformers import SentenceTransformer
 from pprint import pprint
+import hdbscan
+from collections import Counter
 
 def main():
     texts = [
@@ -16,12 +18,18 @@ def main():
         "Шуфричу дозволили вийти з СІЗО під заставу",
         "Велика Британія передала Україні 13 систем ППО Raven і розпочала постачання Gravehawk",
         "Менше, ніж очікували: скільки своїх солдатів країни Заходу готові направити в Україну",
+        "Шуфричу дозволили вийти з-під варти під заставу у понад 33 млн грн",
+        "Суд випустив Шуфрича з-під варти",
+
     ]
 
     model = SentenceTransformer(
-        "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+        # "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+        # "sentence-transformers/all-MiniLM-L6-v2"
+        "google/embeddinggemma-300m"
     )
 
+    print("ℹ️ Calculating embeddings...")
     embeddings = model.encode(
         texts,
         batch_size=16,
@@ -29,8 +37,30 @@ def main():
         normalize_embeddings=True  # ВАЖЛИВО для HDBSCAN
     )
     
-    for e in embeddings:
-        pprint(e)
+    # for e in embeddings:
+    #     pprint(e)
+
+    print("ℹ️ Clustering...")
+    clusterer = hdbscan.HDBSCAN(
+        min_cluster_size=3,      # мін. розмір кластера
+        min_samples=2,           # чутливість до шуму
+        # min_cluster_size=5,      # мін. розмір кластера
+        # min_samples=3,           # чутливість до шуму
+        metric="euclidean",      # з нормалізованими векторами = cosine
+        cluster_selection_method="eom"
+    )
+
+    labels = clusterer.fit_predict(embeddings)
+    pprint(Counter(labels))
+
+    clusters = {}
+    for text, label in zip(texts, labels):
+        clusters.setdefault(label, []).append(text)
+
+    for label, items in clusters.items():
+        print(f"\nCLUSTER {label} ({len(items)})")
+        pprint(items)
+        # print(items[0][:300])
 
 
 if __name__ == "__main__":
