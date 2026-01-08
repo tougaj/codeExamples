@@ -4,7 +4,7 @@ import hdbscan
 from collections import Counter
 
 def main():
-    texts = [
+    _texts = [
         "На Дніпропетровщині та Запоріжжі частково відновлюють світло: яка зараз ситуація в регіонах",
         "“Надзвичайна ситуація національного рівня”: мер Дніпра Філатов розповів про стан справ в місті після блекауту",
         "Російські атаки залишили без світла Запорізьку та Дніпропетровську області ",
@@ -20,19 +20,22 @@ def main():
         "Менше, ніж очікували: скільки своїх солдатів країни Заходу готові направити в Україну",
         "Шуфричу дозволили вийти з-під варти під заставу у понад 33 млн грн",
         "Суд випустив Шуфрича з-під варти",
-
     ]
+
+    texts = [text[:1000] for text in _texts]
 
     model = SentenceTransformer(
         # "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
         # "sentence-transformers/all-MiniLM-L6-v2"
         "google/embeddinggemma-300m"
+        # "Qwen/Qwen3-Embedding-0.6B"
+        # "Qwen/Qwen3-Embedding-8B"
     )
 
     print("ℹ️ Calculating embeddings...")
     embeddings = model.encode(
         texts,
-        batch_size=16,
+        batch_size=32,
         show_progress_bar=True,
         normalize_embeddings=True  # ВАЖЛИВО для HDBSCAN
     )
@@ -44,6 +47,10 @@ def main():
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=3,      # мін. розмір кластера
         min_samples=2,           # чутливість до шуму
+
+        # min_cluster_size=7,      # мін. розмір кластера
+        # min_samples=3,           # чутливість до шуму
+
         # min_cluster_size=5,      # мін. розмір кластера
         # min_samples=3,           # чутливість до шуму
         metric="euclidean",      # з нормалізованими векторами = cosine
@@ -51,16 +58,40 @@ def main():
     )
 
     labels = clusterer.fit_predict(embeddings)
-    pprint(Counter(labels))
 
+    # групуємо тексти по кластерах 📦
     clusters = {}
     for text, label in zip(texts, labels):
         clusters.setdefault(label, []).append(text)
 
-    for label, items in clusters.items():
-        print(f"\nCLUSTER {label} ({len(items)})")
-        pprint(items)
+    # сортуємо кластери за кількістю текстів (спадання ⬇️)
+    sorted_clusters = sorted(
+        clusters.items(),
+        key=lambda item: len(item[1]),
+        reverse=True
+    )
+
+    # виводимо результат 🖨️
+    for index, (label, items) in enumerate(sorted_clusters, 1):
+        if label == -1:
+                continue
+        print(f"\nCLUSTER {index} (label {label}) ({len(items)})")
+        pprint([item[:200] for item in items[:10]])
+        # print(f"\nCLUSTER {label} ({len(items)})")
         # print(items[0][:300])
+
+    # clusters = {}
+    # for text, label in zip(texts, labels):
+    #     clusters.setdefault(label, []).append(text)
+
+    # for label, items in clusters.items():
+    #     if label == -1:
+    #         continue
+    #     print(f"\nCLUSTER {label} ({len(items)})")
+    #     pprint([item[:200] for item in items])
+    #     # print(items[0][:300])
+
+    pprint(Counter(labels))
 
 
 if __name__ == "__main__":
