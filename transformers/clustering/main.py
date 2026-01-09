@@ -70,8 +70,8 @@ def main():
     model = SentenceTransformer(
         # "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
         # "sentence-transformers/all-MiniLM-L6-v2"
-        # "google/embeddinggemma-300m"
-        "Qwen/Qwen3-Embedding-0.6B"
+        "google/embeddinggemma-300m"
+        # "Qwen/Qwen3-Embedding-0.6B"
         # "Qwen/Qwen3-Embedding-8B"
     )
 
