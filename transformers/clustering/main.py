@@ -29,14 +29,18 @@ def main():
 
     print("ℹ️ Clustering...")
     clusterer = hdbscan.HDBSCAN(
-        min_cluster_size=3,      # мін. розмір кластера
-        min_samples=2,           # чутливість до шуму
+        # При низькій кількості повідомлень
+        # min_cluster_size=3,      # мін. розмір кластера
+        # min_samples=2,           # чутливість до шуму
 
-        # min_cluster_size=7,      # мін. розмір кластера
-        # min_samples=3,           # чутливість до шуму
+        # Робочий варіант
+        min_cluster_size=7,      # мін. розмір кластера
+        min_samples=3,           # чутливість до шуму
 
+        # Запропоновано GPT
         # min_cluster_size=5,      # мін. розмір кластера
         # min_samples=3,           # чутливість до шуму
+
         metric="euclidean",      # з нормалізованими векторами = cosine
         cluster_selection_method="eom"
     )
@@ -56,24 +60,14 @@ def main():
     )
 
     # виводимо результат 🖨️
+    labels_count = len(sorted_clusters)
     for index, (label, items) in enumerate(sorted_clusters, 1):
-        if label == -1:
-                continue
-        print(f"\nCLUSTER {index} (label {label}) ({len(items)})")
-        pprint([item[:200] for item in items[:10]])
-        # print(f"\nCLUSTER {label} ({len(items)})")
-        # print(items[0][:300])
-
-    # clusters = {}
-    # for text, label in zip(texts, labels):
-    #     clusters.setdefault(label, []).append(text)
-
-    # for label, items in clusters.items():
-    #     if label == -1:
-    #         continue
-    #     print(f"\nCLUSTER {label} ({len(items)})")
-    #     pprint([item[:200] for item in items])
-    #     # print(items[0][:300])
+        # if label == -1:
+        #         continue
+        print(f"\n📦 CLUSTER {index} of {labels_count} (label: {label}) ({len(items)} messages)")
+        pprint([f"🔵 {item[:200]}" for item in items[:(10 if label != -1 else 20)]])
+        # for item in items[:(10 if label != -1 else 20)]:
+        #     print(f"🔵 {item[:200]}")
 
     pprint(Counter(labels))
 
