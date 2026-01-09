@@ -7,7 +7,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from data import messages
+from data import load_json_file, messages
 
 
 def remove_html_tags(text: str) -> str:
@@ -64,8 +64,9 @@ def cluster_centroid_and_top_texts(texts, embeddings, top_k=10, preview_len=120)
 
 
 def main():
-
-    texts = [remove_html_tags(text)[:1000] for text in messages]
+    data = load_json_file("local.data.json")
+    texts = [remove_html_tags(item.get("summary") or item.get("translated_body") or item.get("body")) for item in data]
+    # texts = [remove_html_tags(text)[:1000] for text in messages]
 
     model = SentenceTransformer(
         # "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
