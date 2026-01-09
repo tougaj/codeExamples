@@ -1,11 +1,14 @@
-from sentence_transformers import SentenceTransformer
-from pprint import pprint
-import hdbscan
-from collections import Counter
-from data import _texts
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 import re
+from collections import Counter
+from pprint import pprint
+
+import hdbscan
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+
+from data import messages
+
 
 def remove_html_tags(text: str) -> str:
     """
@@ -20,6 +23,7 @@ def remove_html_tags(text: str) -> str:
     clean = re.sub(r'<[^>]+>', '', text)
     return clean
 
+
 def cluster_title_centroid(texts, embeddings):
     centroid = embeddings.mean(axis=0, keepdims=True)
     sims = cosine_similarity(centroid, embeddings)[0]
@@ -27,15 +31,47 @@ def cluster_title_centroid(texts, embeddings):
     # return texts[best_idx][:200]  # обрізаємо
     return texts[best_idx]
 
+
+def cluster_centroid_and_top_texts(texts, embeddings, top_k=10, preview_len=120):
+    """
+    Повертає:
+    - centroid (np.array)
+    - representative_text (str)
+    - top_texts: список dict {text, similarity, index}
+    """
+
+    # 1️⃣ центроїд кластера 🧠
+    centroid = embeddings.mean(axis=0, keepdims=True)
+
+    # 2️⃣ cosine similarity до всіх текстів
+    sims = cosine_similarity(centroid, embeddings)[0]
+
+    # 3️⃣ індекси top-k найближчих текстів (спадання)
+    top_indices = np.argsort(sims)[::-1][:top_k]
+
+    top_texts = [
+        {
+            "index": int(i),
+            "similarity": float(sims[i]),
+            "text": texts[i][:preview_len]
+        }
+        for i in top_indices
+    ]
+
+    representative_text = top_texts[0]["text"]
+
+    return centroid[0], representative_text, top_texts
+
+
 def main():
 
-    texts = [remove_html_tags(text)[:1000] for text in _texts]
+    texts = [remove_html_tags(text)[:1000] for text in messages]
 
     model = SentenceTransformer(
         # "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
         # "sentence-transformers/all-MiniLM-L6-v2"
-        "google/embeddinggemma-300m"
-        # "Qwen/Qwen3-Embedding-0.6B"
+        # "google/embeddinggemma-300m"
+        "Qwen/Qwen3-Embedding-0.6B"
         # "Qwen/Qwen3-Embedding-8B"
     )
 
@@ -46,7 +82,7 @@ def main():
         show_progress_bar=True,
         normalize_embeddings=True  # ВАЖЛИВО для HDBSCAN
     )
-    
+
     # for e in embeddings:
     #     pprint(e)
 
@@ -91,11 +127,17 @@ def main():
         # Формування заголовка на основі центроїда кластера (найближчий текст)
         texts_cluster = items
         embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
-        title = cluster_title_centroid(texts_cluster, embeds_cluster)
+
+        centroid, title_text, top_texts = cluster_centroid_and_top_texts(texts_cluster, embeds_cluster, preview_len=250)
+        # Формування заголовка на основі центроїда кластера (найближчий текст)
+        # texts_cluster = items
+        # embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
+        # title = cluster_title_centroid(texts_cluster, embeds_cluster)
 
         print(f"\n📦 CLUSTER {index} of {labels_count} (label: {label}) ({len(items)} messages)")
-        print(f"📰 {title}")
-        pprint([f"🔵 {item[:200]}" for item in items[:(10 if label != -1 else 20)]])
+        print(f"📰 {title_text}")
+        # pprint(top_texts)
+        pprint([f"📐 {item["similarity"]*100:.1f} % {item["text"]}" for item in top_texts[:(10 if label != -1 else 20)]])
         # for item in items[:(10 if label != -1 else 20)]:
         #     print(f"🔵 {item[:200]}")
 
