@@ -3,10 +3,33 @@ from pprint import pprint
 import hdbscan
 from collections import Counter
 from data import _texts
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+import re
+
+def remove_html_tags(text: str) -> str:
+    """
+    Видаляє всі HTML-теги з тексту, залишаючи лише вміст.
+
+    Args:
+        text (str): Вхідний рядок, що може містити HTML-теги.
+
+    Returns:
+        str: Текст без HTML-тегів.
+    """
+    clean = re.sub(r'<[^>]+>', '', text)
+    return clean
+
+def cluster_title_centroid(texts, embeddings):
+    centroid = embeddings.mean(axis=0, keepdims=True)
+    sims = cosine_similarity(centroid, embeddings)[0]
+    best_idx = sims.argmax()
+    # return texts[best_idx][:200]  # обрізаємо
+    return texts[best_idx]
 
 def main():
 
-    texts = [text[:1000] for text in _texts]
+    texts = [remove_html_tags(text)[:1000] for text in _texts]
 
     model = SentenceTransformer(
         # "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -29,13 +52,16 @@ def main():
 
     print("ℹ️ Clustering...")
     clusterer = hdbscan.HDBSCAN(
+        min_cluster_size=7,      # мін. розмір кластера
+        min_samples=3,           # чутливість до шуму
+
         # При низькій кількості повідомлень
         # min_cluster_size=3,      # мін. розмір кластера
         # min_samples=2,           # чутливість до шуму
 
         # Робочий варіант
-        min_cluster_size=7,      # мін. розмір кластера
-        min_samples=3,           # чутливість до шуму
+        # min_cluster_size=7,      # мін. розмір кластера
+        # min_samples=3,           # чутливість до шуму
 
         # Запропоновано GPT
         # min_cluster_size=5,      # мін. розмір кластера
@@ -62,9 +88,13 @@ def main():
     # виводимо результат 🖨️
     labels_count = len(sorted_clusters)
     for index, (label, items) in enumerate(sorted_clusters, 1):
-        # if label == -1:
-        #         continue
+        # Формування заголовка на основі центроїда кластера (найближчий текст)
+        texts_cluster = items
+        embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
+        title = cluster_title_centroid(texts_cluster, embeds_cluster)
+
         print(f"\n📦 CLUSTER {index} of {labels_count} (label: {label}) ({len(items)} messages)")
+        print(f"📰 {title}")
         pprint([f"🔵 {item[:200]}" for item in items[:(10 if label != -1 else 20)]])
         # for item in items[:(10 if label != -1 else 20)]:
         #     print(f"🔵 {item[:200]}")
