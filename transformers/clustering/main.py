@@ -63,9 +63,21 @@ def cluster_centroid_and_top_texts(texts, embeddings, top_k=10, preview_len=120)
     return centroid[0], representative_text, top_texts
 
 
+def get_text(message):
+    return remove_html_tags(message.get("summary") or message.get("translated_body") or message.get("body"))
+
+
+def print_centroid_message_info(data, index):
+    message = data[index]
+    print(f"🖊️ {message["title"]}")
+    print(f"📰 {get_text(message)}")
+
+
 def main():
     data = load_json_file("local.data.json")
-    texts = [remove_html_tags(item.get("summary") or item.get("translated_body") or item.get("body")) for item in data]
+    for item in data:
+        item["text"] = get_text(item)
+    # texts = [get_text(item) for item in data]
     # texts = [remove_html_tags(text)[:1000] for text in messages]
 
     model = SentenceTransformer(
@@ -78,7 +90,7 @@ def main():
 
     print("ℹ️ Calculating embeddings...")
     embeddings = model.encode(
-        texts,
+        [item["text"] for item in data],
         batch_size=32,
         show_progress_bar=True,
         normalize_embeddings=True  # ВАЖЛИВО для HDBSCAN
@@ -112,8 +124,8 @@ def main():
 
     # групуємо тексти по кластерах 📦
     clusters = {}
-    for text, label in zip(texts, labels):
-        clusters.setdefault(label, []).append(text)
+    for item, label in zip(data, labels):
+        clusters.setdefault(label, []).append(item)
 
     # сортуємо кластери за кількістю текстів (спадання ⬇️)
     sorted_clusters = sorted(
@@ -126,7 +138,7 @@ def main():
     labels_count = len(sorted_clusters)
     for index, (label, items) in enumerate(sorted_clusters, 1):
         # Формування заголовка на основі центроїда кластера (найближчий текст)
-        texts_cluster = items
+        texts_cluster = [item["text"] for item in items]
         embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
 
         centroid, title_text, top_texts = cluster_centroid_and_top_texts(texts_cluster, embeds_cluster, preview_len=1000)
@@ -136,11 +148,12 @@ def main():
         # title = cluster_title_centroid(texts_cluster, embeds_cluster)
 
         print(f"\n📦 CLUSTER {index} of {labels_count} (label: {label}) ({len(items)} messages)")
-        print(f"📰 {title_text}")
+        print_centroid_message_info(items, top_texts[0]["index"])
+        # print(f"📰 {title_text}")
         # pprint(top_texts)
         # pprint([f"📐 {item["similarity"]*100:.1f} % {item["text"]}" for item in top_texts])
-        for item in top_texts[1:]:
-            print(f"📐 {item["similarity"]*100:.1f} % {item["text"]}")
+        for item in top_texts:
+            print(f"📐 {item["similarity"]*100:.1f}% {item["text"]}")
 
     pprint(Counter(labels))
 
