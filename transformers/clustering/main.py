@@ -129,7 +129,7 @@ def main():
         texts_cluster = items
         embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
 
-        centroid, title_text, top_texts = cluster_centroid_and_top_texts(texts_cluster, embeds_cluster, preview_len=250)
+        centroid, title_text, top_texts = cluster_centroid_and_top_texts(texts_cluster, embeds_cluster, preview_len=1000)
         # Формування заголовка на основі центроїда кластера (найближчий текст)
         # texts_cluster = items
         # embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
@@ -138,9 +138,9 @@ def main():
         print(f"\n📦 CLUSTER {index} of {labels_count} (label: {label}) ({len(items)} messages)")
         print(f"📰 {title_text}")
         # pprint(top_texts)
-        pprint([f"📐 {item["similarity"]*100:.1f} % {item["text"]}" for item in top_texts[:(10 if label != -1 else 20)]])
-        # for item in items[:(10 if label != -1 else 20)]:
-        #     print(f"🔵 {item[:200]}")
+        # pprint([f"📐 {item["similarity"]*100:.1f} % {item["text"]}" for item in top_texts])
+        for item in top_texts[1:]:
+            print(f"📐 {item["similarity"]*100:.1f} % {item["text"]}")
 
     pprint(Counter(labels))
 
