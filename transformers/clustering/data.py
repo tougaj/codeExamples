@@ -1,4 +1,7 @@
 import json
+from pprint import pprint
+
+from interfaces import Message
 
 messages = [
     "На Дніпропетровщині та Запоріжжі частково відновлюють світло: яка зараз ситуація в регіонах",
@@ -31,7 +34,15 @@ def load_json_file(file_path: str):
     """
     with open(file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
-    return data
+    messages: list[Message] = []
+    for item in data:
+        try:
+            message = Message(**item)
+            messages.append(message)
+        except Exception as e:
+            pprint(e)
+            pprint(item)
+    return messages
 
 
 if __name__ == "__main__":
