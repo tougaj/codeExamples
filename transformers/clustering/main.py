@@ -8,7 +8,8 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from data import load_json_file
-from interfaces import BatchResponse, ChatRequest, Message, TopText
+from interfaces import (BatchResponse, ChatRequest, Message, TextCluster,
+                        TopText)
 
 SERVER_ADDRESS = "http://127.0.0.1:9001"
 REQUEST_TIMEOUT = 300
@@ -53,9 +54,7 @@ def print_centroid_message_info(messages: list[Message], index: int):
     # print(f"📰 {message["text"]}")
 
 
-def get_cluster_title(messages: list[Message]):
-    texts_for_process = [msg.text for msg in messages]
-    texts = "\n---\n".join(texts_for_process)
+def get_cluster_title(texts: list[str]):
     prompt = """Тобі надано набір текстів, розділених рядком \n---\n.
 Усі тексти належать до однієї спільної тематики та є змістовно пов’язаними (кластер схожих статей).
 Твоє завдання — визначити спільну тему цих текстів і сформулювати розгорнуту, чітку та зрозумілу назву, якою можна їх озаглавити.
@@ -77,23 +76,20 @@ def get_cluster_title(messages: list[Message]):
 # Тексти для визначення теми:
 
 # """
-    request_data: ChatRequest = ChatRequest(texts=[texts], prompt=prompt)
-    print(f"🧐 Generating titles")
+    request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt)
+    print(f"🧐 Generating titles for {len(texts)} clusters")
 
     response = requests.post(f"{SERVER_ADDRESS}/generate", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
     raw_data = response.json()
+    titles = []
     if response.status_code == 200:
         model_answer = BatchResponse.model_validate(raw_data)
-        print(model_answer.results[0].text)
-        # results = []
-        # for msg, estimation in zip(messages, model_answer.results):
-        #     results.append({"estimation": estimation.text, "msg": msg.text})
-        # print(results)
+        titles = [answer.text for answer in model_answer.results]
+        # print(model_answer)
+    return titles
 
 
-def get_cluster_summary(messages: list[Message]):
-    texts_for_process = [msg.text for msg in messages]
-    texts = "\n---\n".join(texts_for_process)
+def get_cluster_summary(texts: list[str]):
     prompt = """Ти — система створення новинних резюме.
 
 Отримуєш набір текстів, розділених рядком \n---\n.
@@ -122,14 +118,16 @@ def get_cluster_summary(messages: list[Message]):
 
 Набір текстів:"""
 
-    request_data: ChatRequest = ChatRequest(texts=[texts], prompt=prompt)
+    request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt)
     print(f"🧐 Generating summaries")
 
     response = requests.post(f"{SERVER_ADDRESS}/generate", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
     raw_data = response.json()
+    summaries: list[str] = []
     if response.status_code == 200:
         model_answer = BatchResponse.model_validate(raw_data)
-        print(model_answer.results[0].text)
+        summaries = [answer.text for answer in model_answer.results]
+    return summaries
 
 
 def main():
@@ -193,29 +191,56 @@ def main():
         reverse=True
     )
 
-    # виводимо результат 🖨️
-    labels_count = len(sorted_clusters)
-    for index, (label, messages) in enumerate(sorted_clusters, start=1):
+    # Генерація назв та сумаризацій
+    result_clusters: list[TextCluster] = []
+    for label, messages in sorted_clusters:
         if label == -1:
             continue
-        # Формування заголовка на основі центроїда кластера (найближчий текст)
-        texts_cluster = [item.text for item in messages]
-        embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
+        texts = [msg.text for msg in messages]
+        embeds = embeddings[[i for i, l in enumerate(labels) if l == label]]
 
         # Формування заголовка на основі центроїда кластера (найближчий текст)
-        centroid, title_text, top_texts = cluster_centroid_and_top_texts(texts_cluster, embeds_cluster)
-        top_messages = [messages[text.index] for text in top_texts]
-        cluster_title = get_cluster_title(top_messages)
-        cluster_summary = get_cluster_summary(top_messages)
+        centroid, title_text, top = cluster_centroid_and_top_texts(texts, embeds)
+        top_messages = [messages[item.index] for item in top]
+        result_clusters.append(TextCluster(label=int(label), messages=top_messages,
+                               total_count=len(messages), texts=[msg.text for msg in top_messages]))
 
-        print(f"\n📦 CLUSTER {index} of {labels_count} (label: {label}) ({len(messages)} messages)")
-        # top_item = items[index]
-        print_centroid_message_info(messages, top_texts[0].index)
-        # print(f"📰 {title_text}")
-        # pprint(top_texts)
-        # pprint([f"📐 {item["similarity"]*100:.1f} % {item["text"]}" for item in top_texts])
-        for text in top_texts:
-            print(f"📐 {text.similarity*100:.1f}% {text.text}")
+    batch = ["\n---\n".join(cluster.texts) for cluster in result_clusters]
+    titles: list[str] = get_cluster_title(batch)
+    summaries: list[str] = get_cluster_summary(batch)
+    for cluster, title, summary in zip(result_clusters, titles, summaries):
+        cluster.title = title
+        cluster.summary = summary
+
+    # виводимо результат 🖨️
+    clusters_count = len(result_clusters)
+    for index, cluster in enumerate(result_clusters, start=1):
+        print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({cluster.total_count} messages)
+🖊️ {cluster.title}
+📰 {cluster.summary}""")
+
+    # labels_count = len(sorted_clusters)
+    # for index, (label, messages) in enumerate(sorted_clusters, start=1):
+    #     if label == -1:
+    #         continue
+    #     # Формування заголовка на основі центроїда кластера (найближчий текст)
+    #     texts_cluster = [item.text for item in messages]
+    #     embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
+
+    #     # Формування заголовка на основі центроїда кластера (найближчий текст)
+    #     centroid, title_text, top_texts = cluster_centroid_and_top_texts(texts_cluster, embeds_cluster)
+    #     top_messages = [messages[text.index] for text in top_texts]
+    #     cluster_title = get_cluster_title(top_messages)
+    #     cluster_summary = get_cluster_summary(top_messages)
+
+    #     print(f"\n📦 CLUSTER {index} of {labels_count} (label: {label}) ({len(messages)} messages)")
+    #     # top_item = items[index]
+    #     print_centroid_message_info(messages, top_texts[0].index)
+    #     # print(f"📰 {title_text}")
+    #     # pprint(top_texts)
+    #     # pprint([f"📐 {item["similarity"]*100:.1f} % {item["text"]}" for item in top_texts])
+    #     for text in top_texts:
+    #         print(f"📐 {text.similarity*100:.1f}% {text.text}")
 
     pprint(Counter(labels))
 

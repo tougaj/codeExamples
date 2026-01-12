@@ -19,7 +19,8 @@ class Message(BaseModel):
     @computed_field
     @property
     def text(self) -> str:
-        return remove_html_tags(self.summary or self.translated_body or self.body)
+        text = remove_html_tags(self.summary or self.translated_body or self.body)
+        return text[:1000]
 
 
 def remove_html_tags(text: str) -> str:
@@ -40,6 +41,15 @@ class TopText(BaseModel):
     index: int
     similarity: float
     text: str
+
+
+class TextCluster(BaseModel):
+    label: int
+    messages: list[Message]
+    total_count: int
+    texts: list[str]
+    title: Optional[str] = None
+    summary: Optional[str] = None
 
 
 class ChatRequest(BaseModel):
