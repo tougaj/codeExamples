@@ -1,15 +1,17 @@
-import re
 from collections import Counter
 from pprint import pprint
 
 import hdbscan
 import numpy as np
+import requests
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from data import load_json_file
-from interfaces import Message, TopText
+from interfaces import BatchResponse, ChatRequest, Message, TopText
 
+SERVER_ADDRESS = "http://127.0.0.1:9001"
+REQUEST_TIMEOUT = 300
 # def cluster_title_centroid(texts, embeddings):
 #     centroid = embeddings.mean(axis=0, keepdims=True)
 #     sims = cosine_similarity(centroid, embeddings)[0]
@@ -49,6 +51,85 @@ def print_centroid_message_info(messages: list[Message], index: int):
     message = messages[index]
     print(f"🖊️ {message.title}")
     # print(f"📰 {message["text"]}")
+
+
+def get_cluster_title(messages: list[Message]):
+    texts_for_process = [msg.text for msg in messages]
+    texts = "\n---\n".join(texts_for_process)
+    prompt = """Тобі надано набір текстів, розділених рядком \n---\n.
+Усі тексти належать до однієї спільної тематики та є змістовно пов’язаними (кластер схожих статей).
+Твоє завдання — визначити спільну тему цих текстів і сформулювати розгорнуту, чітку та зрозумілу назву, якою можна їх озаглавити.
+
+Вимоги до назви:
+- українською мовою
+- повне речення або складний іменниковий заголовок
+- чітко відображає суть усіх текстів
+- без лапок
+- без пояснень, коментарів чи списків
+- без абстрактних слів типу «Різне», «Інше», «Огляд теми»
+
+Поверни лише назву тематики одним рядком.
+
+Набір текстів:"""
+#     prompt = """Завдання:
+# Дай розгорнуту назву теми для наступного набору текстів, розділених за допомогою '---'.
+# Відповідь надай українською мовою.
+# Тексти для визначення теми:
+
+# """
+    request_data: ChatRequest = ChatRequest(texts=[texts], prompt=prompt)
+    print(f"🧐 Generating titles")
+
+    response = requests.post(f"{SERVER_ADDRESS}/generate", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
+    raw_data = response.json()
+    if response.status_code == 200:
+        model_answer = BatchResponse.model_validate(raw_data)
+        print(model_answer.results[0].text)
+        # results = []
+        # for msg, estimation in zip(messages, model_answer.results):
+        #     results.append({"estimation": estimation.text, "msg": msg.text})
+        # print(results)
+
+
+def get_cluster_summary(messages: list[Message]):
+    texts_for_process = [msg.text for msg in messages]
+    texts = "\n---\n".join(texts_for_process)
+    prompt = """Ти — система створення новинних резюме.
+
+Отримуєш набір текстів, розділених рядком \n---\n.
+
+Усі тексти належать до однієї спільної тематики та є змістовно пов’язаними (кластер схожих статей).
+
+Твоє завдання — підготувати резюме **українською мовою**, дотримуючись таких правил:
+
+- Резюме має **обов'язково** бути українською мовою!.
+- **Передай головний зміст точно й стисло** — зосередься на ключових фактах, подіях і тезах.
+- Якщо в тексті є **основні учасники, місце, час, причина події**, зазнач це.
+- **Уникай** другорядних деталей, прикладів, цитат, оцінних суджень і емоційного тону.
+- Дотримуйся **нейтрального, об'єктивного та інформативного стилю.**
+- Використовуй **природну, зрозумілу й граматично правильну** українську мову.
+- Довжина резюме має бути від 2 до 3 абзаців, кожен з яких містить від 3 до 5 бажано простих речень.
+- **У відповіді подай лише резюме** — без коментарів, пояснень, заголовків.
+- **Заборонено додавати інформацію, якої немає в оригіналі**, навіть якщо вона здається очевидною або логічною за контекстом.
+- **Не роби припущень** щодо осіб, подій, дат, країн, географічних назв чи фактів. Якщо в тексті не вказано ім’я чи назва суб'єкту — не вигадуй його.
+- **Не додавай** жодних імен, ролей, подій чи фактів, яких **немає в оригіналі**. Якщо в оригіналі немає конкретної назви або імені — **не вигадуй їх**, навіть якщо це звучить природніше.
+- **Заборонено** додавати вигадані імена, факти, уточнення, дати, країни, географічні назви, інтерпретації чи пояснення.
+- **Не інтерпретуй** і не додавай причин, мотивів чи додаткових деталей, яких немає в тексті.
+- Якщо в оригіналі іменовані сутності іншою мовою — **переклади їх українською**.
+- **Заборонено припускати**, що в тексті йдеться про Україну, якщо тільки це не вказано явно в оригіналі.
+- Враховуй те, що 24 лютого 2022 року Росія агресивно напала на Україну з метою знищення української державності і наразі ці дві країни знаходяться в стані війни.
+- Використовуй Markdown **жирний** текст для виділення іменованих сутностей (NER).
+
+Набір текстів:"""
+
+    request_data: ChatRequest = ChatRequest(texts=[texts], prompt=prompt)
+    print(f"🧐 Generating summaries")
+
+    response = requests.post(f"{SERVER_ADDRESS}/generate", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
+    raw_data = response.json()
+    if response.status_code == 200:
+        model_answer = BatchResponse.model_validate(raw_data)
+        print(model_answer.results[0].text)
 
 
 def main():
@@ -114,17 +195,22 @@ def main():
 
     # виводимо результат 🖨️
     labels_count = len(sorted_clusters)
-    for index, (label, items) in enumerate(sorted_clusters, start=1):
+    for index, (label, messages) in enumerate(sorted_clusters, start=1):
+        if label == -1:
+            continue
         # Формування заголовка на основі центроїда кластера (найближчий текст)
-        texts_cluster = [item.text for item in items]
+        texts_cluster = [item.text for item in messages]
         embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
 
         # Формування заголовка на основі центроїда кластера (найближчий текст)
         centroid, title_text, top_texts = cluster_centroid_and_top_texts(texts_cluster, embeds_cluster)
+        top_messages = [messages[text.index] for text in top_texts]
+        cluster_title = get_cluster_title(top_messages)
+        cluster_summary = get_cluster_summary(top_messages)
 
-        print(f"\n📦 CLUSTER {index} of {labels_count} (label: {label}) ({len(items)} messages)")
+        print(f"\n📦 CLUSTER {index} of {labels_count} (label: {label}) ({len(messages)} messages)")
         # top_item = items[index]
-        print_centroid_message_info(items, top_texts[0].index)
+        print_centroid_message_info(messages, top_texts[0].index)
         # print(f"📰 {title_text}")
         # pprint(top_texts)
         # pprint([f"📐 {item["similarity"]*100:.1f} % {item["text"]}" for item in top_texts])

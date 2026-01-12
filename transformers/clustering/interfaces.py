@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, Field, computed_field, field_validator
 
 
 class Message(BaseModel):
@@ -40,3 +40,41 @@ class TopText(BaseModel):
     index: int
     similarity: float
     text: str
+
+
+class ChatRequest(BaseModel):
+    """Запит для чат-генерації з промптом"""
+    texts: list[str] = Field(..., min_length=1, max_length=200)
+    prompt: str = Field(default="", description="Системний промпт для всіх текстів")
+    # sampling_params: Optional[SamplingParamsRequest] = None
+
+    @field_validator("texts")
+    @classmethod
+    def validate_texts(cls, v: list[str]) -> list[str]:
+        if not v:
+            raise ValueError("Список текстів не може бути порожнім")
+        for text in v:
+            if not text.strip():
+                raise ValueError("Текст не може бути порожнім")
+        return v
+
+
+class GenerationResult(BaseModel):
+    """Результат генерації для одного тексту"""
+
+    text: str
+    finish_reason: Optional[str]
+    input_tokens: Optional[int] = None
+    output_tokens: Optional[int] = None
+
+
+class BatchResponse(BaseModel):
+    """Відповідь на batch запит"""
+
+    results: list[GenerationResult]
+    total_texts: int
+    processing_time: float
+    avg_input_tokens: Optional[float] = None
+    avg_output_tokens: Optional[float] = None
+    total_input_tokens: Optional[int] = None
+    total_output_tokens: Optional[int] = None
