@@ -70,7 +70,7 @@ def get_text(message):
 def print_centroid_message_info(data, index):
     message = data[index]
     print(f"🖊️ {message["title"]}")
-    print(f"📰 {get_text(message)}")
+    # print(f"📰 {message["text"]}")
 
 
 def main():
@@ -136,16 +136,13 @@ def main():
 
     # виводимо результат 🖨️
     labels_count = len(sorted_clusters)
-    for index, (label, items) in enumerate(sorted_clusters, 1):
+    for index, (label, items) in enumerate(sorted_clusters, start=1):
         # Формування заголовка на основі центроїда кластера (найближчий текст)
         texts_cluster = [item["text"] for item in items]
         embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
 
-        centroid, title_text, top_texts = cluster_centroid_and_top_texts(texts_cluster, embeds_cluster, preview_len=1000)
         # Формування заголовка на основі центроїда кластера (найближчий текст)
-        # texts_cluster = items
-        # embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
-        # title = cluster_title_centroid(texts_cluster, embeds_cluster)
+        centroid, title_text, top_texts = cluster_centroid_and_top_texts(texts_cluster, embeds_cluster, preview_len=1000)
 
         print(f"\n📦 CLUSTER {index} of {labels_count} (label: {label}) ({len(items)} messages)")
         print_centroid_message_info(items, top_texts[0]["index"])
