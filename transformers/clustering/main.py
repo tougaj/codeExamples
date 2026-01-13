@@ -1,3 +1,4 @@
+import sys
 from collections import Counter
 from pprint import pprint
 
@@ -119,7 +120,7 @@ def get_cluster_summary(texts: list[str]):
 Набір текстів:"""
 
     request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt)
-    print(f"🧐 Generating summaries")
+    print(f"🧐 Generating summaries for {len(texts)} clusters")
 
     response = requests.post(f"{SERVER_ADDRESS}/generate", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
     raw_data = response.json()
@@ -130,8 +131,16 @@ def get_cluster_summary(texts: list[str]):
     return summaries
 
 
+def get_input_filename(default="local.data.json"):
+    if len(sys.argv) > 1:
+        return sys.argv[1]
+    return default
+
+
 def main():
-    messages = load_json_file("local.data.json")
+    data_file = get_input_filename()
+    print(f"Using data from file {data_file}")
+    messages = load_json_file(data_file)
     # for text in data:
     #     text["text"] = get_text(text)
     # texts = [get_text(item) for item in data]
