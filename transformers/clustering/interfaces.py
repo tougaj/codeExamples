@@ -19,8 +19,10 @@ class Message(BaseModel):
     @computed_field
     @property
     def text(self) -> str:
-        text = remove_html_tags(self.summary or self.translated_body or self.body)
-        return text[:1000]
+        # text = remove_html_tags(self.summary or self.translated_body or self.body)
+        title = remove_html_tags(self.translated_title or self.title)
+        text = remove_html_tags(self.translated_body or self.body)
+        return f"{title[:100]}\n{text[:1000]}"
 
 
 def remove_html_tags(text: str) -> str:
