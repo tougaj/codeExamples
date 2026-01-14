@@ -22,7 +22,8 @@ class Message(BaseModel):
         # text = remove_html_tags(self.summary or self.translated_body or self.body)
         title = remove_html_tags(self.translated_title or self.title)
         body = remove_html_tags(self.translated_body or self.body)
-        return f"{title[:100]}\n{body[:1000]}"
+        # return f"{title[:100]}\n{body[:1000]}"
+        return f"{title[:100]}\n{"\n".join(body.split("\n")[:3])}"
 
 
 def remove_html_tags(text: str) -> str:
@@ -54,11 +55,22 @@ class TextCluster(BaseModel):
     summary: Optional[str] = None
 
 
+class SamplingParamsRequest(BaseModel):
+    """Параметри генерації тексту"""
+
+    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+    top_p: float = Field(default=0.9, ge=0.0, le=1.0)
+    max_tokens: int = Field(default=512, ge=1, le=8192)
+    presence_penalty: float = Field(default=0.5, ge=-2.0, le=2.0)
+    frequency_penalty: float = Field(default=0.3, ge=-2.0, le=2.0)
+    stop: Optional[list[str]] = Field(default=None)
+
+
 class ChatRequest(BaseModel):
     """Запит для чат-генерації з промптом"""
     texts: list[str] = Field(..., min_length=1, max_length=200)
     prompt: str = Field(default="", description="Системний промпт для всіх текстів")
-    # sampling_params: Optional[SamplingParamsRequest] = None
+    sampling_params: Optional[SamplingParamsRequest] = None
 
     @field_validator("texts")
     @classmethod

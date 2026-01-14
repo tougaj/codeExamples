@@ -9,8 +9,8 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from data import load_json_file
-from interfaces import (BatchResponse, ChatRequest, Message, TextCluster,
-                        TopText)
+from interfaces import (BatchResponse, ChatRequest, Message,
+                        SamplingParamsRequest, TextCluster, TopText)
 
 SERVER_ADDRESS = "http://127.0.0.1:9001"
 REQUEST_TIMEOUT = 300
@@ -60,7 +60,8 @@ def get_cluster_title(texts: list[str]):
 Усі тексти належать до однієї спільної тематики та є змістовно пов’язаними (кластер схожих статей).
 Твоє завдання — визначити спільну тему цих текстів і сформулювати розгорнуту, чітку та зрозумілу назву, якою можна їх озаглавити.
 
-Вимоги до назви:
+### Вимоги до назви:
+
 - українською мовою
 - повне речення або складний іменниковий заголовок
 - чітко відображає суть усіх текстів
@@ -68,16 +69,21 @@ def get_cluster_title(texts: list[str]):
 - без пояснень, коментарів чи списків
 - без абстрактних слів типу «Різне», «Інше», «Огляд теми»
 
-Поверни лише назву тематики одним рядком.
+### Формат відповіді
 
-Набір текстів:"""
+* У відповіді подай **виключно назву теми одним рядком**.
+* **Без заголовків, списків, коментарів або пояснень.**
+
+Набір текстів для формування спільної теми:"""
+# Поверни лише назву тематики одним рядком.
 #     prompt = """Завдання:
 # Дай розгорнуту назву теми для наступного набору текстів, розділених за допомогою '---'.
 # Відповідь надай українською мовою.
 # Тексти для визначення теми:
 
 # """
-    request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt)
+    sampling_params = SamplingParamsRequest(temperature=0.5, max_tokens=128)
+    request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt, sampling_params=sampling_params)
     print(f"🧐 Generating titles for {len(texts)} clusters")
 
     response = requests.post(f"{SERVER_ADDRESS}/generate", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
@@ -283,7 +289,8 @@ def get_cluster_summary(texts: list[str]):
 
 Набір текстів для формування довідки:"""
 
-    request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt)
+    sampling_params = SamplingParamsRequest(temperature=0.5, max_tokens=2048)
+    request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt, sampling_params=sampling_params)
     print(f"🧐 Generating summaries for {len(texts)} clusters")
 
     response = requests.post(f"{SERVER_ADDRESS}/generate", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
@@ -332,7 +339,7 @@ def main():
     print("ℹ️ Clustering...")
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=7,      # мін. розмір кластера
-        min_samples=3,           # чутливість до шуму
+        min_samples=7,           # чутливість до шуму
 
         # При низькій кількості повідомлень
         # min_cluster_size=3,      # мін. розмір кластера
@@ -392,12 +399,12 @@ def main():
     for index, cluster in enumerate(result_clusters, start=1):
         print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({cluster.total_count} messages)
 🖊️ {cluster.title}
-🪅 {cluster.summary}
+🪅 {cluster.summary}""")
 
-📰 Заголовки топ-повідомлень:""")
-        for msg in cluster.messages:
-            print(f"- {msg.title}")
-            # print(msg.text)
+    # 📰 Заголовки топ-повідомлень:""")
+    #         for msg in cluster.messages:
+    #             print(f"- {msg.title}")
+    #             # print(msg.text)
 
     # labels_count = len(sorted_clusters)
     # for index, (label, messages) in enumerate(sorted_clusters, start=1):
