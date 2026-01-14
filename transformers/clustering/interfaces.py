@@ -19,11 +19,18 @@ class Message(BaseModel):
     @computed_field
     @property
     def text(self) -> str:
-        # text = remove_html_tags(self.summary or self.translated_body or self.body)
-        title = remove_html_tags(self.translated_title or self.title)
-        body = remove_html_tags(self.translated_body or self.body)
-        # return f"{title[:100]}\n{body[:1000]}"
-        return f"{title[:100]}\n{"\n".join(body.split("\n")[:3])}"
+        # Текст на основі сумаризації
+        title = remove_html_tags(self.translated_title or self.title)[:100]
+        exact_body = "\n".join(remove_html_tags(self.translated_body or self.body).split("\n")[:3])
+        body = self.summary.replace('**', '')[:1000] if self.summary else exact_body
+        return f"{title}\n{body}"
+        # return body
+
+        # Текст на основі тексту
+        # title = remove_html_tags(self.translated_title or self.title)
+        # body = remove_html_tags(self.translated_body or self.body)
+        # # return f"{title[:100]}\n{body[:1000]}"
+        # return f"{title[:100]}\n{"\n".join(body.split("\n")[:3])}"
 
 
 def remove_html_tags(text: str) -> str:
