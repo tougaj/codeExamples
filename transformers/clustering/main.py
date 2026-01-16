@@ -388,18 +388,21 @@ def main():
                                total_count=len(messages), texts=[msg.text for msg in top_messages]))
 
     batch = ["\n---\n".join(cluster.texts) for cluster in result_clusters]
-    titles: list[str] = get_cluster_title(batch)
-    # summary_batch = [f"Тема кластера:\n{title}\n\nНабір текстів для формування довідки:\n"+tb for tb, title in zip(batch, titles)]
-    # summaries: list[str] = get_cluster_summary(summary_batch)
-    summaries: list[str] = get_cluster_summary(batch)
-    for cluster, title, summary in zip(result_clusters, titles, summaries):
-        cluster.title = title
-        cluster.summary = summary
+    if len(batch) == 0:
+        print("🫤 No clusters exist")
+    else:
+        titles: list[str] = get_cluster_title(batch)
+        # summary_batch = [f"Тема кластера:\n{title}\n\nНабір текстів для формування довідки:\n"+tb for tb, title in zip(batch, titles)]
+        # summaries: list[str] = get_cluster_summary(summary_batch)
+        summaries: list[str] = get_cluster_summary(batch)
+        for cluster, title, summary in zip(result_clusters, titles, summaries):
+            cluster.title = title
+            cluster.summary = summary
 
-    # виводимо результат 🖨️
-    clusters_count = len(result_clusters)
-    for index, cluster in enumerate(result_clusters, start=1):
-        print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({cluster.total_count} messages)
+        # виводимо результат 🖨️
+        clusters_count = len(result_clusters)
+        for index, cluster in enumerate(result_clusters, start=1):
+            print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({cluster.total_count} messages)
 🖊️ {cluster.title}
 🪅 {cluster.summary}""")
 
@@ -412,29 +415,6 @@ def main():
     #         for msg in cluster.messages:
     #             print(f"- {msg.title}")
     #             # print(msg.text)
-
-    # labels_count = len(sorted_clusters)
-    # for index, (label, messages) in enumerate(sorted_clusters, start=1):
-    #     if label == -1:
-    #         continue
-    #     # Формування заголовка на основі центроїда кластера (найближчий текст)
-    #     texts_cluster = [item.text for item in messages]
-    #     embeds_cluster = embeddings[[i for i, l in enumerate(labels) if l == label]]
-
-    #     # Формування заголовка на основі центроїда кластера (найближчий текст)
-    #     centroid, title_text, top_texts = cluster_centroid_and_top_texts(texts_cluster, embeds_cluster)
-    #     top_messages = [messages[text.index] for text in top_texts]
-    #     cluster_title = get_cluster_title(top_messages)
-    #     cluster_summary = get_cluster_summary(top_messages)
-
-    #     print(f"\n📦 CLUSTER {index} of {labels_count} (label: {label}) ({len(messages)} messages)")
-    #     # top_item = items[index]
-    #     print_centroid_message_info(messages, top_texts[0].index)
-    #     # print(f"📰 {title_text}")
-    #     # pprint(top_texts)
-    #     # pprint([f"📐 {item["similarity"]*100:.1f} % {item["text"]}" for item in top_texts])
-    #     for text in top_texts:
-    #         print(f"📐 {text.similarity*100:.1f}% {text.text}")
 
     pprint(Counter(labels))
 
