@@ -317,6 +317,8 @@ def main():
     # texts = [get_text(item) for item in data]
     # texts = [remove_html_tags(text)[:1000] for text in messages]
 
+    # Завантажити локальну модель можна так (тут вказується каталог, де знаходиться config.json):
+    # model = SentenceTransformer("/data/hf_home/hub/models--google--embeddinggemma-300m/snapshots/57c266a740f537b4dc058e1b0cda161fd15afa75")
     model = SentenceTransformer(
         # "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
         # "sentence-transformers/all-MiniLM-L6-v2"
