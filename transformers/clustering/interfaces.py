@@ -68,6 +68,20 @@ class TextCleaner:
         return self.text.strip()
 
 
+def get_upper_paragraphs(text: str, max_len=500):
+    # return "\n".join(text.split("\n")[:3])
+    paragraphs = text.split("\n")
+    processed_text = ''
+    for p in paragraphs:
+        paragraph = p.strip()
+        if not paragraph:
+            continue
+        processed_text += ("\n" if processed_text else "")+paragraph
+        if len(processed_text) >= max_len:
+            break
+    return processed_text
+
+
 class Message(BaseModel):
     url: str
     hit_date: str
@@ -97,17 +111,18 @@ class Message(BaseModel):
     @computed_field
     @property
     def text(self) -> str:
-        # Текст на основі сумаризації
-        title = (self.translated_title or self.title)[:200]
-        exact_body = "\n".join((self.translated_body or self.body).split("\n")[:3])
-        body = self.summary[:1000] if self.summary else exact_body
-        return f"# {title}\n\n{body}"
+        # title = (self.translated_title or self.title)[:200]
+        # exact_body = "\n".join((self.translated_body or self.body).split("\n")[:3])
+        # body = self.summary[:1000] if self.summary else exact_body
+        # return f"# {title}\n\n{body}"
 
+        title = (self.translated_title or self.title)[:200]
+        exact_body = get_upper_paragraphs(self.translated_body or self.body)
+        # Текст на основі сумаризації
+        body = self.summary[:1000] if self.summary else exact_body
         # Текст на основі тексту
-        # title = remove_html_tags(self.translated_title or self.title)
-        # body = remove_html_tags(self.translated_body or self.body)
-        # # return f"{title[:100]}\n{body[:1000]}"
-        # return f"{title[:100]}\n{"\n".join(body.split("\n")[:3])}"
+        # body = exact_body
+        return f"# {title}\n\n{body}"
 
 
 # def remove_html_tags(text: str) -> str:
