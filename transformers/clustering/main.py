@@ -325,6 +325,7 @@ def main():
         "google/embeddinggemma-300m"
         # "Qwen/Qwen3-Embedding-0.6B"
         # "Qwen/Qwen3-Embedding-8B"
+        # , local_files_only=True # ⚠️ For using local model
     )
 
     print("ℹ️ Calculating embeddings...")
