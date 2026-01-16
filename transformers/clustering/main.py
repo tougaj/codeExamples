@@ -373,8 +373,10 @@ def main():
 
     # Генерація назв та сумаризацій
     result_clusters: list[TextCluster] = []
+    not_in_cluster_messages: list[Message] = []
     for label, messages in sorted_clusters:
         if label == -1:
+            not_in_cluster_messages = messages
             continue
         texts = [msg.text for msg in messages]
         embeds = embeddings[[i for i, l in enumerate(labels) if l == label]]
@@ -400,6 +402,11 @@ def main():
         print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({cluster.total_count} messages)
 🖊️ {cluster.title}
 🪅 {cluster.summary}""")
+
+    # if len(not_in_cluster_messages) != 0:
+    #     print("\n🚫 Not in cluster messages:")
+    #     for msg in not_in_cluster_messages[:20]:
+    #         print(f"\n🗞️ {msg.text}")
 
     # 📰 Заголовки топ-повідомлень:""")
     #         for msg in cluster.messages:
