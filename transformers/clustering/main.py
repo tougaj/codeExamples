@@ -409,15 +409,15 @@ def main():
 🖊️ {cluster.title}
 🪅 {cluster.summary}""")
 
+            # 📰 Заголовки топ-повідомлень:""")
+            # for msg in cluster.messages:
+            #     print(f"- {msg.title}")
+            #     # print(msg.text)
+
     # if len(not_in_cluster_messages) != 0:
     #     print("\n🚫 Not in cluster messages:")
     #     for msg in not_in_cluster_messages[:20]:
     #         print(f"\n🗞️ {msg.text}")
-
-    # 📰 Заголовки топ-повідомлень:""")
-    #         for msg in cluster.messages:
-    #             print(f"- {msg.title}")
-    #             # print(msg.text)
 
     pprint(Counter(labels))
 
