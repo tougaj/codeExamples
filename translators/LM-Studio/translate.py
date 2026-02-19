@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import lmstudio as lms
+from pprint import pprint
 
-SERVER_API_HOST = "localhost:1234"
-lms.configure_default_client(SERVER_API_HOST)
+# SERVER_API_HOST = "localhost:1234"
+# lms.configure_default_client(SERVER_API_HOST)
 
 # model = lms.llm("google/gemma-3-4b")
 # result = model.respond("""Переклади текст нижче українською мовою. виведи лише переклад. Ось текст:
@@ -13,8 +14,8 @@ lms.configure_default_client(SERVER_API_HOST)
 # print(result)
 
 # model_key = "google/gemma-3-4b"
-model_key = "google/gemma-3-27b"
-draft_model_key = "google/gemma-3-4b"
+model_key = "google/gemma-3-4b"
+draft_model_key = "google/gemma-3-1b"
 
 
 with lms.Client() as client:
@@ -25,13 +26,14 @@ C’est une nouvelle qui va intéresser l’ensemble des propriétaires de voitu
 Pour rappel, le FORTA est essentiellement financé par les taxes sur l’essence, donc par les voitures thermiques. Avec la croissance du nombre de véhicules électriques, les recettes provenant des taxes sur les huiles minérales diminuent, mettant à mal la pérennité du fonds. Avec cet impôt, le Conseil fédéral entend également introduire une certaine équité entre les automobilistes, estimant que l’infrastructure routière doit être financée par l’ensemble de ceux qui l’utilisent. Le gouvernement a ainsi lancé ce vendredi une procédure de consultation sur la question.Voir plus
 """,
     config={
-        "draftModel": draft_model_key,
+        # "draftModel": draft_model_key,
         "temperature": 0.1,
     })
 
-    print(result)
+    pprint(result)
 
     stats = result.stats
+    pprint(stats)
     print(f"Accepted {stats.accepted_draft_tokens_count}/{stats.predicted_tokens_count} tokens")
 
 # with lms.Client() as client:
