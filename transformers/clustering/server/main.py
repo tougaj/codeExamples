@@ -34,6 +34,9 @@ async def lifespan(app: FastAPI):
     print(f"📦 Модель: {MODEL_NAME}")
 
     try:
+        # Завантажити локальну модель можна так (тут вказується каталог, де знаходиться config.json):
+        # model = SentenceTransformer("/data/hf_home/hub/models--google--embeddinggemma-300m/snapshots/57c266a740f537b4dc058e1b0cda161fd15afa75")
+
         # Ініціалізація моделі
         model = SentenceTransformer(
             MODEL_NAME

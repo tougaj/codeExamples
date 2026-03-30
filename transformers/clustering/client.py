@@ -7,7 +7,6 @@ import hdbscan
 import numpy as np
 import requests
 from dotenv import load_dotenv
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from data import load_json_file
@@ -325,20 +324,6 @@ def get_embeddings(texts: list[str]):
 
 
 def main():
-    # request_data: TextRequest = TextRequest(texts=["hello world", "Здрастуй, світ"])
-
-    # response = requests.post(f"{EMBEDDING_SERVER_ADDRESS}/embed", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
-
-    # # res = requests.post("http://127.0.0.1:8000/embed", json={
-    # #     "texts": ["hello world", "Здрастуй, світ"]
-    # # })
-
-    # raw_data = response.json()
-    # data = EmbeddingResponse.model_validate(raw_data)
-
-    # embeddings = np.array(data.embeddings, dtype=np.float32)  # 🔥 відновлення типу
-    embeddings = get_embeddings(["hello world", "Здрастуй, світ"])
-
     data_file = get_input_filename()
     print(f"Using data from file {data_file}")
     messages = load_json_file(data_file)
@@ -347,24 +332,8 @@ def main():
     # texts = [get_text(item) for item in data]
     # texts = [remove_html_tags(text)[:1000] for text in messages]
 
-    # Завантажити локальну модель можна так (тут вказується каталог, де знаходиться config.json):
-    # model = SentenceTransformer("/data/hf_home/hub/models--google--embeddinggemma-300m/snapshots/57c266a740f537b4dc058e1b0cda161fd15afa75")
-    model = SentenceTransformer(
-        # "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-        # "sentence-transformers/all-MiniLM-L6-v2"
-        "google/embeddinggemma-300m"
-        # "Qwen/Qwen3-Embedding-0.6B"
-        # "Qwen/Qwen3-Embedding-8B"
-        # , local_files_only=True # ⚠️ For using local model
-    )
-
     print("ℹ️ Calculating embeddings...")
-    embeddings = model.encode(
-        [msg.text for msg in messages],
-        batch_size=32,
-        show_progress_bar=True,
-        normalize_embeddings=True  # ВАЖЛИВО для HDBSCAN
-    )
+    embeddings = get_embeddings([msg.text for msg in messages])
 
     # for e in embeddings:
     #     pprint(e)
