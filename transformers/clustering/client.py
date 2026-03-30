@@ -13,6 +13,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from data import load_json_file
 from interfaces import (BatchResponse, ChatRequest, Message,
                         SamplingParamsRequest, TextCluster, TopText)
+from server.interfaces import EmbeddingResponse, TextRequest
 
 load_dotenv()
 
@@ -314,7 +315,30 @@ def get_input_filename(default="local.data.json"):
     return default
 
 
+def get_embeddings(texts: list[str]):
+    request_data: TextRequest = TextRequest(texts=texts)
+    response = requests.post(f"{EMBEDDING_SERVER_ADDRESS}/embed", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
+    raw_data = response.json()
+    data = EmbeddingResponse.model_validate(raw_data)
+    embeddings = np.array(data.embeddings, dtype=np.float32)  # 🔥 відновлення типу
+    return embeddings
+
+
 def main():
+    # request_data: TextRequest = TextRequest(texts=["hello world", "Здрастуй, світ"])
+
+    # response = requests.post(f"{EMBEDDING_SERVER_ADDRESS}/embed", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
+
+    # # res = requests.post("http://127.0.0.1:8000/embed", json={
+    # #     "texts": ["hello world", "Здрастуй, світ"]
+    # # })
+
+    # raw_data = response.json()
+    # data = EmbeddingResponse.model_validate(raw_data)
+
+    # embeddings = np.array(data.embeddings, dtype=np.float32)  # 🔥 відновлення типу
+    embeddings = get_embeddings(["hello world", "Здрастуй, світ"])
+
     data_file = get_input_filename()
     print(f"Using data from file {data_file}")
     messages = load_json_file(data_file)

@@ -5,10 +5,17 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Clustering",
+			"name": "Main Clustering",
 			"type": "debugpy",
 			"request": "launch",
 			"program": "main.py",
+			"console": "integratedTerminal"
+		},
+		{
+			"name": "Client Clustering",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "client.py",
 			"console": "integratedTerminal"
 		}
 	]
