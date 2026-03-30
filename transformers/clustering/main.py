@@ -12,7 +12,8 @@ from data import load_json_file
 from interfaces import (BatchResponse, ChatRequest, Message,
                         SamplingParamsRequest, TextCluster, TopText)
 
-SERVER_ADDRESS = "http://127.0.0.1:9001"
+# SERVER_ADDRESS = "http://127.0.0.1:9001"
+SERVER_ADDRESS = "http://10.100.20.11:8000"
 REQUEST_TIMEOUT = 300
 # def cluster_title_centroid(texts, embeddings):
 #     centroid = embeddings.mean(axis=0, keepdims=True)
