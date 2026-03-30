@@ -70,7 +70,7 @@ class TextCleaner:
 
 def get_upper_paragraphs(text: str, max_len=500):
     # return "\n".join(text.split("\n")[:3])
-    paragraphs = text.split("\n")
+    paragraphs = text.strip().split("\n")
     processed_text = ''
     for p in paragraphs:
         paragraph = p.strip()
@@ -79,7 +79,7 @@ def get_upper_paragraphs(text: str, max_len=500):
         processed_text += ("\n" if processed_text else "")+paragraph
         if len(processed_text) >= max_len:
             break
-    return processed_text
+    return processed_text if "\n" in processed_text else processed_text[:max_len]
 
 
 class Message(BaseModel):
