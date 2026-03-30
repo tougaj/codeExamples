@@ -111,11 +111,6 @@ class Message(BaseModel):
     @computed_field
     @property
     def text(self) -> str:
-        # title = (self.translated_title or self.title)[:200]
-        # exact_body = "\n".join((self.translated_body or self.body).split("\n")[:3])
-        # body = self.summary[:1000] if self.summary else exact_body
-        # return f"# {title}\n\n{body}"
-
         title = (self.translated_title or self.title)[:200]
         exact_body = get_upper_paragraphs(self.translated_body or self.body)
         # Текст на основі сумаризації
@@ -123,20 +118,6 @@ class Message(BaseModel):
         # Текст на основі тексту
         # body = exact_body
         return f"# {title}\n\n{body}"
-
-
-# def remove_html_tags(text: str) -> str:
-#     """
-#     Видаляє всі HTML-теги з тексту, залишаючи лише вміст.
-
-#     Args:
-#         text (str): Вхідний рядок, що може містити HTML-теги.
-
-#     Returns:
-#         str: Текст без HTML-тегів.
-#     """
-#     clean = re.sub(r'<[^>]+>', '', text)
-#     return clean
 
 
 class TopText(BaseModel):
