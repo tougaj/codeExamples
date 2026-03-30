@@ -1,3 +1,4 @@
+import os
 import sys
 from collections import Counter
 from pprint import pprint
@@ -5,6 +6,7 @@ from pprint import pprint
 import hdbscan
 import numpy as np
 import requests
+from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -12,9 +14,12 @@ from data import load_json_file
 from interfaces import (BatchResponse, ChatRequest, Message,
                         SamplingParamsRequest, TextCluster, TopText)
 
-# SERVER_ADDRESS = "http://127.0.0.1:9001"
-SERVER_ADDRESS = "http://10.100.20.11:8000"
-REQUEST_TIMEOUT = 300
+load_dotenv()
+
+EMBEDDING_SERVER_ADDRESS = os.getenv("EMBEDDING_SERVER", "http://127.0.0.1:8000")
+LLM_SERVER_ADDRESS = os.getenv("LLM_SERVER", "http://127.0.0.1:8000")
+REQUEST_TIMEOUT = int(os.getenv("REQUESTS_TIMEOUT", "300"))
+
 # def cluster_title_centroid(texts, embeddings):
 #     centroid = embeddings.mean(axis=0, keepdims=True)
 #     sims = cosine_similarity(centroid, embeddings)[0]
@@ -87,7 +92,7 @@ def get_cluster_title(texts: list[str]):
     request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt, sampling_params=sampling_params)
     print(f"🧐 Generating titles for {len(texts)} clusters")
 
-    response = requests.post(f"{SERVER_ADDRESS}/generate", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
+    response = requests.post(f"{LLM_SERVER_ADDRESS}/generate", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
     raw_data = response.json()
     titles = []
     if response.status_code == 200:
@@ -294,7 +299,7 @@ def get_cluster_summary(texts: list[str]):
     request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt, sampling_params=sampling_params)
     print(f"🧐 Generating summaries for {len(texts)} clusters")
 
-    response = requests.post(f"{SERVER_ADDRESS}/generate", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
+    response = requests.post(f"{LLM_SERVER_ADDRESS}/generate", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
     raw_data = response.json()
     summaries: list[str] = []
     if response.status_code == 200:
