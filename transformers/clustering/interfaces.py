@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, computed_field, field_validator
 
+MAX_TEXT_LEN = 2000
+
 
 class TextCleaner:
     """Клас для виконання очистки тексту від зайвих символів та мусору
@@ -68,7 +70,7 @@ class TextCleaner:
         return self.text.strip()
 
 
-def get_upper_paragraphs(text: str, max_len=500):
+def get_upper_paragraphs(text: str, max_len=MAX_TEXT_LEN):
     # return "\n".join(text.split("\n")[:3])
     paragraphs = text.strip().split("\n")
     processed_text = ''
@@ -114,10 +116,10 @@ class Message(BaseModel):
         title = (self.translated_title or self.title)[:200]
         exact_body = get_upper_paragraphs(self.translated_body or self.body)
         # Текст на основі сумаризації
-        body = self.summary[:1000] if self.summary else exact_body
+        body = self.summary[:MAX_TEXT_LEN] if self.summary else exact_body
         # Текст на основі тексту
         # body = exact_body
-        return f"# {title}\n\n{body}"
+        return f"### {title}\n\n{body}"
 
 
 class TopText(BaseModel):

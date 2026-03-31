@@ -4,7 +4,7 @@
 
 import os
 from contextlib import asynccontextmanager
-from typing import Optional
+from typing import cast
 
 import numpy as np
 from dotenv import load_dotenv
@@ -12,10 +12,33 @@ from fastapi import Depends, FastAPI, HTTPException, Request, status
 # from fastapi.responses import JSONResponse
 from sentence_transformers import SentenceTransformer
 
-from interfaces import EmbeddingResponse, TextRequest
+from interfaces import EmbeddingRequest, EmbeddingResponse
 
 # Завантаження змінних оточення
 load_dotenv()
+
+
+# state
+class AppState:
+    model: SentenceTransformer
+    batch_size: int
+
+
+def get_state(request: Request) -> AppState:
+    return cast(AppState, request.app.state)
+
+
+def get_model(state: AppState = Depends(get_state)) -> SentenceTransformer:
+    if state.model is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Модель не завантажена",
+        )
+    return state.model
+
+
+def get_batch_size(state: AppState = Depends(get_state)) -> int:
+    return state.batch_size
 
 
 # 🎬 Lifecycle управління
@@ -38,7 +61,11 @@ async def lifespan(app: FastAPI):
             # , local_files_only=True # ⚠️ For using local model
         )
         app.state.model = model
-        print("✅ Модель успішно завантажена!")
+        batch_size = int(os.getenv("BATCH_SIZE", "32"))
+        app.state.batch_size = batch_size
+        print(f"""✅ Параметри успішно завантажені!
+- модель: {MODEL_NAME}
+- batch size: {batch_size}""")
     except Exception as e:
         print(f"❌ Помилка завантаження моделі: {e}")
         raise
@@ -57,24 +84,13 @@ app = FastAPI(
 )
 
 
-def get_model(request: Request) -> SentenceTransformer:
-    return request.app.state.model
-
 # 📍 Ендпоінти
-
-
 @app.post("/embed", response_model=EmbeddingResponse)
-def embed(request: TextRequest, model: SentenceTransformer = Depends(get_model)):
-    """Створення резюме текстів українською мовою"""
-    if model is None:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Модель не завантажена",
-        )
-
+def embed(request: EmbeddingRequest, model: SentenceTransformer = Depends(get_model), batch_size: int = Depends(get_batch_size)):
+    """Генерація embeddings для переданих текстів"""
     embeddings: np.ndarray = model.encode(
         request.texts,
-        batch_size=32,
+        batch_size=batch_size,
         show_progress_bar=True,
         normalize_embeddings=True  # ВАЖЛИВО для HDBSCAN
     )

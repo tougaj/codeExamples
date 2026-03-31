@@ -406,7 +406,9 @@ def main():
         for index, cluster in enumerate(result_clusters, start=1):
             print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({cluster.total_count} messages)
 🖊️ {cluster.title}
-🪅 {cluster.summary}""")
+🪅 {cluster.summary}
+
+{'-'*20}""")
 
             # 📰 Заголовки топ-повідомлень:""")
             # for msg in cluster.messages:
