@@ -216,10 +216,11 @@ def main():
     print("ℹ️ Calculating embeddings...")
     embeddings = get_embeddings([msg.text for msg in messages])
 
-    print("ℹ️ Clustering...")
+    min_cluster_size = int(os.getenv("MIN_CLUSTER_SIZE", "7"))  # мін. розмір кластера
+    min_samples = int(os.getenv("MIN_SAMPLES", "3"))           # чутливість до шуму
     clusterer = hdbscan.HDBSCAN(
-        min_cluster_size=7,      # мін. розмір кластера
-        min_samples=7,           # чутливість до шуму
+        min_cluster_size=min_cluster_size,  # мін. розмір кластера
+        min_samples=min_samples,           # чутливість до шуму
 
         # При низькій кількості повідомлень
         # min_cluster_size=3,      # мін. розмір кластера
@@ -236,6 +237,9 @@ def main():
         metric="euclidean",      # з нормалізованими векторами = cosine
         cluster_selection_method="eom"
     )
+    print(f"""ℹ️ Clustering parameters:
+- minimum cluster size: {min_cluster_size}
+- minimum samples count: {min_samples}""")
 
     labels = clusterer.fit_predict(embeddings)
 
