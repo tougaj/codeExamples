@@ -8,7 +8,7 @@ from typing import Optional
 
 import numpy as np
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 # from fastapi.responses import JSONResponse
 from sentence_transformers import SentenceTransformer
 
@@ -17,16 +17,11 @@ from interfaces import EmbeddingResponse, TextRequest
 # Завантаження змінних оточення
 load_dotenv()
 
-# 🔧 Глобальні змінні для моделі
-model: Optional[SentenceTransformer] = None
-
 
 # 🎬 Lifecycle управління
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Ініціалізація та очищення ресурсів"""
-    global model
-
     # Завантаження конфігурації з .env
     MODEL_NAME = os.getenv("MODEL_NAME", "google/embeddinggemma-300m")
 
@@ -42,6 +37,7 @@ async def lifespan(app: FastAPI):
             MODEL_NAME
             # , local_files_only=True # ⚠️ For using local model
         )
+        app.state.model = model
         print("✅ Модель успішно завантажена!")
     except Exception as e:
         print(f"❌ Помилка завантаження моделі: {e}")
@@ -61,9 +57,14 @@ app = FastAPI(
 )
 
 
+def get_model(request: Request) -> SentenceTransformer:
+    return request.app.state.model
+
 # 📍 Ендпоінти
+
+
 @app.post("/embed", response_model=EmbeddingResponse)
-def embed(request: TextRequest):
+def embed(request: TextRequest, model: SentenceTransformer = Depends(get_model)):
     """Створення резюме текстів українською мовою"""
     if model is None:
         raise HTTPException(
