@@ -118,9 +118,9 @@ class Message(BaseModel):
         title = (self.translated_title or self.title)[:200]
         exact_body = get_upper_paragraphs(self.translated_body or self.body)
         # Текст на основі сумаризації
-        body = self.summary[:MAX_TEXT_LEN] if self.summary else exact_body
+        # body = self.summary[:MAX_TEXT_LEN] if self.summary else exact_body
         # Текст на основі тексту
-        # body = exact_body
+        body = exact_body
         return f"### {title}\n\n{body}"
 
 
