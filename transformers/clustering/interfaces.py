@@ -85,12 +85,12 @@ def get_upper_paragraphs(text: str, max_len=500):
 class Message(BaseModel):
     url: str
     hit_date: str
-    country: str
+    # country: str
     title: str
     body: str
-    language: Optional[str] = None
+    # language: Optional[str] = None
     summary: Optional[str] = None
-    source_title: str
+    # source_title: str
     translated_title: Optional[str] = None
     translated_body: Optional[str] = None
 

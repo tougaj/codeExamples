@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, Field, field_validator
 
 
-class TextRequest(BaseModel):
+class EmbeddingRequest(BaseModel):
     """Запит з текстами для обробки"""
 
     texts: list[str] = Field(..., min_length=1, max_length=10000)

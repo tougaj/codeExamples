@@ -12,7 +12,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from data import load_json_file
 from interfaces import (BatchResponse, ChatRequest, Message,
                         SamplingParamsRequest, TextCluster, TopText)
-from server.interfaces import EmbeddingResponse, TextRequest
+from server.interfaces import EmbeddingRequest, EmbeddingResponse
 
 load_dotenv()
 
@@ -315,7 +315,7 @@ def get_input_filename(default="local.data.json"):
 
 
 def get_embeddings(texts: list[str]):
-    request_data: TextRequest = TextRequest(texts=texts)
+    request_data: EmbeddingRequest = EmbeddingRequest(texts=texts)
     response = requests.post(f"{EMBEDDING_SERVER_ADDRESS}/embed", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
     raw_data = response.json()
     data = EmbeddingResponse.model_validate(raw_data)
