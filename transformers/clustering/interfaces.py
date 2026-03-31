@@ -127,7 +127,6 @@ class Message(BaseModel):
 class TopText(BaseModel):
     index: int
     similarity: float
-    text: str
 
 
 class TextCluster(BaseModel):
