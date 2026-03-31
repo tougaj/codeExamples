@@ -1,4 +1,5 @@
 import re
+import uuid
 from typing import Optional
 
 from pydantic import BaseModel, Field, computed_field, field_validator
@@ -85,6 +86,7 @@ def get_upper_paragraphs(text: str, max_len=MAX_TEXT_LEN):
 
 
 class Message(BaseModel):
+    id: Optional[str] = Field(default_factory=lambda: str(uuid.uuid4()))
     url: str
     hit_date: str
     # country: str

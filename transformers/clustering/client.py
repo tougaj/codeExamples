@@ -335,9 +335,6 @@ def main():
     print("ℹ️ Calculating embeddings...")
     embeddings = get_embeddings([msg.text for msg in messages])
 
-    # for e in embeddings:
-    #     pprint(e)
-
     print("ℹ️ Clustering...")
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=7,      # мін. розмір кластера
