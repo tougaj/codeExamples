@@ -305,6 +305,14 @@ def get_clusters(messages: list[Message], embeddings: np.ndarray):
     return result_clusters
 
 
+def get_batch(clusters: list[ClusterInfo], top_k=10):
+    texts: list[str] = []
+    for cluster in clusters:
+        top_texts = [cluster.messages[message_id].text for message_id in cluster.ids[:top_k]]
+        texts.append("\n---\n".join(top_texts))
+    return texts
+
+
 def main():
     data_file = get_input_filename()
     print(f"Using data from file {data_file}")
@@ -314,6 +322,7 @@ def main():
     embeddings = get_embeddings([msg.text for msg in messages])
 
     _clusters = get_clusters(messages=messages, embeddings=embeddings)
+    _batch = get_batch(_clusters)
 
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=min_cluster_size,  # мін. розмір кластера
