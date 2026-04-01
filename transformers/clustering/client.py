@@ -11,8 +11,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from data import load_json_file
 from interfaces import (BatchResponse, ChatRequest, ClusterInfo, Message,
-                        SamplingParamsRequest, Similarity, TextCluster,
-                        TopText)
+                        SamplingParamsRequest, Similarity)
 from server.interfaces import EmbeddingRequest, EmbeddingResponse
 
 load_dotenv()
