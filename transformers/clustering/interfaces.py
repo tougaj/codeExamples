@@ -125,21 +125,7 @@ class Message(BaseModel):
         return f"### {title}\n\n{body}"
 
 
-class TopText(BaseModel):
-    index: int
-    similarity: float
-    text: Optional[str] = None
-
-
-class TextCluster(BaseModel):
-    label: int
-    messages: list[Message]
-    total_count: int
-    texts: list[str]
-    title: Optional[str] = None
-    summary: Optional[str] = None
-
-
+# Clustering
 class Similarity(BaseModel):
     index: int
     similarity: float
@@ -155,6 +141,7 @@ class ClusterInfo(BaseModel):
     summary: Optional[str] = None
 
 
+# LLM
 class SamplingParamsRequest(BaseModel):
     """Параметри генерації тексту"""
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
@@ -199,3 +186,19 @@ class BatchResponse(BaseModel):
     avg_output_tokens: Optional[float] = None
     total_input_tokens: Optional[int] = None
     total_output_tokens: Optional[int] = None
+
+
+# Legacy clustering
+class TopText(BaseModel):
+    index: int
+    similarity: float
+    text: Optional[str] = None
+
+
+class TextCluster(BaseModel):
+    label: int
+    messages: list[Message]
+    total_count: int
+    texts: list[str]
+    title: Optional[str] = None
+    summary: Optional[str] = None
