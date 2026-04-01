@@ -10,8 +10,9 @@ from dotenv import load_dotenv
 from sklearn.metrics.pairwise import cosine_similarity
 
 from data import load_json_file
-from interfaces import (BatchResponse, ChatRequest, Message,
-                        SamplingParamsRequest, TextCluster, TopText)
+from interfaces import (BatchResponse, ChatRequest, ClusterInfo, Message,
+                        SamplingParamsRequest, Similarity, TextCluster,
+                        TopText)
 from server.interfaces import EmbeddingRequest, EmbeddingResponse
 
 load_dotenv()
@@ -19,6 +20,8 @@ load_dotenv()
 EMBEDDING_SERVER_ADDRESS = os.getenv("EMBEDDING_SERVER", "http://127.0.0.1:8000")
 LLM_SERVER_ADDRESS = os.getenv("LLM_SERVER", "http://127.0.0.1:8000")
 REQUEST_TIMEOUT = int(os.getenv("REQUESTS_TIMEOUT", "300"))
+min_cluster_size = int(os.getenv("MIN_CLUSTER_SIZE", "7"))
+min_samples = int(os.getenv("MIN_SAMPLES", "3"))
 
 # def cluster_title_centroid(texts, embeddings):
 #     centroid = embeddings.mean(axis=0, keepdims=True)
@@ -28,7 +31,7 @@ REQUEST_TIMEOUT = int(os.getenv("REQUESTS_TIMEOUT", "300"))
 #     return texts[best_idx]
 
 
-def cluster_centroid_and_top_texts(embeddings, top_k=10):
+def cluster_centroid_and_top_texts(embeddings: np.ndarray, top_k=10):
     """
     Повертає:
     - centroid (np.array)
@@ -60,32 +63,43 @@ def print_centroid_message_info(messages: list[Message], index: int):
 
 
 def get_cluster_title(texts: list[str]):
-    prompt = """Тобі надано набір текстів, розділених рядком \n---\n.
+    prompt = """### Роль
+
+Ти — система автоматичного створення заголовків.
+
+### Завдання
+
+Тобі надано набір текстів, розділених рядком \n---\n.
 Усі тексти належать до однієї спільної тематики та є змістовно пов’язаними (кластер схожих статей).
 Твоє завдання — визначити спільну тему цих текстів і сформулювати розгорнуту, чітку та зрозумілу назву, якою можна їх озаглавити.
 
 ### Вимоги до назви:
 
-- українською мовою
-- повне речення або складний іменниковий заголовок
-- чітко відображає суть усіх текстів
-- без лапок
-- без пояснень, коментарів чи списків
-- без абстрактних слів типу «Різне», «Інше», «Огляд теми»
+- Визнач основну спільну тему всіх наданих текстів.
+- Ігноруй другорядні або унікальні деталі, що не повторюються.
+- Пріоритезуй найчастіше згадувані ідеї та концепти.
+- Сформулюй заголовок як повне речення або складний іменниковий заголовок (10-20 слів) **українською мовою**.
+- Використовуй ключові терміни та поняття, характерні для більшості текстів.
+- Уникай надто абстрактних або беззмістовних формулювань.
+- Не копіюй дослівно фрази з текстів, а узагальнюй зміст.
+- Забезпеч логічну ясність і зрозумілість заголовка без додаткового контексту.
+- Дотримуйся нейтрального, об’єктивного стилю без оцінок.
+- Поверни лише один фінальний варіант заголовка без пояснень.
 
 ### Формат відповіді
 
-* У відповіді подай **виключно назву теми одним рядком**.
-* **Без заголовків, списків, коментарів або пояснень.**
+- У відповіді подай **виключно назву теми одним рядком**.
+- **Без заголовків, списків, коментарів або пояснень.**
+- Без лапок.
+- Без абстрактних слів типу «Різне», «Інше», «Огляд теми».
+
+### Важливо
+
+Назва **ОБОВ'ЯЗКОВО** має бути написана українською мовою.
 
 Набір текстів для формування спільної теми:"""
-# Поверни лише назву тематики одним рядком.
-#     prompt = """Завдання:
-# Дай розгорнуту назву теми для наступного набору текстів, розділених за допомогою '---'.
-# Відповідь надай українською мовою.
-# Тексти для визначення теми:
-
-# """
+# - повне речення або складний іменниковий заголовок українською мовою;
+# - чітко відображає суть усіх текстів.
     sampling_params = SamplingParamsRequest(temperature=0.2, max_tokens=128)
     request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt, sampling_params=sampling_params)
     print(f"🧐 Generating titles for {len(texts)} clusters")
@@ -193,13 +207,102 @@ def get_input_filename(default="local.data.json"):
     return default
 
 
-def get_embeddings(texts: list[str]):
+def get_embeddings(texts: list[str]) -> np.ndarray:
     request_data: EmbeddingRequest = EmbeddingRequest(texts=texts)
     response = requests.post(f"{EMBEDDING_SERVER_ADDRESS}/embed", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
     raw_data = response.json()
     data = EmbeddingResponse.model_validate(raw_data)
     embeddings = np.array(data.embeddings, dtype=np.float32)  # 🔥 відновлення типу
     return embeddings
+
+
+def get_similarity_by_index(embeddings: np.ndarray) -> list[Similarity]:
+    # 1️⃣ центроїд кластера 🧠
+    # Що відбувається:
+    # - Береться **середнє значення по всіх embedding'ах**
+    # - `axis=0` → середнє по рядках (тобто по всіх текстах)
+    # - `keepdims=True` → результат має форму `(1, embedding_dim)`, а не `(embedding_dim,)`
+    # Інтуїція:
+    # Центроїд — це **“середній зміст” усіх текстів**
+    # 👉 Якщо уявити embeddings як точки в просторі:
+    # - центроїд — це центр мас цього кластера
+    centroid = embeddings.mean(axis=0, keepdims=True)
+
+    # 2️⃣ cosine similarity до всіх текстів
+    sims = cosine_similarity(centroid, embeddings)[0]
+
+    # 3️⃣ індекси найближчих текстів (спадання)
+    similarity_by_indexes = np.argsort(sims)[::-1]
+
+    similarity: list[Similarity] = []
+    for index in similarity_by_indexes:
+        similarity.append(Similarity(index=index, similarity=sims[index]))
+
+    return similarity
+
+
+def get_clusters(messages: list[Message], embeddings: np.ndarray):
+    clusterer = hdbscan.HDBSCAN(
+        min_cluster_size=min_cluster_size,  # мін. розмір кластера
+        min_samples=min_samples,           # чутливість до шуму
+
+        # При низькій кількості повідомлень
+        # min_cluster_size=3,      # мін. розмір кластера
+        # min_samples=2,           # чутливість до шуму
+
+        # Робочий варіант
+        # min_cluster_size=7,      # мін. розмір кластера
+        # min_samples=3,           # чутливість до шуму
+
+        # Запропоновано GPT
+        # min_cluster_size=5,      # мін. розмір кластера
+        # min_samples=3,           # чутливість до шуму
+
+        metric="euclidean",      # з нормалізованими векторами = cosine
+        cluster_selection_method="eom"
+        # cluster_selection_method="leaf"
+    )
+    print(f"""ℹ️ Clustering parameters:
+- minimum cluster size: {min_cluster_size}
+- minimum samples count: {min_samples}""")
+
+    labels = clusterer.fit_predict(embeddings)
+
+    # групуємо тексти по кластерах 📦
+    raw_clusters: dict[np.int64, list[Message]] = {}
+    for msg, label in zip(messages, labels):
+        raw_clusters.setdefault(label, []).append(msg)
+
+    # сортуємо кластери за кількістю текстів (спадання ⬇️)
+    sorted_clusters = sorted(
+        raw_clusters.items(),
+        key=lambda item: len(item[1]),
+        reverse=True
+    )
+
+    result_clusters: list[ClusterInfo] = []
+    # not_in_cluster_messages: list[Message] = []
+    for label, messages in sorted_clusters:
+        if label == -1:
+            # not_in_cluster_messages = messages
+            continue
+        # embeds = embeddings[[i for i, l in enumerate(labels) if l == label]]
+        # Через маску виходить швидше
+        embeds = embeddings[labels == label]
+
+        # Формування заголовка на основі центроїда кластера (найближчий текст)
+        similarity_by_indexes = get_similarity_by_index(embeddings=embeds)
+        cluster_info = ClusterInfo(label=int(label), ids=[], messages={})
+        for sim in similarity_by_indexes:
+            message = messages[sim.index]
+            message.similarity = sim.similarity
+            message_id = message.id
+            cluster_info.ids.append(message_id)
+            cluster_info.messages[message_id] = message
+
+        result_clusters.append(cluster_info)
+
+    return result_clusters
 
 
 def main():
@@ -210,8 +313,8 @@ def main():
     print("ℹ️ Calculating embeddings...")
     embeddings = get_embeddings([msg.text for msg in messages])
 
-    min_cluster_size = int(os.getenv("MIN_CLUSTER_SIZE", "7"))
-    min_samples = int(os.getenv("MIN_SAMPLES", "3"))
+    _clusters = get_clusters(messages=messages, embeddings=embeddings)
+
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=min_cluster_size,  # мін. розмір кластера
         min_samples=min_samples,           # чутливість до шуму
@@ -250,7 +353,6 @@ def main():
         reverse=True
     )
 
-    # Генерація назв та сумаризацій
     result_clusters: list[TextCluster] = []
     # not_in_cluster_messages: list[Message] = []
     for label, messages in sorted_clusters:
@@ -267,6 +369,7 @@ def main():
         result_clusters.append(TextCluster(label=int(label), messages=top_messages,
                                total_count=len(messages), texts=[msg.text for msg in top_messages]))
 
+    # Генерація назв та сумаризацій
     batch = ["\n---\n".join(cluster.texts) for cluster in result_clusters]
     if len(batch) == 0:
         print("🫤 No clusters exist")

@@ -86,7 +86,7 @@ def get_upper_paragraphs(text: str, max_len=MAX_TEXT_LEN):
 
 
 class Message(BaseModel):
-    id: Optional[str] = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     url: str
     hit_date: str
     # country: str
@@ -97,6 +97,7 @@ class Message(BaseModel):
     # source_title: str
     translated_title: Optional[str] = None
     translated_body: Optional[str] = None
+    similarity: float = 0
 
     @field_validator('title', 'body', mode='before')
     @classmethod
@@ -127,6 +128,7 @@ class Message(BaseModel):
 class TopText(BaseModel):
     index: int
     similarity: float
+    text: Optional[str] = None
 
 
 class TextCluster(BaseModel):
@@ -138,9 +140,23 @@ class TextCluster(BaseModel):
     summary: Optional[str] = None
 
 
+class Similarity(BaseModel):
+    index: int
+    similarity: float
+
+
+class ClusterInfo(BaseModel):
+    # Фактично це просто ідентифікатор кластеру
+    label: int
+    # Передбачається, що сортування id відбувається по зменшенню схожості повідомлень з центроїдом
+    ids: list[str]
+    messages: dict[str, Message]
+    title: Optional[str] = None
+    summary: Optional[str] = None
+
+
 class SamplingParamsRequest(BaseModel):
     """Параметри генерації тексту"""
-
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
     top_p: float = Field(default=0.9, ge=0.0, le=1.0)
     max_tokens: int = Field(default=512, ge=1, le=8192)
@@ -168,7 +184,6 @@ class ChatRequest(BaseModel):
 
 class GenerationResult(BaseModel):
     """Результат генерації для одного тексту"""
-
     text: str
     finish_reason: Optional[str]
     input_tokens: Optional[int] = None
@@ -177,7 +192,6 @@ class GenerationResult(BaseModel):
 
 class BatchResponse(BaseModel):
     """Відповідь на batch запит"""
-
     results: list[GenerationResult]
     total_texts: int
     processing_time: float

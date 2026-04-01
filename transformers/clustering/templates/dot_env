@@ -1,2 +1,6 @@
-EMBEDDING_SERVER= "http://127.0.0.1:8000"
-LLM_SERVER="http://127.0.0.1:8000"
+EMBEDDING_SERVER = "http://127.0.0.1:8000"
+LLM_SERVER = "http://127.0.0.1:8000"
+# Мін. розмір кластера
+MIN_CLUSTER_SIZE = 7
+# Суворість до шуму (чим більше, тим менше шуму буде)
+MIN_SAMPLES = 3
