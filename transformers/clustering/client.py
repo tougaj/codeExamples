@@ -23,38 +23,6 @@ REQUEST_TIMEOUT = int(os.getenv("REQUESTS_TIMEOUT", "300"))
 min_cluster_size = int(os.getenv("MIN_CLUSTER_SIZE", "7"))
 min_samples = int(os.getenv("MIN_SAMPLES", "3"))
 
-# def cluster_title_centroid(texts, embeddings):
-#     centroid = embeddings.mean(axis=0, keepdims=True)
-#     sims = cosine_similarity(centroid, embeddings)[0]
-#     best_idx = sims.argmax()
-#     # return texts[best_idx][:200]  # обрізаємо
-#     return texts[best_idx]
-
-
-def cluster_centroid_and_top_texts(embeddings: np.ndarray, top_k=10):
-    """
-    Повертає:
-    - centroid (np.array)
-    - representative_text (str)
-    - top_texts: список dict {text, similarity, index}
-    """
-
-    # 1️⃣ центроїд кластера 🧠
-    centroid = embeddings.mean(axis=0, keepdims=True)
-
-    # 2️⃣ cosine similarity до всіх текстів
-    sims = cosine_similarity(centroid, embeddings)[0]
-
-    # 3️⃣ індекси top-k найближчих текстів (спадання)
-    top_indices = np.argsort(sims)[::-1][:top_k]
-
-    top_texts = [
-        TopText(index=int(i), similarity=float(sims[i]))
-        for i in top_indices
-    ]
-
-    return centroid[0], top_texts
-
 
 def print_centroid_message_info(messages: list[Message], index: int):
     message = messages[index]
@@ -267,6 +235,7 @@ def get_clusters(messages: list[Message], embeddings: np.ndarray):
 - minimum samples count: {min_samples}""")
 
     labels = clusterer.fit_predict(embeddings)
+    pprint(Counter(labels))
 
     # групуємо тексти по кластерах 📦
     raw_clusters: dict[np.int64, list[Message]] = {}
@@ -320,97 +289,36 @@ def main():
 
     print("ℹ️ Calculating embeddings...")
     embeddings = get_embeddings([msg.text for msg in messages])
-
-    _clusters = get_clusters(messages=messages, embeddings=embeddings)
-    _batch = get_batch(_clusters)
-
-    clusterer = hdbscan.HDBSCAN(
-        min_cluster_size=min_cluster_size,  # мін. розмір кластера
-        min_samples=min_samples,           # чутливість до шуму
-
-        # При низькій кількості повідомлень
-        # min_cluster_size=3,      # мін. розмір кластера
-        # min_samples=2,           # чутливість до шуму
-
-        # Робочий варіант
-        # min_cluster_size=7,      # мін. розмір кластера
-        # min_samples=3,           # чутливість до шуму
-
-        # Запропоновано GPT
-        # min_cluster_size=5,      # мін. розмір кластера
-        # min_samples=3,           # чутливість до шуму
-
-        metric="euclidean",      # з нормалізованими векторами = cosine
-        cluster_selection_method="eom"
-        # cluster_selection_method="leaf"
-    )
-    print(f"""ℹ️ Clustering parameters:
-- minimum cluster size: {min_cluster_size}
-- minimum samples count: {min_samples}""")
-
-    labels = clusterer.fit_predict(embeddings)
-
-    # групуємо тексти по кластерах 📦
-    clusters: dict[np.int64, list[Message]] = {}
-    for msg, label in zip(messages, labels):
-        clusters.setdefault(label, []).append(msg)
-
-    # сортуємо кластери за кількістю текстів (спадання ⬇️)
-    sorted_clusters = sorted(
-        clusters.items(),
-        key=lambda item: len(item[1]),
-        reverse=True
-    )
-
-    result_clusters: list[TextCluster] = []
-    # not_in_cluster_messages: list[Message] = []
-    for label, messages in sorted_clusters:
-        if label == -1:
-            # not_in_cluster_messages = messages
-            continue
-        # embeds = embeddings[[i for i, l in enumerate(labels) if l == label]]
-        # Через маску виходить швидше
-        embeds = embeddings[labels == label]
-
-        # Формування заголовка на основі центроїда кластера (найближчий текст)
-        centroid, top_texts = cluster_centroid_and_top_texts(embeds)
-        top_messages = [messages[item.index] for item in top_texts]
-        result_clusters.append(TextCluster(label=int(label), messages=top_messages,
-                               total_count=len(messages), texts=[msg.text for msg in top_messages]))
+    clusters = get_clusters(messages=messages, embeddings=embeddings)
+    batch = get_batch(clusters)
 
     # Генерація назв та сумаризацій
-    batch = ["\n---\n".join(cluster.texts) for cluster in result_clusters]
     if len(batch) == 0:
         print("🫤 No clusters exist")
     else:
         titles: list[str] = get_cluster_title(batch)
-        # summary_batch = [f"Тема кластера:\n{title}\n\nНабір текстів для формування довідки:\n"+tb for tb, title in zip(batch, titles)]
-        # summaries: list[str] = get_cluster_summary(summary_batch)
         summaries: list[str] = get_cluster_summary(batch)
-        for cluster, title, summary in zip(result_clusters, titles, summaries):
+        for cluster, title, summary in zip(clusters, titles, summaries):
             cluster.title = title
             cluster.summary = summary
 
         # виводимо результат 🖨️
-        clusters_count = len(result_clusters)
-        for index, cluster in enumerate(result_clusters, start=1):
-            print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({cluster.total_count} messages)
+        clusters_count = len(clusters)
+        for index, cluster in enumerate(clusters, start=1):
+            print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({len(cluster.ids)} messages)
 🖊️ {cluster.title}
 🪅 {cluster.summary}
 
 {'-'*20}""")
 
-            # 📰 Заголовки топ-повідомлень:""")
-            # for msg in cluster.messages:
-            #     print(f"- {msg.title}")
-            #     # print(msg.text)
+            # print("📰 Заголовки топ-повідомлень:")
+            # for msg_id in cluster.ids[:10]:
+            #     print(f"- {cluster.messages[msg_id].title}")
 
     # if len(not_in_cluster_messages) != 0:
     #     print("\n🚫 Not in cluster messages:")
     #     for msg in not_in_cluster_messages[:20]:
     #         print(f"\n🗞️ {msg.text}")
-
-    pprint(Counter(labels))
 
 
 if __name__ == "__main__":
