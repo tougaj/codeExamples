@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field, computed_field, field_validator
 
 MAX_TEXT_LEN = 2000
 
+MessageId = str
+
 
 class TextCleaner:
     """Клас для виконання очистки тексту від зайвих символів та мусору
@@ -85,8 +87,8 @@ def get_upper_paragraphs(text: str, max_len=MAX_TEXT_LEN):
     return processed_text if "\n" in processed_text else processed_text[:max_len]
 
 
-class Message(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+class RawMessage(BaseModel):
+    id: MessageId = Field(default_factory=lambda: str(uuid.uuid4()))
     url: str
     hit_date: str
     # country: str
@@ -97,7 +99,6 @@ class Message(BaseModel):
     # source_title: str
     translated_title: Optional[str] = None
     translated_body: Optional[str] = None
-    similarity: float = 0
 
     @field_validator('title', 'body', mode='before')
     @classmethod
@@ -125,23 +126,41 @@ class Message(BaseModel):
         return f"### {title}\n\n{body}"
 
 
+class ProcessedMessage(RawMessage):
+    similarity: float = 0
+
 # Clustering
-class Similarity(BaseModel):
+
+
+class SimilarityByIndex(BaseModel):
     index: int
     similarity: float
+
+
+class MessageIdWithSimilarity(BaseModel):
+    id: MessageId
+    similarity: float
+
+
+class ClusterInfoWithTexts(BaseModel):
+    # Фактично це просто ідентифікатор кластеру
+    label: int
+    # Передбачається, що сортування id відбувається по зменшенню схожості повідомлень з центроїдом
+    ids: list[MessageId]
+    messages: dict[MessageId, ProcessedMessage]
+    title: Optional[str] = None
+    summary: Optional[str] = None
 
 
 class ClusterInfo(BaseModel):
     # Фактично це просто ідентифікатор кластеру
     label: int
-    # Передбачається, що сортування id відбувається по зменшенню схожості повідомлень з центроїдом
-    ids: list[str]
-    messages: dict[str, Message]
-    title: Optional[str] = None
-    summary: Optional[str] = None
-
+    # Передбачається, що сортування відбувається по зменшенню схожості повідомлень з центроїдом
+    similarity: list[MessageIdWithSimilarity]
 
 # LLM
+
+
 class SamplingParamsRequest(BaseModel):
     """Параметри генерації тексту"""
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
@@ -197,7 +216,7 @@ class TopText(BaseModel):
 
 class TextCluster(BaseModel):
     label: int
-    messages: list[Message]
+    messages: list[RawMessage]
     total_count: int
     texts: list[str]
     title: Optional[str] = None

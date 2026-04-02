@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from data import load_json_file
-from interfaces import (BatchResponse, ChatRequest, Message,
+from interfaces import (BatchResponse, ChatRequest, RawMessage,
                         SamplingParamsRequest, TextCluster, TopText)
 
 SERVER_ADDRESS = "http://10.100.20.11:8000"
@@ -49,7 +49,7 @@ def cluster_centroid_and_top_texts(texts: list[str], embeddings, top_k=10, previ
     return centroid[0], representative_text, top_texts
 
 
-def print_centroid_message_info(messages: list[Message], index: int):
+def print_centroid_message_info(messages: list[RawMessage], index: int):
     message = messages[index]
     print(f"🖊️ {message.title}")
     # print(f"📰 {message["text"]}")
@@ -363,7 +363,7 @@ def main():
     labels = clusterer.fit_predict(embeddings)
 
     # групуємо тексти по кластерах 📦
-    clusters: dict[np.int64, list[Message]] = {}
+    clusters: dict[np.int64, list[RawMessage]] = {}
     for text, label in zip(messages, labels):
         clusters.setdefault(label, []).append(text)
 
@@ -376,7 +376,7 @@ def main():
 
     # Генерація назв та сумаризацій
     result_clusters: list[TextCluster] = []
-    not_in_cluster_messages: list[Message] = []
+    not_in_cluster_messages: list[RawMessage] = []
     for label, messages in sorted_clusters:
         if label == -1:
             not_in_cluster_messages = messages

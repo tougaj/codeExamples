@@ -10,8 +10,10 @@ from dotenv import load_dotenv
 from sklearn.metrics.pairwise import cosine_similarity
 
 from data import load_json_file
-from interfaces import (BatchResponse, ChatRequest, ClusterInfo, Message,
-                        SamplingParamsRequest, Similarity)
+from interfaces import (BatchResponse, ChatRequest, ClusterInfo,
+                        ClusterInfoWithTexts, MessageId,
+                        MessageIdWithSimilarity, ProcessedMessage, RawMessage,
+                        SamplingParamsRequest, SimilarityByIndex)
 from server.models import EmbeddingRequest, EmbeddingResponse
 
 load_dotenv()
@@ -23,7 +25,7 @@ min_cluster_size = int(os.getenv("MIN_CLUSTER_SIZE", "7"))
 min_samples = int(os.getenv("MIN_SAMPLES", "3"))
 
 
-def print_centroid_message_info(messages: list[Message], index: int):
+def print_centroid_message_info(messages: list[RawMessage], index: int):
     message = messages[index]
     print(f"🖊️ {message.title}")
     # print(f"📰 {message["text"]}")
@@ -183,7 +185,7 @@ def get_embeddings(texts: list[str]) -> np.ndarray:
     return embeddings
 
 
-def get_similarity_by_index(embeddings: np.ndarray) -> list[Similarity]:
+def get_similarity_by_index(embeddings: np.ndarray) -> list[SimilarityByIndex]:
     # 1️⃣ центроїд кластера 🧠
     # Що відбувається:
     # - Береться **середнє значення по всіх embedding'ах**
@@ -201,14 +203,14 @@ def get_similarity_by_index(embeddings: np.ndarray) -> list[Similarity]:
     # 3️⃣ індекси найближчих текстів (спадання)
     similarity_by_indexes = np.argsort(sims)[::-1]
 
-    similarity: list[Similarity] = []
+    similarity: list[SimilarityByIndex] = []
     for index in similarity_by_indexes:
-        similarity.append(Similarity(index=index, similarity=sims[index]))
+        similarity.append(SimilarityByIndex(index=index, similarity=sims[index]))
 
     return similarity
 
 
-def get_clusters(messages: list[Message], embeddings: np.ndarray):
+def get_clusters_with_texts(messages: list[RawMessage], embeddings: np.ndarray):
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=min_cluster_size,  # мін. розмір кластера
         min_samples=min_samples,           # чутливість до шуму
@@ -237,7 +239,7 @@ def get_clusters(messages: list[Message], embeddings: np.ndarray):
     pprint(Counter(labels))
 
     # групуємо тексти по кластерах 📦
-    raw_clusters: dict[np.int64, list[Message]] = {}
+    raw_clusters: dict[np.int64, list[RawMessage]] = {}
     for msg, label in zip(messages, labels):
         raw_clusters.setdefault(label, []).append(msg)
 
@@ -248,7 +250,7 @@ def get_clusters(messages: list[Message], embeddings: np.ndarray):
         reverse=True
     )
 
-    result_clusters: list[ClusterInfo] = []
+    result_clusters: list[ClusterInfoWithTexts] = []
     # not_in_cluster_messages: list[Message] = []
     for label, messages in sorted_clusters:
         if label == -1:
@@ -260,10 +262,9 @@ def get_clusters(messages: list[Message], embeddings: np.ndarray):
 
         # Формування заголовка на основі центроїда кластера (найближчий текст)
         similarity_by_indexes = get_similarity_by_index(embeddings=embeds)
-        cluster_info = ClusterInfo(label=int(label), ids=[], messages={})
+        cluster_info = ClusterInfoWithTexts(label=int(label), ids=[], messages={})
         for sim in similarity_by_indexes:
-            message = messages[sim.index]
-            message.similarity = sim.similarity
+            message = ProcessedMessage(**messages[sim.index].model_dump(), similarity=sim.similarity)
             message_id = message.id
             cluster_info.ids.append(message_id)
             cluster_info.messages[message_id] = message
@@ -273,10 +274,66 @@ def get_clusters(messages: list[Message], embeddings: np.ndarray):
     return result_clusters
 
 
-def get_batch(clusters: list[ClusterInfo], top_k=10):
+def get_batch_from_texts(clusters: list[ClusterInfoWithTexts], top_k=10):
     texts: list[str] = []
     for cluster in clusters:
         top_texts = [cluster.messages[message_id].text for message_id in cluster.ids[:top_k]]
+        texts.append("\n---\n".join(top_texts))
+    return texts
+
+
+def get_clusters(ids: list[MessageId], embeddings: np.ndarray):
+    clusterer = hdbscan.HDBSCAN(
+        min_cluster_size=min_cluster_size,  # мін. розмір кластера
+        min_samples=min_samples,           # чутливість до шуму
+        metric="euclidean",      # з нормалізованими векторами = cosine
+        cluster_selection_method="eom"
+        # cluster_selection_method="leaf"
+    )
+    print(f"""ℹ️ Clustering parameters:
+- minimum cluster size: {min_cluster_size}
+- minimum samples count: {min_samples}""")
+
+    labels = clusterer.fit_predict(embeddings)
+    pprint(Counter(labels))
+
+    # групуємо тексти по кластерах 📦
+    raw_clusters: dict[np.int64, list[MessageId]] = {}
+    for msg_id, label in zip(ids, labels):
+        raw_clusters.setdefault(label, []).append(msg_id)
+
+    # сортуємо кластери за кількістю текстів (спадання ⬇️)
+    sorted_clusters = sorted(
+        raw_clusters.items(),
+        key=lambda item: len(item[1]),
+        reverse=True
+    )
+
+    result_clusters: list[ClusterInfo] = []
+    for label, ids in sorted_clusters:
+        if label == -1:
+            continue
+        embeds = embeddings[labels == label]
+
+        # Формування заголовка на основі центроїда кластера (найближчий текст)
+        similarity_by_indexes = get_similarity_by_index(embeddings=embeds)
+        cluster_info = ClusterInfo(label=int(label), similarity=[])
+        for sim in similarity_by_indexes:
+            id = ids[sim.index]
+            cluster_info.similarity.append(MessageIdWithSimilarity(id=id, similarity=sim.similarity))
+
+        result_clusters.append(cluster_info)
+
+    return result_clusters
+
+
+def get_batch(clusters: list[ClusterInfo], raw_messages: list[RawMessage], top_k=10):
+    messages: dict[MessageId, RawMessage] = {}
+    for msg in raw_messages:
+        messages[msg.id] = msg
+    texts: list[str] = []
+    for cluster in clusters:
+        top_texts = [messages[sim.id].text for sim in cluster.similarity[:top_k]]
         texts.append("\n---\n".join(top_texts))
     return texts
 
@@ -288,22 +345,43 @@ def main():
 
     print("ℹ️ Calculating embeddings...")
     embeddings = get_embeddings([msg.text for msg in messages])
-    clusters = get_clusters(messages=messages, embeddings=embeddings)
-    batch = get_batch(clusters)
 
-    # Генерація назв та сумаризацій
+    # Without texts
+    clusters = get_clusters([msg.id for msg in messages], embeddings=embeddings)
+    batch = get_batch(clusters, raw_messages=messages)
+
     if len(batch) == 0:
         print("🫤 No clusters exist")
     else:
         titles: list[str] = get_cluster_title(batch)
         summaries: list[str] = get_cluster_summary(batch)
-        for cluster, title, summary in zip(clusters, titles, summaries):
+        clusters_count = len(clusters)
+        assert len(clusters) == len(titles) == len(summaries)
+        for index, (cluster, title, summary) in enumerate(zip(clusters, titles, summaries), start=1):
+            # виводимо результат 🖨️
+            print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({len(cluster.similarity)} messages)
+🖊️ {title}
+🪅 {summary}
+
+{'-'*20}""")
+
+    # With texts
+    clusters_with_texts = get_clusters_with_texts(messages=messages, embeddings=embeddings)
+    batch_with_texts = get_batch_from_texts(clusters_with_texts)
+
+    # Генерація назв та сумаризацій
+    if len(batch_with_texts) == 0:
+        print("🫤 No clusters exist")
+    else:
+        titles: list[str] = get_cluster_title(batch_with_texts)
+        summaries: list[str] = get_cluster_summary(batch_with_texts)
+        for cluster, title, summary in zip(clusters_with_texts, titles, summaries):
             cluster.title = title
             cluster.summary = summary
 
         # виводимо результат 🖨️
-        clusters_count = len(clusters)
-        for index, cluster in enumerate(clusters, start=1):
+        clusters_count = len(clusters_with_texts)
+        for index, cluster in enumerate(clusters_with_texts, start=1):
             print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({len(cluster.ids)} messages)
 🖊️ {cluster.title}
 🪅 {cluster.summary}

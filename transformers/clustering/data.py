@@ -1,7 +1,7 @@
 import json
 from pprint import pprint
 
-from interfaces import Message
+from interfaces import RawMessage
 
 messages = [
     "На Дніпропетровщині та Запоріжжі частково відновлюють світло: яка зараз ситуація в регіонах",
@@ -34,11 +34,11 @@ def load_json_file(file_path: str, max_body_len=5000):
     """
     with open(file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
-    messages: list[Message] = []
+    messages: list[RawMessage] = []
     errors_count = 0
     for item in data:
         try:
-            message = Message(**item)
+            message = RawMessage(**item)
             if len(message.text) > max_body_len:
                 raise ValueError("Надто довге повідомлення")
             messages.append(message)
