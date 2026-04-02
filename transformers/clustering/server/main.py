@@ -9,10 +9,8 @@ from typing import cast
 import numpy as np
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request, status
-# from fastapi.responses import JSONResponse
+from models import EmbeddingRequest, EmbeddingResponse
 from sentence_transformers import SentenceTransformer
-
-from interfaces import EmbeddingRequest, EmbeddingResponse
 
 # Завантаження змінних оточення
 load_dotenv()
