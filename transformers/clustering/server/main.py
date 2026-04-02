@@ -82,16 +82,20 @@ app = FastAPI(
 )
 
 
-# 📍 Ендпоінти
-@app.post("/embed", response_model=EmbeddingResponse)
-def embed(request: EmbeddingRequest, model: SentenceTransformer = Depends(get_model), batch_size: int = Depends(get_batch_size)):
-    """Генерація embeddings для переданих текстів"""
-    embeddings: np.ndarray = model.encode(
-        request.texts,
+def get_embeddings(texts: list[str], model: SentenceTransformer, batch_size: int) -> np.ndarray:
+    return model.encode(
+        texts,
         batch_size=batch_size,
         show_progress_bar=True,
         normalize_embeddings=True  # ВАЖЛИВО для HDBSCAN
     )
+
+
+# 📍 Ендпоінти
+@app.post("/embed", response_model=EmbeddingResponse)
+def embed(request: EmbeddingRequest, model: SentenceTransformer = Depends(get_model), batch_size: int = Depends(get_batch_size)):
+    """Генерація embeddings для переданих текстів"""
+    embeddings: np.ndarray = get_embeddings(request.texts, model=model, batch_size=batch_size)
     return {
         "embeddings": embeddings.tolist(),
     }
