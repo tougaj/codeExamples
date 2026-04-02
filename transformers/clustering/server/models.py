@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field, field_validator
+import numpy as np
+from pydantic import BaseModel, Field, field_serializer, field_validator
 
 
 class EmbeddingRequest(BaseModel):
@@ -19,3 +20,50 @@ class EmbeddingRequest(BaseModel):
 
 class EmbeddingResponse(BaseModel):
     embeddings: list[list[float]]
+
+
+MessageId = str
+
+
+class ClusteringRequestBase(BaseModel):
+    ids: list[MessageId]
+    embeddings: list[list[float]]  # нейтральний тип
+    min_cluster_size: int
+    min_samples: int
+
+
+class ClusteringRequest(BaseModel):
+    ids: list[str]
+    # серверна версія — автоматично конвертує в ndarray
+    embeddings: list[np.ndarray]
+    min_cluster_size: int
+    min_samples: int
+
+    @field_validator("embeddings", mode="before")
+    @classmethod
+    def convert_embeddings(cls, v):
+        # if not v:
+        #     return v
+        # # 🔥 якщо вже ndarray — нічого не робимо
+        # if isinstance(v[0], np.ndarray):
+        #     return v
+        return [np.array(e) for e in v]
+
+    # @field_serializer("embeddings")
+    # def serialize_embeddings(self, v):
+    #     return [e.tolist() for e in v]
+
+
+class MessageIdWithSimilarity(BaseModel):
+    id: MessageId
+    similarity: float
+
+
+class ClusterInfo(BaseModel):
+    # Фактично це просто ідентифікатор кластеру
+    label: int
+    # Передбачається, що сортування відбувається по зменшенню схожості повідомлень з центроїдом
+    similarity: list[MessageIdWithSimilarity]
+
+
+ClusteringResponse = list[ClusterInfo]
