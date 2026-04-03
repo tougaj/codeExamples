@@ -35,23 +35,32 @@ class ClusteringRequestBase(BaseModel):
 class ClusteringRequest(BaseModel):
     ids: list[str]
     # серверна версія — автоматично конвертує в ndarray
-    embeddings: list[np.ndarray]
+    embeddings: list[list[float]]
     min_cluster_size: int
     min_samples: int
 
-    @field_validator("embeddings", mode="before")
-    @classmethod
-    def convert_embeddings(cls, v):
-        # if not v:
-        #     return v
-        # # 🔥 якщо вже ndarray — нічого не робимо
-        # if isinstance(v[0], np.ndarray):
-        #     return v
-        return [np.array(e) for e in v]
+# Це цікавий кейс з використання валідаторів та серіалізаторів.
+# Нажаль, в цьому проекті він не працює, але я залишу це для прикладу.
+# class ClusteringRequest(BaseModel):
+#     ids: list[str]
+#     # серверна версія — автоматично конвертує в ndarray
+#     embeddings: list[np.ndarray]
+#     min_cluster_size: int
+#     min_samples: int
 
-    # @field_serializer("embeddings")
-    # def serialize_embeddings(self, v):
-    #     return [e.tolist() for e in v]
+#     @field_validator("embeddings", mode="before")
+#     @classmethod
+#     def convert_embeddings(cls, v):
+#         if not v:
+#             return v
+#         # 🔥 якщо вже ndarray — нічого не робимо
+#         if isinstance(v[0], np.ndarray):
+#             return v
+#         return [np.array(e) for e in v]
+
+#     @field_serializer("embeddings")
+#     def serialize_embeddings(self, v):
+#         return [e.tolist() for e in v]
 
 
 class MessageIdWithSimilarity(BaseModel):
