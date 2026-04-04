@@ -22,7 +22,7 @@ messages = [
 ]
 
 
-def load_json_file(file_path: str, max_body_len=5000):
+def load_json_file(file_path: str):
     """
     Завантажує дані з JSON-файлу.
 
@@ -39,8 +39,6 @@ def load_json_file(file_path: str, max_body_len=5000):
     for item in data:
         try:
             message = RawMessage(**item)
-            if len(message.text) > max_body_len:
-                raise ValueError("Надто довге повідомлення")
             messages.append(message)
         except Exception as e:
             errors_count += 1

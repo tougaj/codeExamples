@@ -4,8 +4,6 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, computed_field, field_validator
 
-MAX_TEXT_LEN = 2000
-
 MessageId = str
 
 
@@ -73,7 +71,7 @@ class TextCleaner:
         return self.text.strip()
 
 
-def get_upper_paragraphs(text: str, max_len=MAX_TEXT_LEN):
+def get_upper_paragraphs(text: str, max_len: int):
     # return "\n".join(text.split("\n")[:3])
     paragraphs = text.strip().split("\n")
     processed_text = ''
@@ -114,13 +112,11 @@ class RawMessage(BaseModel):
             return v
         return v.replace('**', '')
 
-    @computed_field
-    @property
-    def text(self) -> str:
+    def get_text(self, max_len: int) -> str:
         title = (self.translated_title or self.title)[:200]
-        exact_body = get_upper_paragraphs(self.translated_body or self.body)
+        exact_body = get_upper_paragraphs(self.translated_body or self.body, max_len=max_len)
         # Текст на основі сумаризації
-        # body = self.summary[:MAX_TEXT_LEN] if self.summary else exact_body
+        # body = self.summary[:max_len] if self.summary else exact_body
         # Текст на основі тексту
         body = exact_body
         return f"### {title}\n\n{body}"

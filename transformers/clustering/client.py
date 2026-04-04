@@ -22,7 +22,8 @@ EMBEDDING_SERVER_ADDRESS = os.getenv("EMBEDDING_SERVER", "http://127.0.0.1:8000"
 LLM_SERVER_ADDRESS = os.getenv("LLM_SERVER", "http://127.0.0.1:8000")
 REQUEST_TIMEOUT = int(os.getenv("REQUESTS_TIMEOUT", "300"))
 min_cluster_size = int(os.getenv("MIN_CLUSTER_SIZE", "7"))
-min_samples = int(os.getenv("MIN_SAMPLES")) if os.getenv("MIN_SAMPLES") else None
+min_samples = int(os.getenv("MIN_SAMPLES", "")) if os.getenv("MIN_SAMPLES") else None
+MAX_TEXT_LEN = 2000
 
 
 def print_centroid_message_info(messages: list[RawMessage], index: int):
@@ -167,6 +168,8 @@ def get_cluster_summary(texts: list[str]):
     if response.status_code == 200:
         model_answer = BatchResponse.model_validate(raw_data)
         summaries = [answer.text for answer in model_answer.results]
+    else:
+        raise ValueError(response.text)
     return summaries
 
 
@@ -274,10 +277,10 @@ def get_clusters_with_texts(messages: list[RawMessage], embeddings: np.ndarray):
     return result_clusters
 
 
-def get_batch_from_texts(clusters: list[ClusterInfoWithTexts], top_k=10):
+def get_batch_from_texts(clusters: list[ClusterInfoWithTexts], max_len: int, top_k=10):
     texts: list[str] = []
     for cluster in clusters:
-        top_texts = [cluster.messages[message_id].text for message_id in cluster.ids[:top_k]]
+        top_texts = [cluster.messages[message_id].get_text(max_len) for message_id in cluster.ids[:top_k]]
         texts.append("\n---\n".join(top_texts))
     return texts
 
@@ -327,13 +330,13 @@ def get_clusters(ids: list[MessageId], embeddings: np.ndarray):
     return result_clusters
 
 
-def get_batch(clusters: list[ClusterInfo], raw_messages: list[RawMessage], top_k=10):
+def get_batch(clusters: list[ClusterInfo], raw_messages: list[RawMessage], max_len: int, top_k=10):
     messages: dict[MessageId, RawMessage] = {}
     for msg in raw_messages:
         messages[msg.id] = msg
     texts: list[str] = []
     for cluster in clusters:
-        top_texts = [messages[sim.id].text for sim in cluster.similarity[:top_k]]
+        top_texts = [messages[sim.id].get_text(max_len) for sim in cluster.similarity[:top_k]]
         texts.append("\n---\n".join(top_texts))
     return texts
 
@@ -344,17 +347,26 @@ def main():
     messages = load_json_file(data_file)
 
     print("ℹ️ Calculating embeddings...")
-    embeddings = get_embeddings([msg.text for msg in messages])
+    embeddings = get_embeddings([msg.get_text(MAX_TEXT_LEN) for msg in messages])
 
     # Without texts
     clusters = get_clusters([msg.id for msg in messages], embeddings=embeddings)
-    batch = get_batch(clusters, raw_messages=messages)
+    batch = get_batch(clusters, raw_messages=messages, max_len=MAX_TEXT_LEN)
 
     if len(batch) == 0:
         print("🫤 No clusters exist")
     else:
         titles: list[str] = get_cluster_title(batch)
-        summaries: list[str] = get_cluster_summary(batch)
+        summaries: list[str] = []
+        max_message_len = MAX_TEXT_LEN
+        while len(summaries) == 0:
+            try:
+                summaries: list[str] = get_cluster_summary(batch)
+            except Exception as e:
+                print(e)
+                max_message_len -= 100
+                batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
+
         # summaries: list[str] = [None for _ in batch]
         clusters_count = len(clusters)
         assert len(clusters) == len(titles) == len(summaries)
