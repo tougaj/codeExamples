@@ -356,9 +356,17 @@ def main():
     if len(batch) == 0:
         print("🫤 No clusters exist")
     else:
-        titles: list[str] = get_cluster_title(batch)
-        summaries: list[str] = []
         max_message_len = MAX_TEXT_LEN
+        titles: list[str] = []
+        while len(titles) == 0:
+            try:
+                titles: list[str] = get_cluster_title(batch)
+            except Exception as e:
+                print(e)
+                max_message_len -= 100
+                batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
+
+        summaries: list[str] = []
         while len(summaries) == 0:
             try:
                 summaries: list[str] = get_cluster_summary(batch)
