@@ -22,7 +22,7 @@ EMBEDDING_SERVER_ADDRESS = os.getenv("EMBEDDING_SERVER", "http://127.0.0.1:8000"
 LLM_SERVER_ADDRESS = os.getenv("LLM_SERVER", "http://127.0.0.1:8000")
 REQUEST_TIMEOUT = int(os.getenv("REQUESTS_TIMEOUT", "300"))
 min_cluster_size = int(os.getenv("MIN_CLUSTER_SIZE", "7"))
-min_samples = int(os.getenv("MIN_SAMPLES", "3"))
+min_samples = int(os.getenv("MIN_SAMPLES")) if os.getenv("MIN_SAMPLES") else None
 
 
 def print_centroid_message_info(messages: list[RawMessage], index: int):
@@ -355,6 +355,7 @@ def main():
     else:
         titles: list[str] = get_cluster_title(batch)
         summaries: list[str] = get_cluster_summary(batch)
+        # summaries: list[str] = [None for _ in batch]
         clusters_count = len(clusters)
         assert len(clusters) == len(titles) == len(summaries)
         for index, (cluster, title, summary) in enumerate(zip(clusters, titles, summaries), start=1):
@@ -366,36 +367,36 @@ def main():
 {'-'*20}""")
 
     # With texts
-    clusters_with_texts = get_clusters_with_texts(messages=messages, embeddings=embeddings)
-    batch_with_texts = get_batch_from_texts(clusters_with_texts)
+#     clusters_with_texts = get_clusters_with_texts(messages=messages, embeddings=embeddings)
+#     batch_with_texts = get_batch_from_texts(clusters_with_texts)
 
-    # Генерація назв та сумаризацій
-    if len(batch_with_texts) == 0:
-        print("🫤 No clusters exist")
-    else:
-        titles: list[str] = get_cluster_title(batch_with_texts)
-        summaries: list[str] = get_cluster_summary(batch_with_texts)
-        for cluster, title, summary in zip(clusters_with_texts, titles, summaries):
-            cluster.title = title
-            cluster.summary = summary
+#     # Генерація назв та сумаризацій
+#     if len(batch_with_texts) == 0:
+#         print("🫤 No clusters exist")
+#     else:
+#         titles: list[str] = get_cluster_title(batch_with_texts)
+#         summaries: list[str] = get_cluster_summary(batch_with_texts)
+#         for cluster, title, summary in zip(clusters_with_texts, titles, summaries):
+#             cluster.title = title
+#             cluster.summary = summary
 
-        # виводимо результат 🖨️
-        clusters_count = len(clusters_with_texts)
-        for index, cluster in enumerate(clusters_with_texts, start=1):
-            print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({len(cluster.ids)} messages)
-🖊️ {cluster.title}
-🪅 {cluster.summary}
+#         # виводимо результат 🖨️
+#         clusters_count = len(clusters_with_texts)
+#         for index, cluster in enumerate(clusters_with_texts, start=1):
+#             print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({len(cluster.ids)} messages)
+# 🖊️ {cluster.title}
+# 🪅 {cluster.summary}
 
-{'-'*20}""")
+# {'-'*20}""")
 
-            # print("📰 Заголовки топ-повідомлень:")
-            # for msg_id in cluster.ids[:10]:
-            #     print(f"- {cluster.messages[msg_id].title}")
+#             # print("📰 Заголовки топ-повідомлень:")
+#             # for msg_id in cluster.ids[:10]:
+#             #     print(f"- {cluster.messages[msg_id].title}")
 
-    # if len(not_in_cluster_messages) != 0:
-    #     print("\n🚫 Not in cluster messages:")
-    #     for msg in not_in_cluster_messages[:20]:
-    #         print(f"\n🗞️ {msg.text}")
+#     # if len(not_in_cluster_messages) != 0:
+#     #     print("\n🚫 Not in cluster messages:")
+#     #     for msg in not_in_cluster_messages[:20]:
+#     #         print(f"\n🗞️ {msg.text}")
 
 
 if __name__ == "__main__":
