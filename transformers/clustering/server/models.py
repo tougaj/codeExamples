@@ -1,7 +1,9 @@
-import numpy as np
-from pydantic import BaseModel, Field, field_serializer, field_validator
+from typing import Optional
+
+from pydantic import BaseModel, Field, field_validator
 
 
+# embeddings
 class EmbeddingRequest(BaseModel):
     """Запит з текстами для обробки"""
 
@@ -21,23 +23,18 @@ class EmbeddingRequest(BaseModel):
 class EmbeddingResponse(BaseModel):
     embeddings: list[list[float]]
 
+# EmbeddingResponse = list[list[float]]
 
+
+# clustering
 MessageId = str
-
-
-class ClusteringRequestBase(BaseModel):
-    ids: list[MessageId]
-    embeddings: list[list[float]]  # нейтральний тип
-    min_cluster_size: int
-    min_samples: int
 
 
 class ClusteringRequest(BaseModel):
     ids: list[str]
-    # серверна версія — автоматично конвертує в ndarray
     embeddings: list[list[float]]
     min_cluster_size: int
-    min_samples: int
+    min_samples: Optional[int]
 
 # Це цікавий кейс з використання валідаторів та серіалізаторів.
 # Нажаль, в цьому проекті він не працює, але я залишу це для прикладу.
@@ -62,10 +59,27 @@ class ClusteringRequest(BaseModel):
 #     def serialize_embeddings(self, v):
 #         return [e.tolist() for e in v]
 
+# Clustering
+
+
+class SimilarityByIndex(BaseModel):
+    index: int
+    similarity: float
+
 
 class MessageIdWithSimilarity(BaseModel):
     id: MessageId
     similarity: float
+
+
+# class ClusterInfoWithTexts(BaseModel):
+#     # Фактично це просто ідентифікатор кластеру
+#     label: int
+#     # Передбачається, що сортування id відбувається по зменшенню схожості повідомлень з центроїдом
+#     ids: list[MessageId]
+#     messages: dict[MessageId, ProcessedMessage]
+#     title: Optional[str] = None
+#     summary: Optional[str] = None
 
 
 class ClusterInfo(BaseModel):

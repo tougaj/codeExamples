@@ -122,37 +122,37 @@ class RawMessage(BaseModel):
         return f"### {title}\n\n{body}"
 
 
-class ProcessedMessage(RawMessage):
-    similarity: float = 0
+# class ProcessedMessage(RawMessage):
+#     similarity: float = 0
 
 # Clustering
 
 
-class SimilarityByIndex(BaseModel):
-    index: int
-    similarity: float
+# class SimilarityByIndex(BaseModel):
+#     index: int
+#     similarity: float
 
 
-class MessageIdWithSimilarity(BaseModel):
-    id: MessageId
-    similarity: float
+# class MessageIdWithSimilarity(BaseModel):
+#     id: MessageId
+#     similarity: float
 
 
-class ClusterInfoWithTexts(BaseModel):
-    # Фактично це просто ідентифікатор кластеру
-    label: int
-    # Передбачається, що сортування id відбувається по зменшенню схожості повідомлень з центроїдом
-    ids: list[MessageId]
-    messages: dict[MessageId, ProcessedMessage]
-    title: Optional[str] = None
-    summary: Optional[str] = None
+# class ClusterInfoWithTexts(BaseModel):
+#     # Фактично це просто ідентифікатор кластеру
+#     label: int
+#     # Передбачається, що сортування id відбувається по зменшенню схожості повідомлень з центроїдом
+#     ids: list[MessageId]
+#     messages: dict[MessageId, ProcessedMessage]
+#     title: Optional[str] = None
+#     summary: Optional[str] = None
 
 
-class ClusterInfo(BaseModel):
-    # Фактично це просто ідентифікатор кластеру
-    label: int
-    # Передбачається, що сортування відбувається по зменшенню схожості повідомлень з центроїдом
-    similarity: list[MessageIdWithSimilarity]
+# class ClusterInfo(BaseModel):
+#     # Фактично це просто ідентифікатор кластеру
+#     label: int
+#     # Передбачається, що сортування відбувається по зменшенню схожості повідомлень з центроїдом
+#     similarity: list[MessageIdWithSimilarity]
 
 # LLM
 
