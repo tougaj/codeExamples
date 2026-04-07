@@ -30,12 +30,25 @@ class EmbeddingResponse(BaseModel):
 MessageId = str
 
 
-class ClusteringRequest(BaseModel):
-    ids: list[str]
-    embeddings: list[list[float]]
+class ClusteringParams(BaseModel):
     min_cluster_size: int
     min_samples: Optional[int]
     ignore_empty_cluster: bool = True
+
+
+class ClusteringRequest(ClusteringParams):
+    ids: list[str]
+    embeddings: list[list[float]]
+
+
+class MessageForClustering(BaseModel):
+    id: MessageId
+    text: str
+
+
+class ClusteringTextRequest(ClusteringParams):
+    messages: list[MessageForClustering]
+
 
 # Це цікавий кейс з використання валідаторів та серіалізаторів.
 # Нажаль, в цьому проекті він не працює, але я залишу це для прикладу.

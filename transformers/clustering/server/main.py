@@ -11,8 +11,8 @@ import numpy as np
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from models import (ClusterInfo, ClusteringRequest, ClusteringResponse,
-                    EmbeddingRequest, EmbeddingResponse, MessageId,
-                    MessageIdWithSimilarity, SimilarityByIndex)
+                    ClusteringTextRequest, EmbeddingRequest, EmbeddingResponse,
+                    MessageId, MessageIdWithSimilarity, SimilarityByIndex)
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -97,7 +97,9 @@ def get_embeddings(texts: list[str], model: SentenceTransformer, batch_size: int
 
 # 📍 Ендпоінти
 @app.post("/embed", response_model=EmbeddingResponse)
-def embed(request: EmbeddingRequest, model: SentenceTransformer = Depends(get_model), batch_size: int = Depends(get_batch_size)):
+def embed(request: EmbeddingRequest,
+          model: SentenceTransformer = Depends(get_model),
+          batch_size: int = Depends(get_batch_size)):
     """Генерація embeddings для переданих текстів"""
     embeddings: np.ndarray = get_embeddings(request.texts, model=model, batch_size=batch_size)
     return {
@@ -189,10 +191,31 @@ def get_clusters(ids: list[MessageId], embeddings: np.ndarray, min_cluster_size:
 
 @app.post("/clusters", response_model=ClusteringResponse)
 def clustering(request: ClusteringRequest):
-    """Кластеризація повідомлень"""
+    """Кластеризація повідомлень на підставі embeddings"""
     embeddings: np.ndarray = np.array(request.embeddings, dtype=np.float32)
-    clusters = get_clusters(request.ids, embeddings=embeddings, min_cluster_size=request.min_cluster_size,
-                            min_samples=request.min_samples, ignore_empty_cluster=request.ignore_empty_cluster)
+    clusters = get_clusters(
+        request.ids,
+        embeddings=embeddings,
+        min_cluster_size=request.min_cluster_size,
+        min_samples=request.min_samples,
+        ignore_empty_cluster=request.ignore_empty_cluster
+    )
+    return clusters
+
+
+@app.post("/text_clusters", response_model=ClusteringResponse)
+def text_clustering(request: ClusteringTextRequest,
+                    model: SentenceTransformer = Depends(get_model),
+                    batch_size: int = Depends(get_batch_size)):
+    """Кластеризація повідомлень на підставі текстів"""
+    embeddings: np.ndarray = get_embeddings([msg.text for msg in request.messages], model=model, batch_size=batch_size)
+    clusters = get_clusters(
+        [msg.id for msg in request.messages],
+        embeddings=embeddings,
+        min_cluster_size=request.min_cluster_size,
+        min_samples=request.min_samples,
+        ignore_empty_cluster=request.ignore_empty_cluster
+    )
     return clusters
 
 
