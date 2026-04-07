@@ -199,14 +199,52 @@ def request_embeddings(texts: list[str]) -> np.ndarray:
 
 
 def request_clusters(ids: list[str], embeddings: np.ndarray, min_cluster_size: int, min_samples: Optional[int]) -> list[ClusterInfo]:
+    assert len(ids) == len(embeddings)
     request_data = ClusteringRequest(ids=ids, embeddings=embeddings.tolist(), min_cluster_size=min_cluster_size,
-                                     min_samples=min_samples, ignore_empty_cluster=False)
+                                     min_samples=min_samples, ignore_empty_cluster=True)
     response = requests.post(f"{EMBEDDING_SERVER_ADDRESS}/clusters", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
     raw_data = response.json()
     clusters = TypeAdapter(list[ClusterInfo]).validate_python(raw_data)
     # Можна і так, але це менш "pydantic-way"
     # clusters = [ClusterInfo(**item) for item in raw_data]
     return clusters
+
+
+def request_descriptions(messages: list[RawMessage], clusters: list[ClusterInfo]) -> tuple[list[str], list[str]]:
+    batch = get_batch(clusters, raw_messages=messages, max_len=MAX_TEXT_LEN)
+
+    max_message_len = MAX_TEXT_LEN
+    titles: list[str] = []
+    while len(titles) == 0:
+        try:
+            titles: list[str] = get_cluster_title(batch)
+        except Exception as e:
+            print(e)
+            max_message_len -= 100
+            batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
+
+    summaries: list[str] = []
+    while len(summaries) == 0:
+        try:
+            summaries: list[str] = get_cluster_summary(batch)
+        except Exception as e:
+            print(e)
+            max_message_len -= 100
+            batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
+
+    return titles, summaries
+
+
+def print_clusters(clusters: list[ClusterInfo], titles: list[str], summaries: list[str]):
+    clusters_count = len(clusters)
+    assert clusters_count == len(titles) == len(summaries)
+    for index, (cluster, title, summary) in enumerate(zip(clusters, titles, summaries), start=1):
+        # виводимо результат 🖨️
+        print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({len(cluster.similarity)} messages)
+🖊️ {title}
+🪅 {summary}
+
+{'-'*20}""")
 
 
 def main():
@@ -217,76 +255,16 @@ def main():
     print("ℹ️ Calculating embeddings...")
     embeddings = request_embeddings([msg.get_text(MAX_TEXT_LEN) for msg in messages])
 
-    # Without texts
-    assert len(messages) == len(embeddings)
+    print("ℹ️ Searching for clusters...")
     clusters = request_clusters([msg.id for msg in messages], embeddings=embeddings, min_cluster_size=min_cluster_size, min_samples=min_samples)
-    # clusters = get_clusters([msg.id for msg in messages], embeddings=embeddings)
-    batch = get_batch(clusters, raw_messages=messages, max_len=MAX_TEXT_LEN)
 
-    if len(batch) == 0:
+    if len(clusters) == 0:
         print("🫤 No clusters exist")
-    else:
-        max_message_len = MAX_TEXT_LEN
-        titles: list[str] = []
-        while len(titles) == 0:
-            try:
-                titles: list[str] = get_cluster_title(batch)
-            except Exception as e:
-                print(e)
-                max_message_len -= 100
-                batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
+        return
 
-        summaries: list[str] = []
-        while len(summaries) == 0:
-            try:
-                summaries: list[str] = get_cluster_summary(batch)
-            except Exception as e:
-                print(e)
-                max_message_len -= 100
-                batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
+    titles, summaries = request_descriptions(messages=messages, clusters=clusters)
 
-        # summaries: list[str] = [None for _ in batch]
-        clusters_count = len(clusters)
-        assert len(clusters) == len(titles) == len(summaries)
-        for index, (cluster, title, summary) in enumerate(zip(clusters, titles, summaries), start=1):
-            # виводимо результат 🖨️
-            print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({len(cluster.similarity)} messages)
-🖊️ {title}
-🪅 {summary}
-
-{'-'*20}""")
-
-    # With texts
-#     clusters_with_texts = get_clusters_with_texts(messages=messages, embeddings=embeddings)
-#     batch_with_texts = get_batch_from_texts(clusters_with_texts)
-
-#     # Генерація назв та сумаризацій
-#     if len(batch_with_texts) == 0:
-#         print("🫤 No clusters exist")
-#     else:
-#         titles: list[str] = get_cluster_title(batch_with_texts)
-#         summaries: list[str] = get_cluster_summary(batch_with_texts)
-#         for cluster, title, summary in zip(clusters_with_texts, titles, summaries):
-#             cluster.title = title
-#             cluster.summary = summary
-
-#         # виводимо результат 🖨️
-#         clusters_count = len(clusters_with_texts)
-#         for index, cluster in enumerate(clusters_with_texts, start=1):
-#             print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({len(cluster.ids)} messages)
-# 🖊️ {cluster.title}
-# 🪅 {cluster.summary}
-
-# {'-'*20}""")
-
-#             # print("📰 Заголовки топ-повідомлень:")
-#             # for msg_id in cluster.ids[:10]:
-#             #     print(f"- {cluster.messages[msg_id].title}")
-
-#     # if len(not_in_cluster_messages) != 0:
-#     #     print("\n🚫 Not in cluster messages:")
-#     #     for msg in not_in_cluster_messages[:20]:
-#     #         print(f"\n🗞️ {msg.text}")
+    print_clusters(clusters=clusters, titles=titles, summaries=summaries)
 
 
 if __name__ == "__main__":
