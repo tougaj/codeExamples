@@ -35,6 +35,7 @@ class ClusteringRequest(BaseModel):
     embeddings: list[list[float]]
     min_cluster_size: int
     min_samples: Optional[int]
+    ignore_empty_cluster: bool = True
 
 # Це цікавий кейс з використання валідаторів та серіалізаторів.
 # Нажаль, в цьому проекті він не працює, але я залишу це для прикладу.

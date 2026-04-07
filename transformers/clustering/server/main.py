@@ -130,7 +130,7 @@ def get_similarity_by_index(embeddings: np.ndarray) -> list[SimilarityByIndex]:
     return similarity
 
 
-def get_clusters(ids: list[MessageId], embeddings: np.ndarray, min_cluster_size: int, min_samples: Optional[int]):
+def get_clusters(ids: list[MessageId], embeddings: np.ndarray, min_cluster_size: int, min_samples: Optional[int], ignore_empty_cluster: bool):
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=min_cluster_size,  # мін. розмір кластера
         min_samples=min_samples,           # чутливість до шуму
@@ -171,7 +171,7 @@ def get_clusters(ids: list[MessageId], embeddings: np.ndarray, min_cluster_size:
 
     result_clusters: list[ClusterInfo] = []
     for label, ids in sorted_clusters:
-        if label == -1:
+        if label == -1 and ignore_empty_cluster:
             continue
         embeds = embeddings[labels == label]
 
@@ -191,7 +191,8 @@ def get_clusters(ids: list[MessageId], embeddings: np.ndarray, min_cluster_size:
 def clustering(request: ClusteringRequest):
     """Кластеризація повідомлень"""
     embeddings: np.ndarray = np.array(request.embeddings, dtype=np.float32)
-    clusters = get_clusters(request.ids, embeddings=embeddings, min_cluster_size=request.min_cluster_size, min_samples=request.min_samples)
+    clusters = get_clusters(request.ids, embeddings=embeddings, min_cluster_size=request.min_cluster_size,
+                            min_samples=request.min_samples, ignore_empty_cluster=request.ignore_empty_cluster)
     return clusters
 
 
