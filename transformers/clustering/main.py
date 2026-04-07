@@ -20,6 +20,7 @@ REQUEST_TIMEOUT = 300
 #     best_idx = sims.argmax()
 #     # return texts[best_idx][:200]  # обрізаємо
 #     return texts[best_idx]
+MAX_TEXT_LEN = 2000
 
 
 def cluster_centroid_and_top_texts(texts: list[str], embeddings, top_k=10, preview_len=10000):
@@ -330,7 +331,7 @@ def main():
 
     print("ℹ️ Calculating embeddings...")
     embeddings = model.encode(
-        [msg.text for msg in messages],
+        [msg.get_text(MAX_TEXT_LEN) for msg in messages],
         batch_size=32,
         show_progress_bar=True,
         normalize_embeddings=True  # ВАЖЛИВО для HDBSCAN
@@ -381,14 +382,14 @@ def main():
         if label == -1:
             not_in_cluster_messages = messages
             continue
-        texts = [msg.text for msg in messages]
+        texts = [msg.get_text(MAX_TEXT_LEN) for msg in messages]
         embeds = embeddings[[i for i, l in enumerate(labels) if l == label]]
 
         # Формування заголовка на основі центроїда кластера (найближчий текст)
         centroid, title_text, top = cluster_centroid_and_top_texts(texts, embeds)
         top_messages = [messages[item.index] for item in top]
         result_clusters.append(TextCluster(label=int(label), messages=top_messages,
-                               total_count=len(messages), texts=[msg.text for msg in top_messages]))
+                               total_count=len(messages), texts=[msg.get_text(MAX_TEXT_LEN) for msg in top_messages]))
 
     batch = ["\n---\n".join(cluster.texts) for cluster in result_clusters]
     if len(batch) == 0:
