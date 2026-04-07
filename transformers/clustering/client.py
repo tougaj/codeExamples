@@ -178,17 +178,6 @@ def get_input_filename(default="local.data.json"):
     return default
 
 
-def get_batch(clusters: list[ClusterInfo], raw_messages: list[RawMessage], max_len: int, top_k=10):
-    messages: dict[MessageId, RawMessage] = {}
-    for msg in raw_messages:
-        messages[msg.id] = msg
-    texts: list[str] = []
-    for cluster in clusters:
-        top_texts = [messages[sim.id].get_text(max_len) for sim in cluster.similarity[:top_k]]
-        texts.append("\n---\n".join(top_texts))
-    return texts
-
-
 def request_embeddings(texts: list[str]) -> np.ndarray:
     request_data = EmbeddingRequest(texts=texts)
     response = requests.post(f"{EMBEDDING_SERVER_ADDRESS}/embed", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
@@ -208,6 +197,17 @@ def request_clusters(ids: list[str], embeddings: np.ndarray, min_cluster_size: i
     # Можна і так, але це менш "pydantic-way"
     # clusters = [ClusterInfo(**item) for item in raw_data]
     return clusters
+
+
+def get_batch(clusters: list[ClusterInfo], raw_messages: list[RawMessage], max_len: int, top_k=10):
+    messages: dict[MessageId, RawMessage] = {}
+    for msg in raw_messages:
+        messages[msg.id] = msg
+    texts: list[str] = []
+    for cluster in clusters:
+        top_texts = [messages[sim.id].get_text(max_len) for sim in cluster.similarity[:top_k]]
+        texts.append("\n---\n".join(top_texts))
+    return texts
 
 
 def request_descriptions(messages: list[RawMessage], clusters: list[ClusterInfo]) -> tuple[list[str], list[str]]:
@@ -255,7 +255,7 @@ def main():
     print("ℹ️ Calculating embeddings...")
     embeddings = request_embeddings([msg.get_text(MAX_TEXT_LEN) for msg in messages])
 
-    print("ℹ️ Searching for clusters...")
+    print("ℹ️ Looking up for clusters...")
     clusters = request_clusters([msg.id for msg in messages], embeddings=embeddings, min_cluster_size=min_cluster_size, min_samples=min_samples)
 
     if len(clusters) == 0:
