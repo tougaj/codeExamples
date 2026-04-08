@@ -41,7 +41,7 @@ def get_cluster_title(texts: list[str]):
 ### Instruction ###
 <task>
 Тобі надано набір статей, кожна з яких міститься в окремому <article>.
-Усі статті належать до однієї спільної тематики та є змістовно пов'язаними (кластер схожих статей).
+Усі статті належать до однієї спільної тематики та є змістовно пов'язаними (кластер схожих статей), описують ті самі або тісно пов'язані події, можуть частково дублювати або уточнювати одне одного.
 Твоє завдання — визначити спільну тему цих статей та сформулювати ОДИН узагальнений, чіткий та зрозумілий заголовок **українською мовою**, яким можна їх озаглавити.
 </task>
 
@@ -58,6 +58,7 @@ def get_cluster_title(texts: list[str]):
 - Довжина заголовка: від 10 до 20 слів. Намагайся дотримуватись цього діапазону.
 - Використовуй ключові терміни з текстів, узагальнюючи або перефразовуючи їх без дослівного копіювання.
 - Формулювання має бути конкретним і змістовним, з чітким зазначенням предмета або події.
+- **ЗАБОРОНЕНО** формулювати заголовок таким чином, який допускає двозначне або неоднозначне тлумачення.
 - Не використовуй узагальнення без конкретики (наприклад: "тенденції", "аспекти", "питання" без уточнення).
 - Не використовуй абстрактні слова типу «Різне», «Інше», «Огляд теми».
 - Заголовок має відображати основний зміст більшості статей, а не окремі аспекти.
@@ -108,9 +109,8 @@ def get_cluster_title(texts: list[str]):
 def get_cluster_summary(texts: list[str]):
     prompt = """**Ти — система автоматичного формування інформаційних довідок на основі новинних кластерів.**
 
-Ти отримуєш набір текстів, розділених рядком `\n---\n`.
-
-Усі тексти належать до **однієї тематики**, описують **ті самі або тісно пов’язані події** та можуть частково дублювати або уточнювати одне одного.
+Тобі надано набір статей, кожна з яких міститься в окремому <article>.
+Усі статті належать до однієї спільної тематики та є змістовно пов'язаними (кластер схожих статей), описують ті самі або тісно пов'язані події, можуть частково дублювати або уточнювати одне одного.
 
 ---
 
@@ -177,7 +177,8 @@ def get_cluster_summary(texts: list[str]):
 * У відповіді подай **виключно текст довідки**.
 * **Без заголовків, маркерів, пояснень або коментарів.**
 
-Набір текстів для формування довідки:"""
+Набір текстів для формування довідки:
+<input>"""
 
     sampling_params = SamplingParamsRequest(temperature=0.2, max_tokens=2048)
     request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt, sampling_params=sampling_params)
@@ -263,17 +264,17 @@ def request_descriptions(messages: list[RawMessage], clusters: list[ClusterInfo]
                 raise RuntimeError("Unable to generate titles")
             batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
 
-    summaries: list[str] = ["" for _ in clusters]  # 🪲 for debug
-    # summaries: list[str] = []
-    # while len(summaries) == 0:
-    #     try:
-    #         summaries: list[str] = get_cluster_summary(batch)
-    #     except Exception as e:
-    #         print(e)
-    #         max_message_len -= 100
-    #         if max_message_len <= 100:
-    #             raise RuntimeError("Unable to generate summaries")
-    #         batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
+    # summaries: list[str] = ["" for _ in clusters]  # 🪲 for debug
+    summaries: list[str] = []
+    while len(summaries) == 0:
+        try:
+            summaries: list[str] = get_cluster_summary(batch)
+        except Exception as e:
+            print(e)
+            max_message_len -= 100
+            if max_message_len <= 100:
+                raise RuntimeError("Unable to generate summaries")
+            batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
 
     return titles, summaries
 
