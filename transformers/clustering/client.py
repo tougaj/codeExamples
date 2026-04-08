@@ -32,8 +32,17 @@ def print_centroid_message_info(messages: list[RawMessage], index: int):
     # print(f"📰 {message["text"]}")
 
 
-def get_cluster_title(texts: list[str]):
-    prompt = """### Role ###
+def get_cluster_title(texts: list[str], supercluster: Optional[str] = None):
+    supercluster_context = f"""
+#### Суперкластер: ####
+<supercluster>
+{supercluster}
+</supercluster>""" if supercluster else ""
+    supercluster_constraints = """- Враховуй тематику суперкластеру як контекст для уточнення змісту заголовка.
+- Заголовок має відображати саме підтематику (цей кластер), а не дублювати або узагальнювати назву суперкластеру.
+- За потреби використовуй терміни із суперкластеру, якщо вони допомагають точніше описати підтематику.""" if supercluster else ""
+
+    prompt = f"""### Role ###
 <role>
 Система автоматичного створення заголовків.
 </role>
@@ -44,6 +53,12 @@ def get_cluster_title(texts: list[str]):
 Усі статті належать до однієї спільної тематики та є змістовно пов'язаними (кластер схожих статей), описують ті самі або тісно пов'язані події, можуть частково дублювати або уточнювати одне одного.
 Твоє завдання — визначити спільну тему цих статей та сформулювати ОДИН узагальнений, чіткий та зрозумілий заголовок **українською мовою**, яким можна їх озаглавити.
 </task>
+
+### Context ###
+<context>
+24 лютого 2022 року Росія здійснила повномасштабний збройний напад на Україну, і ці дві держави перебувають у стані війни. Використовуй цей контекст лише тоді, коли він прямо присутній у статтях.
+{supercluster_context}
+</context>
 
 ### Constraints ###
 <constraints>
@@ -65,6 +80,7 @@ def get_cluster_title(texts: list[str]):
 - Заголовок має бути самодостатнім, логічно ясним і зрозумілим без додаткового контексту.
 - Дотримуйся нейтрального, об'єктивного стилю без оцінок.
 - Заголовок ОБОВ'ЯЗКОВО має бути написаний українською мовою.
+{supercluster_constraints}
 </constraints>
 
 ### Output Format ###
@@ -249,14 +265,14 @@ def get_batch(clusters: list[ClusterInfo], raw_messages: list[RawMessage], max_l
     return texts
 
 
-def request_descriptions(messages: list[RawMessage], clusters: list[ClusterInfo]) -> tuple[list[str], list[str]]:
+def request_descriptions(messages: list[RawMessage], clusters: list[ClusterInfo], supercluster: Optional[str]) -> tuple[list[str], list[str]]:
     max_message_len = MAX_TEXT_LEN
     batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
 
     titles: list[str] = []
     while len(titles) == 0:
         try:
-            titles: list[str] = get_cluster_title(batch)
+            titles: list[str] = get_cluster_title(batch, supercluster=supercluster)
         except Exception as e:
             print(e)
             max_message_len -= 100
@@ -309,7 +325,8 @@ def main():
         print("🫤 No clusters exist")
         return
 
-    titles, summaries = request_descriptions(messages=messages, clusters=clusters)
+    supercluster = os.getenv("SUPERCLUSTER")
+    titles, summaries = request_descriptions(messages=messages, clusters=clusters, supercluster=supercluster)
 
     print_clusters(clusters=clusters, titles=titles, summaries=summaries)
 
