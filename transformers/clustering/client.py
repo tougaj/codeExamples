@@ -12,8 +12,9 @@ from pydantic import TypeAdapter
 from data import load_json_file
 from interfaces import (BatchResponse, ChatRequest, MessageId, RawMessage,
                         SamplingParamsRequest)
-from server.models import (ClusterInfo, ClusteringRequest, EmbeddingRequest,
-                           EmbeddingResponse)
+from server.models import (ClusterInfo, ClusteringRequest,
+                           ClusteringTextRequest, EmbeddingRequest,
+                           EmbeddingResponse, MessageForClustering)
 
 load_dotenv()
 
@@ -80,6 +81,8 @@ def get_cluster_title(texts: list[str]):
         model_answer = BatchResponse.model_validate(raw_data)
         titles = [answer.text for answer in model_answer.results]
         # print(model_answer)
+    else:
+        raise ValueError(response.text)
     return titles
 
 
@@ -199,6 +202,20 @@ def request_clusters(ids: list[str], embeddings: np.ndarray, min_cluster_size: i
     return clusters
 
 
+def request_text_clusters(messages: list[RawMessage],  min_cluster_size: int, min_samples: Optional[int]) -> list[ClusterInfo]:
+    request_data = ClusteringTextRequest(
+        messages=[MessageForClustering(id=msg.id, text=msg.get_text(MAX_TEXT_LEN)) for msg in messages],
+        min_cluster_size=min_cluster_size,
+        min_samples=min_samples,
+        ignore_empty_cluster=True)
+    response = requests.post(f"{EMBEDDING_SERVER_ADDRESS}/text_clusters", json=request_data.model_dump(), timeout=REQUEST_TIMEOUT)
+    raw_data = response.json()
+    clusters = TypeAdapter(list[ClusterInfo]).validate_python(raw_data)
+    # Можна і так, але це менш "pydantic-way"
+    # clusters = [ClusterInfo(**item) for item in raw_data]
+    return clusters
+
+
 def get_batch(clusters: list[ClusterInfo], raw_messages: list[RawMessage], max_len: int, top_k=10):
     messages: dict[MessageId, RawMessage] = {}
     for msg in raw_messages:
@@ -211,9 +228,9 @@ def get_batch(clusters: list[ClusterInfo], raw_messages: list[RawMessage], max_l
 
 
 def request_descriptions(messages: list[RawMessage], clusters: list[ClusterInfo]) -> tuple[list[str], list[str]]:
-    batch = get_batch(clusters, raw_messages=messages, max_len=MAX_TEXT_LEN)
-
     max_message_len = MAX_TEXT_LEN
+    batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
+
     titles: list[str] = []
     while len(titles) == 0:
         try:
@@ -221,6 +238,8 @@ def request_descriptions(messages: list[RawMessage], clusters: list[ClusterInfo]
         except Exception as e:
             print(e)
             max_message_len -= 100
+            if max_message_len <= 100:
+                raise RuntimeError("Unable to generate titles")
             batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
 
     summaries: list[str] = []
@@ -230,6 +249,8 @@ def request_descriptions(messages: list[RawMessage], clusters: list[ClusterInfo]
         except Exception as e:
             print(e)
             max_message_len -= 100
+            if max_message_len <= 100:
+                raise RuntimeError("Unable to generate summaries")
             batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
 
     return titles, summaries
@@ -252,11 +273,14 @@ def main():
     print(f"Using data from file {data_file}")
     messages = load_json_file(data_file)
 
-    print("ℹ️ Calculating embeddings...")
-    embeddings = request_embeddings([msg.get_text(MAX_TEXT_LEN) for msg in messages])
+    # print("ℹ️ Calculating embeddings...")
+    # embeddings = request_embeddings([msg.get_text(MAX_TEXT_LEN) for msg in messages])
+
+    # print("ℹ️ Looking up for clusters...")
+    # clusters = request_clusters([msg.id for msg in messages], embeddings=embeddings, min_cluster_size=min_cluster_size, min_samples=min_samples)
 
     print("ℹ️ Looking up for clusters...")
-    clusters = request_clusters([msg.id for msg in messages], embeddings=embeddings, min_cluster_size=min_cluster_size, min_samples=min_samples)
+    clusters = request_text_clusters(messages, min_cluster_size=min_cluster_size, min_samples=min_samples)
 
     if len(clusters) == 0:
         print("🫤 No clusters exist")
