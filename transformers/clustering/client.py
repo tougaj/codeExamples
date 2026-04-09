@@ -1,8 +1,7 @@
 import os
 import sys
-# from collections import Counter
-# from pprint import pprint
-from typing import Optional
+from functools import partial
+from typing import Callable, Optional
 
 import numpy as np
 import requests
@@ -136,7 +135,8 @@ def get_cluster_summary(texts: list[str], supercluster: Optional[str] = None):
 - Заголовок має відображати саме підтематику (цей кластер), а не дублювати або узагальнювати назву суперкластеру.
 - За потреби використовуй терміни із суперкластеру, якщо вони допомагають точніше описати підтематику.""" if supercluster else ""
 
-    prompt = f"""### Role ###
+    prompt = f"""
+### Role ###
 <role>
 система автоматичного формування інформаційних довідок на основі новинних кластерів.
 </role>
@@ -156,7 +156,8 @@ def get_cluster_summary(texts: list[str], supercluster: Optional[str] = None):
 
 ### Constraints ###
 <constraints>
-- Довідка має **точно та стисло передавати головні факти**.
+- Довідка має **точно та стисло передавати ключових факти, події і тези**.
+- УНИКАЙ другорядних деталей, прикладів, цитат, оцінних суджень і емоційного тону.
 - Зосереджуйся на:
 
   + події або процесі,
@@ -166,48 +167,42 @@ def get_cluster_summary(texts: list[str], supercluster: Optional[str] = None):
   + безпосередніх причинах або підставах **лише якщо вони прямо зазначені в текстах**.
 
 - Інформація з різних текстів має бути **узгоджено об’єднана**, без повторів і суперечностей.
-- Мова: **українська** (обов’язково).
-- Стиль: **нейтральний, інформативний, довідковий**.
+- Мова: **українська** (обов’язково). Використовуй природну, зрозумілу й граматично правильну українську мову.
+- Дотримуйся нейтрального, об'єктивного та інформативного стилю.
 - Без емоцій, оцінок, риторики, прогнозів або висновків.
-- Довжина довідки: **2–3 абзаци**, у кожному **3–5 переважно простих речень**. Намагайся дотримуватись цього діапазону.
+- Якщо в текстах є неоднозначна інформація, намагайся передати її максимально нейтрально, не віддаючи перевагу жодній з інтерпретацій.
+- Якщо формулювання в довідці не може бути підтверджене прямою цитатою або перефразуванням фрагментів оригінальних текстів, воно вважається забороненим.
 {supercluster_constraints}
 </constraints>
 
 ### Strict prohibitions (critical) ###
 <prohibitions>
-- **ЗАБОРОНЕНО** додавати будь-яку інформацію, якої немає в оригінальних текстах, навіть якщо вона здається логічною або загальновідомою.
-- **ЗАБОРОНЕНО** робити припущення щодо:
-
-  + осіб,
-  + ролей,
-  + дат,
-  + причин,
-  + країн,
-  + географічних назв,
-  + наслідків чи мотивів.
-
+- **ЗАБОРОНЕНО** додавати будь-яку інформацію, яка не міститься безпосередньо в оригінальних текстах (навіть якщо вона здається логічною або загальновідомою), включаючи припущення, інтерпретації, пояснення, імена, факти, дати, географічні назви тощо.
+- Інформація вважається безпосередньо присутньою **лише у разі її явної текстової згадки** в текстах; інформація, що випливає з контексту, логічних міркувань або загальних знань, **вважається забороненою**.
+- **ЗАБОРОНЕНО** робити припущення щодо осіб, ролей, подій, дат, причин, країн, географічних назв, фактів, наслідків чи мотивів. Якщо в тексті не вказано ім’я чи назва суб'єкту — заборонено їх вигадувати.
 - **ЗАБОРОНЕНО** вигадувати імена або назви:
 
   - якщо суб’єкт не названий у тексті — залишай його неназваним;
   - не уточнюй і не конкретизуй те, що в оригіналі подано узагальнено.
 
-- **ЗАБОРОНЕНО** інтерпретувати події і пояснювати їх причин або значення, якщо цього прямо немає в текстах.
-- **ЗАБОРОНЕНО** припускати, що подія стосується України, **якщо це не зазначено явно**.
+- **ЗАБОРОНЕНО** інтерпретувати і додавати причини, мотиви чи додаткові деталі, яких немає в текстах.
+- **ЗАБОРОНЕНО ПРИПУСКАТИ**, що в тексті йдеться про Україну, якусь область або місто України, українських політиків, українські органи влади, якщо тільки це не вказано явно в текстах.
 </prohibitions>
 
 ### Output Format ###
 <format>
 - **ЗАБОРОНЕНО** використовувати в назві будь-яку мову, окрім української.
 - У відповіді подай **виключно текст довідки**.
+- Довжина довідки: **2–3 абзаци**, у кожному **3–5 переважно простих речень**. Намагайся дотримуватись цього діапазону.
 - **ЗАБОРОНЕНО** використовувати заголовки, списки, коментарі, пояснення.
-- Використовуй **Markdown-жирний** текст для виділення іменованих сутностей (особи, організації, географічні назви, події).
-- Якщо іменовані сутності подані іншою мовою — **переклади їх українською**, без зміни змісту.
+- Використовуй Markdown **жирний** текст для виділення іменованих сутностей (NER).
+- Виділяй жирним **лише конкретні іменовані сутності**: осіб, організації, країни, міста, установи, офіційні назви подій чи документів.
 </format>
 
 ### Input Data ###
 <input>"""
 
-    sampling_params = SamplingParamsRequest(temperature=0.2, max_tokens=2048)
+    sampling_params = SamplingParamsRequest(temperature=0.2, max_tokens=2*1024)
     request_data: ChatRequest = ChatRequest(texts=texts, prompt=prompt, sampling_params=sampling_params)
     print(f"🧐 Generating summaries for {len(texts)} clusters")
 
@@ -216,7 +211,7 @@ def get_cluster_summary(texts: list[str], supercluster: Optional[str] = None):
     summaries: list[str] = []
     if response.status_code == 200:
         model_answer = BatchResponse.model_validate(raw_data)
-        summaries = [answer.text for answer in model_answer.results]
+        summaries = [(answer.text if answer.finish_reason == "stop" else "") for answer in model_answer.results]
     else:
         raise ValueError(response.text)
     return summaries
@@ -276,33 +271,86 @@ def get_batch(clusters: list[ClusterInfo], raw_messages: list[RawMessage], max_l
     return texts
 
 
-def request_descriptions(messages: list[RawMessage], clusters: list[ClusterInfo], supercluster: Optional[str]) -> tuple[list[str], list[str]]:
-    max_message_len = MAX_TEXT_LEN
-    batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
+# def request_descriptions(messages: list[RawMessage], clusters: list[ClusterInfo], max_sample_len: int, supercluster: Optional[str]) -> tuple[list[str], list[str]]:
+#     max_message_len = max_sample_len
+#     batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
 
-    titles: list[str] = []
-    while len(titles) == 0:
-        try:
-            titles: list[str] = get_cluster_title(batch, supercluster=supercluster)
-        except Exception as e:
-            print(e)
-            max_message_len -= 100
-            if max_message_len <= 100:
-                raise RuntimeError("Unable to generate titles")
-            batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
+#     titles: list[str] = []
+#     while len(titles) == 0:
+#         try:
+#             titles: list[str] = get_cluster_title(batch, supercluster=supercluster)
+#         except Exception as e:
+#             print(e)
+#             max_message_len -= 100
+#             if max_message_len <= 100:
+#                 raise RuntimeError("Unable to generate titles")
+#             batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
 
-    # summaries: list[str] = ["" for _ in clusters]  # 🪲 for debug
-    summaries: list[str] = []
-    while len(summaries) == 0:
-        try:
-            summaries: list[str] = get_cluster_summary(batch, supercluster=supercluster)
-        except Exception as e:
-            print(e)
-            max_message_len -= 100
-            if max_message_len <= 100:
-                raise RuntimeError("Unable to generate summaries")
-            batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
+#     # summaries: list[str] = ["" for _ in clusters]  # 🪲 for debug
+#     summaries: list[str] = []
+#     while len(summaries) == 0:
+#         try:
+#             summaries: list[str] = get_cluster_summary(batch, supercluster=supercluster)
+#         except Exception as e:
+#             print(e)
+#             max_message_len -= 100
+#             if max_message_len <= 100:
+#                 raise RuntimeError("Unable to generate summaries")
+#             batch = get_batch(clusters, raw_messages=messages, max_len=max_message_len)
 
+#     return titles, summaries
+
+
+def _generate_with_retry(
+    generate_fn: Callable[[list[str]], list[str]],
+    clusters: list[ClusterInfo],
+    messages: list[RawMessage],
+    max_len: int,
+    min_len: int = 100,
+    step: int = 100,
+) -> list[str]:
+    if max_len <= min_len:
+        raise RuntimeError(f"Unable to generate: max_len exhausted")
+
+    # 1️⃣ Спроба згенерувати batch і отримати результат
+    batch = get_batch(clusters, raw_messages=messages, max_len=max_len)
+    try:
+        results = generate_fn(batch)
+    except Exception as e:
+        print(e)
+        return _generate_with_retry(generate_fn, clusters, messages, max_len - step, min_len, step)
+
+    # 2️⃣ Знаходимо індекси порожніх результатів
+    empty_indices = [i for i, r in enumerate(results) if not r]
+    if not empty_indices:
+        return results
+
+    print(f"🤐 Content generation error for {len(empty_indices)} item(s)")
+    # 3️⃣ Рекурсивно перегенеровуємо тільки проблемні елементи
+    failed_clusters = [clusters[i] for i in empty_indices]
+    regenerated = _generate_with_retry(generate_fn, failed_clusters, messages, max_len - step, min_len, step)
+
+    # 4️⃣ Вставляємо на правильні місця
+    for idx, value in zip(empty_indices, regenerated):
+        results[idx] = value
+
+    return results
+
+
+def request_descriptions(
+    messages: list[RawMessage],
+    clusters: list[ClusterInfo],
+    max_sample_len: int,
+    supercluster: Optional[str],
+) -> tuple[list[str], list[str]]:
+    titles = _generate_with_retry(
+        partial(get_cluster_title, supercluster=supercluster),
+        clusters, messages, max_sample_len,
+    )
+    summaries = _generate_with_retry(
+        partial(get_cluster_summary, supercluster=supercluster),
+        clusters, messages, max_sample_len,
+    )
     return titles, summaries
 
 
@@ -337,7 +385,7 @@ def main():
         return
 
     supercluster = os.getenv("SUPERCLUSTER")
-    titles, summaries = request_descriptions(messages=messages, clusters=clusters, supercluster=supercluster)
+    titles, summaries = request_descriptions(messages=messages, clusters=clusters, max_sample_len=MAX_TEXT_LEN, supercluster=supercluster)
 
     print_clusters(clusters=clusters, titles=titles, summaries=summaries)
 
