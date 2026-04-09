@@ -34,60 +34,61 @@ def print_centroid_message_info(messages: list[RawMessage], index: int):
 
 def get_cluster_title(texts: list[str], supercluster: Optional[str] = None):
     supercluster_context = f"""
-#### Суперкластер: ####
+#### Supercluster’s theme: ####
 <supercluster>
 {supercluster}
 </supercluster>""" if supercluster else ""
-    supercluster_constraints = """- Враховуй тематику суперкластеру як контекст для уточнення змісту заголовка.
-- Заголовок має відображати саме підтематику (цей кластер), а не дублювати або узагальнювати назву суперкластеру.
-- За потреби використовуй терміни із суперкластеру, якщо вони допомагають точніше описати підтематику.""" if supercluster else ""
+    supercluster_constraints = """- Use the supercluster’s theme as a context for refining the headline’s content.
+- The headline should reflect the subtopic (this cluster) specifically, rather than duplicating or generalizing the supercluster’s theme.
+- If necessary, use terms from the supercluster if they help describe the subtopic more accurately.""" if supercluster else ""
 
     prompt = f"""### Role ###
 <role>
-Система автоматичного створення заголовків.
+Automatic headline generation system.
 </role>
 
 ### Instruction ###
 <task>
-Тобі надано набір статей, кожна з яких міститься в окремому <article>.
-Усі статті належать до однієї спільної тематики та є змістовно пов'язаними (кластер схожих статей), описують ті самі або тісно пов'язані події, можуть частково дублювати або уточнювати одне одного.
-Твоє завдання — визначити спільну тему цих статей та сформулювати ОДИН узагальнений, чіткий та зрозумілий заголовок **українською мовою**, яким можна їх озаглавити.
+You have been provided with a set of articles, each of which is located at a separate <article>.
+All articles belong to a single common topic and are thematically related (a cluster of similar articles); they describe the same or closely related events and may partially overlap or clarify one another.
+Your task is to identify the common theme of these articles and formulate ONE general, clear, and understandable headline **in Ukrainian** that can be used to name them.
 </task>
 
 ### Context ###
 <context>
-24 лютого 2022 року Росія здійснила повномасштабний збройний напад на Україну, і ці дві держави перебувають у стані війни. Використовуй цей контекст лише тоді, коли він прямо присутній у статтях.
+On February 24, 2022, Russia launched a full-scale military invasion of Ukraine, and the two countries are currently at war. Use this context only when it is explicitly mentioned in the articles.
 {supercluster_context}
 </context>
 
 ### Constraints ###
 <constraints>
-- Використовуй граматично правильну, природну та стилістично узгоджену українську мову без кальок і неприродних конструкцій.
-- Ігноруй другорядні або унікальні деталі, що не повторюються.
-- Пріоритезуй найчастіше згадувані ідеї та концепти.
-- Якщо є кілька можливих тем, обери ту, що:
-  + найчастіше повторюється
-  + є найбільш конкретною (не надто загальною)
-- Якщо спільна тема слабко виражена, орієнтуйся на найбільш повторювані елементи та узагальни їх без вигадування нових фактів.
-- Сформулюй заголовок як повне речення або складний іменниковий заголовок українською мовою.
-- Довжина заголовка: від 10 до 20 слів. Намагайся дотримуватись цього діапазону.
-- Використовуй ключові терміни з текстів, узагальнюючи або перефразовуючи їх без дослівного копіювання.
-- Формулювання має бути конкретним і змістовним, з чітким зазначенням предмета або події.
-- **ЗАБОРОНЕНО** формулювати заголовок таким чином, який допускає двозначне або неоднозначне тлумачення.
-- Не використовуй узагальнення без конкретики (наприклад: "тенденції", "аспекти", "питання" без уточнення).
-- Не використовуй абстрактні слова типу «Різне», «Інше», «Огляд теми».
-- Заголовок має відображати основний зміст більшості статей, а не окремі аспекти.
-- Заголовок має бути самодостатнім, логічно ясним і зрозумілим без додаткового контексту.
-- Дотримуйся нейтрального, об'єктивного стилю без оцінок.
-- Заголовок ОБОВ'ЯЗКОВО має бути написаний українською мовою.
+- Use grammatically correct, natural, and stylistically consistent Ukrainian without clichés or unnatural constructions.
+- Ignore minor or unique details that do not recur.
+- Prioritize the most frequently mentioned ideas and concepts.
+- If there are several possible topics, choose the one that:
+  + is mentioned most frequently
+  + is the most specific (not too general)
+- If the common theme is not very clear, focus on the most frequently recurring elements and summarize them without inventing new facts.
+- Formulate the headline as a complete sentence or a compound noun headline in Ukrainian.
+- Headline length: 10 to 20 words. Try to stay within this range.
+- Use key terms from the text, summarizing or rephrasing them without copying them verbatim.
+- The wording should be specific and meaningful, clearly indicating the subject or event.
+- **IT IS PROHIBITED** to formulate a headline in a way that allows for ambiguous or multiple interpretations.
+- Do not use generalizations without specifics (for example: “trends,” “aspects,” “issues” without clarification).
+- Do not use abstract words such as “Miscellaneous,” “Other,” or “Overview of the topic.”
+- The headline should reflect the main content of most articles, not individual aspects.
+- The headline should be self-contained, logically clear, and understandable without additional context.
+- Maintain a neutral, objective style without judgment.
+- The headline MUST be written in Ukrainian.
 {supercluster_constraints}
 </constraints>
 
 ### Output Format ###
 <format>
-- У відповіді подай **виключно заголовок теми одним рядком**.
-- Відповідь має містити РІВНО ОДИН рядок тексту.
-- **ЗАБОРОНЕНО** використовувати заголовки, списки, коментарі, пояснення, лапки.
+- It is **PROHIBITED** to use any language other than Ukrainian for the headline.
+- In your reply, include **only the topic headline in a single line**.
+- Your reply must contain EXACTLY ONE line of text.
+- It is **PROHIBITED** to use headings, lists, comments, explanations, or quotation marks.
 </format>
 
 ### Example ###
@@ -95,6 +96,9 @@ def get_cluster_title(texts: list[str], supercluster: Optional[str] = None):
 <input>
 <article>Європа стикається зі зростанням цін на природний газ...</article>
 <article>Енергетична криза спричинила підвищення тарифів...</article>
+<article>Европа сталкивается с рекордным ростом цен на газ и угрозой деиндустриализации...</article>
+<article>Europe’s energy crisis deepens as surging gas prices fuel economic uncertainty...</article>
+<article>Europa kämpft mit explodierenden Gaspreisen und den Folgen für die Industrie...</article>
 </input>
 
 <answer>
