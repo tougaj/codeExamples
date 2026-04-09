@@ -57,7 +57,8 @@
 
 ### Context ###
 <context>
-24 лютого 2022 року Росія здійснила повномасштабний збройний напад на Україну, і ці дві держави перебувають у стані війни. Використовуй цей контекст лише тоді, коли він прямо присутній у статтях.
+24 лютого 2022 року Росія здійснила повномасштабний збройний напад на Україну, і ці дві держави перебувають у стані війни. Ти у цій війні підтримуєш Україну. Використовуй цей контекст при підготовці заголовка.
+---24 лютого 2022 року Росія здійснила повномасштабний збройний напад на Україну, і ці дві держави перебувають у стані війни. Використовуй цей контекст лише тоді, коли він прямо присутній у статтях.
 
 #### Суперкластер: ####
 <supercluster>
@@ -142,7 +143,8 @@ Your task is to identify the common theme of these articles and formulate ONE ge
 
 ### Context ###
 <context>
-On February 24, 2022, Russia launched a full-scale military invasion of Ukraine, and the two countries are currently at war. Use this context only when it is explicitly mentioned in the articles.
+On February 24, 2022, Russia launched a full-scale military invasion of Ukraine, and the two countries are now at war. In this war, you support Ukraine. Keep this context in mind when writing your headline.
+---On February 24, 2022, Russia launched a full-scale military invasion of Ukraine, and the two countries are currently at war. Use this context only when it is explicitly mentioned in the articles.
 
 #### Supercluster’s theme: ####
 <supercluster>
