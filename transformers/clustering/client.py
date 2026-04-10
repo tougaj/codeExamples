@@ -239,7 +239,7 @@ Follow this order unless it contradicts the content of the texts.
 - Provide **only the brief text**, without headings.
 - Length: **2–3 paragraphs**, each with **3–5 sentences**. Try to stay within this range. Prefer simple and moderately complex sentences without excessive complexity.
 - It is **FORBIDDEN** to use headings, lists, comments, or explanations.
-- Use Markdown **bold** text to highlight the following named entities (NER): persons, organizations, countries, cities, institutions, official names of events or documents.
+- **MUST** use **bold** Markdown text to highlight the following named entities (NER): people, organizations, countries, cities, institutions, and official names of events or documents.
 - Highlight each named entity in bold on first mention. Repeated mentions may remain unhighlighted.
 - Do not highlight unnecessary or generic words as named entities.
 </format>
@@ -355,14 +355,14 @@ def _generate_with_retry(
     step: int = 100,
 ) -> list[str]:
     if max_len <= min_len:
-        raise RuntimeError(f"Unable to generate: max_len exhausted")
+        raise RuntimeError(f"Unable to generate: {max_len} exhausted")
 
     # 1️⃣ Спроба згенерувати batch і отримати результат
     batch = get_batch(clusters, raw_messages=messages, max_len=max_len)
     try:
         results = generate_fn(batch)
     except Exception as e:
-        print(e)
+        print(f"🤔 Content generation error: {e}")
         return _generate_with_retry(generate_fn, clusters, messages, max_len - step, min_len, step)
 
     # 2️⃣ Знаходимо індекси порожніх результатів
@@ -399,12 +399,13 @@ def request_descriptions(
     return titles, summaries
 
 
-def print_clusters(clusters: list[ClusterInfo], titles: list[str], summaries: list[str]):
+def print_clusters(clusters: list[ClusterInfo], titles: list[str], summaries: list[str], original_messages_count: int):
     clusters_count = len(clusters)
     assert clusters_count == len(titles) == len(summaries)
     for index, (cluster, title, summary) in enumerate(zip(clusters, titles, summaries), start=1):
+        msg_count = len(cluster.similarity)
         # виводимо результат 🖨️
-        print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({len(cluster.similarity)} messages)
+        print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({msg_count} messages, {msg_count/original_messages_count*100:.1f} %)
 🖊️ {title}
 🪅 {summary}
 
@@ -416,13 +417,13 @@ def main():
     print(f"Using data from file {data_file}")
     messages = load_json_file(data_file)
 
-    # print("ℹ️ Calculating embeddings...")
+    # print("🔍 Calculating embeddings...")
     # embeddings = request_embeddings([msg.get_text(MAX_TEXT_LEN) for msg in messages])
 
-    # print("ℹ️ Looking up for clusters...")
+    # print("🔍 Looking up for clusters...")
     # clusters = request_clusters([msg.id for msg in messages], embeddings=embeddings, min_cluster_size=min_cluster_size, min_samples=min_samples)
 
-    print("ℹ️ Looking up for clusters...")
+    print("🔍 Looking up for clusters...")
     clusters = request_text_clusters(messages, min_cluster_size=min_cluster_size, min_samples=min_samples)
 
     if len(clusters) == 0:
@@ -432,7 +433,7 @@ def main():
     supercluster = os.getenv("SUPERCLUSTER")
     titles, summaries = request_descriptions(messages=messages, clusters=clusters, max_sample_len=MAX_TEXT_LEN, supercluster=supercluster)
 
-    print_clusters(clusters=clusters, titles=titles, summaries=summaries)
+    print_clusters(clusters=clusters, titles=titles, summaries=summaries, original_messages_count=len(messages))
 
 
 if __name__ == "__main__":

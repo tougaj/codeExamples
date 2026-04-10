@@ -196,7 +196,7 @@ WHEN INFORMATION CONFLICTS:
 - У відповіді подай **виключно текст довідки**, без заголовків.
 - Довжина довідки: **2–3 абзаци**, у кожному **3–5 речень**. Намагайся дотримуватись цього діапазону. Використовуй переважно прості та середньої складності речення без надмірної складності.
 - **ЗАБОРОНЕНО** використовувати заголовки, списки, коментарі, пояснення.
-- **Використовуй** Markdown **жирний** текст для виділення таких іменованих сутностей (NER): особи, організації, країни, міста, установи, офіційні назви подій чи документів.
+- **ОБОВ'ЯЗКОВО** використовуй Markdown **жирний** текст для виділення таких іменованих сутностей (NER): особи, організації, країни, міста, установи, офіційні назви подій чи документів.
 - Виділяй кожну іменовану сутність жирним при першій згадці. Повторні згадки можна не виділяти.
 - Не виділяй зайві або загальні слова як іменовані сутності.
 </format>
@@ -338,7 +338,7 @@ Follow this order unless it contradicts the content of the texts.
 - Provide **only the brief text**, without headings.
 - Length: **2–3 paragraphs**, each with **3–5 sentences**. Try to stay within this range. Prefer simple and moderately complex sentences without excessive complexity.
 - It is **FORBIDDEN** to use headings, lists, comments, or explanations.
-- Use Markdown **bold** text to highlight the following named entities (NER): persons, organizations, countries, cities, institutions, official names of events or documents.
+- **MUST** use **bold** Markdown text to highlight the following named entities (NER): people, organizations, countries, cities, institutions, and official names of events or documents.
 - Highlight each named entity in bold on first mention. Repeated mentions may remain unhighlighted.
 - Do not highlight unnecessary or generic words as named entities.
 </format>
