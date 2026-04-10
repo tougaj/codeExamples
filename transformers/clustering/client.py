@@ -38,8 +38,7 @@ def get_cluster_title(texts: list[str], supercluster: Optional[str] = None):
 {supercluster}
 </supercluster>""" if supercluster else ""
     supercluster_constraints = """- Use the supercluster’s theme as a context for refining the headline’s content.
-- The headline should reflect the subtopic (this cluster) specifically, rather than duplicating or generalizing the supercluster’s theme.
-- If necessary, use terms from the supercluster if they help describe the subtopic more accurately.""" if supercluster else ""
+- The headline should reflect the subtopic (this cluster) specifically, rather than duplicating or generalizing the supercluster’s theme.""" if supercluster else ""
 
     prompt = f"""### Role ###
 <role>
@@ -132,8 +131,7 @@ def get_cluster_summary(texts: list[str], supercluster: Optional[str] = None):
 {supercluster}
 </supercluster>""" if supercluster else ""
     supercluster_constraints = """- Враховуй тематику суперкластеру як контекст для уточнення змісту заголовка.
-- Заголовок має відображати саме підтематику (цей кластер), а не дублювати або узагальнювати назву суперкластеру.
-- За потреби використовуй терміни із суперкластеру, якщо вони допомагають точніше описати підтематику.""" if supercluster else ""
+- Довідка має відображати саме підтематику (цей кластер), а не дублювати або узагальнювати назву суперкластеру.""" if supercluster else ""
 
     prompt = f"""
 ### Role ###

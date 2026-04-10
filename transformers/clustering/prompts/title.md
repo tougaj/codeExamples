@@ -90,7 +90,6 @@
 
 - Враховуй тематику суперкластеру як контекст для уточнення змісту заголовка.
 - Заголовок має відображати саме підтематику (цей кластер), а не дублювати або узагальнювати назву суперкластеру.
-- За потреби використовуй терміни із суперкластеру, якщо вони допомагають точніше описати підтематику.
 </constraints>
 
 ### Output Format ###
@@ -173,7 +172,6 @@ The title or a brief description of the general topic to which these articles be
 
 - Use the supercluster’s theme as a context for refining the headline’s content.
 - The headline should reflect the subtopic (this cluster) specifically, rather than duplicating or generalizing the supercluster’s theme.
-- If necessary, use terms from the supercluster if they help describe the subtopic more accurately.
 </constraints>
 
 ### Output Format ###
