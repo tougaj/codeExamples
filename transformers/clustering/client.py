@@ -363,7 +363,7 @@ def _generate_with_retry(
     try:
         results = generate_fn(batch)
     except Exception as e:
-        print(f"🤔 Content generation error: {e}")
+        print(f"🤔 Content generation error (maximum text length is {max_len}): {e}")
         return _generate_with_retry(generate_fn, clusters, messages, max_len - step, min_len, step)
 
     # 2️⃣ Знаходимо індекси порожніх результатів
