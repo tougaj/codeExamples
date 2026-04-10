@@ -195,6 +195,7 @@ def get_cluster_summary(texts: list[str], supercluster: Optional[str] = None):
 </prohibitions>
 
 ### Execution Rules ###
+<rules>
 DO:
 - Об'єднуй інформацію з кількох текстів у єдиний виклад.
 - Перефразовуй для стислості та усунення повторів.
