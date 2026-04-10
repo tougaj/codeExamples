@@ -171,6 +171,7 @@ On February 24, 2022, Russia launched a full-scale armed invasion of Ukraine, an
 - Avoid secondary details, examples, quotations, and unnecessary clarifications.
 - Brevity must not lead to loss of key facts.
 - If information is insufficient — omit the corresponding aspects without explanation.
+- The brief MUST be written in Ukrainian.
 {supercluster_constraints}
 </constraints>
 
@@ -235,10 +236,10 @@ Follow this order unless it contradicts the content of the texts.
 
 ### Output Format
 <format>
-- It is **STRICTLY FORBIDDEN** to use any language other than Ukrainian for writing the brief.
+- It is **STRICTLY PROHIBITED** to use any language other than Ukrainian for writing the brief.
 - Provide **only the brief text**, without headings.
 - Length: **2–3 paragraphs**, each with **3–5 sentences**. Try to stay within this range. Prefer simple and moderately complex sentences without excessive complexity.
-- It is **FORBIDDEN** to use headings, lists, comments, or explanations.
+- It is **PROHIBITED** to use headings, lists, comments, or explanations.
 - **MUST** use **bold** Markdown text to highlight the following named entities (NER): people, organizations, countries, cities, institutions, and official names of events or documents.
 - Highlight each named entity in bold on first mention. Repeated mentions may remain unhighlighted.
 - Do not highlight unnecessary or generic words as named entities.

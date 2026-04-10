@@ -125,6 +125,7 @@
 - Стислість не повинна призводити до втрати ключових фактів.
 
 - Якщо інформації недостатньо — опускай відповідні аспекти без пояснень.
+- Довідка **ОБОВ'ЯЗКОВО** має бути написана українською мовою.
 - Використовуй суперкластер лише для уточнення контексту, не дублюючи його зміст.
 - Довідка має відображати саме підтематику (цей кластер), а не дублювати або узагальнювати зміст суперкластеру.
 </constraints>
@@ -269,6 +270,7 @@ Supercluster name
 - Avoid secondary details, examples, quotations, and unnecessary clarifications.
 - Brevity must not lead to loss of key facts.
 - If information is insufficient — omit the corresponding aspects without explanation.
+- The brief MUST be written in Ukrainian.
 - Use the supercluster only to clarify context, without duplicating its content.
 - The brief must reflect the specific subtopic (this cluster), not duplicate or generalize the supercluster content.
 </constraints>
@@ -334,10 +336,10 @@ Follow this order unless it contradicts the content of the texts.
 
 ### Output Format
 <format>
-- It is **STRICTLY FORBIDDEN** to use any language other than Ukrainian for writing the brief.
+- It is **STRICTLY PROHIBITED** to use any language other than Ukrainian for writing the brief.
 - Provide **only the brief text**, without headings.
 - Length: **2–3 paragraphs**, each with **3–5 sentences**. Try to stay within this range. Prefer simple and moderately complex sentences without excessive complexity.
-- It is **FORBIDDEN** to use headings, lists, comments, or explanations.
+- It is **PROHIBITED** to use headings, lists, comments, or explanations.
 - **MUST** use **bold** Markdown text to highlight the following named entities (NER): people, organizations, countries, cities, institutions, and official names of events or documents.
 - Highlight each named entity in bold on first mention. Repeated mentions may remain unhighlighted.
 - Do not highlight unnecessary or generic words as named entities.
