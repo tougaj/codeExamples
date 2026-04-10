@@ -55,7 +55,7 @@ Your task is to identify the common theme of these articles and formulate ONE ge
 
 ### Context ###
 <context>
-On February 24, 2022, Russia launched a full-scale military invasion of Ukraine, and the two countries are now at war. In this war, you support Ukraine. Keep this context in mind when writing your headline.
+On February 24, 2022, Russia launched a full-scale military invasion of Ukraine, and the two countries are currently at war. This context is provided solely for a general understanding of the situation. Do not use it to add new facts, assessments, or interpretations that are not included in the texts.
 {supercluster_context}
 </context>
 
@@ -150,7 +150,7 @@ def get_cluster_summary(texts: list[str], supercluster: Optional[str] = None):
 
 ### Context ###
 <context>
-24 лютого 2022 року Росія здійснила повномасштабний збройний напад на Україну, і ці дві держави перебувають у стані війни. Ти у цій війні підтримуєш Україну. Використовуй цей контекст при підготовці довідки.
+24 лютого 2022 року Росія здійснила повномасштабний збройний напад на Україну, і ці дві держави перебувають у стані війни. Цей контекст надано лише для загального розуміння ситуації. Не використовуй його для додавання нових фактів, оцінок або інтерпретацій, відсутніх у текстах.
 {supercluster_context}
 </context>
 
@@ -191,7 +191,7 @@ def get_cluster_summary(texts: list[str], supercluster: Optional[str] = None):
 ### Output Format ###
 <format>
 - **ЗАБОРОНЕНО** використовувати в назві будь-яку мову, окрім української.
-- У відповіді подай **виключно текст довідки**.
+- У відповіді подай **виключно текст довідки**, без заголовків.
 - Довжина довідки: **2–3 абзаци**, у кожному **3–5 переважно простих речень**. Намагайся дотримуватись цього діапазону.
 - **ЗАБОРОНЕНО** використовувати заголовки, списки, коментарі, пояснення.
 - **Використовуй** Markdown **жирний** текст для виділення іменованих сутностей (NER).
