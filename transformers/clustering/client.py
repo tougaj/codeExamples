@@ -416,13 +416,15 @@ def print_clusters(clusters: list[ClusterInfo], titles: list[str], summaries: li
 
 def main():
     data_file = get_input_filename()
+    messages = load_json_file(data_file)
+
     print(f"""⚙️ Clustering messages using configuration:
   - data from file: {data_file}
+  - messages count: {len(messages)}
   - minimum cluster size: {min_cluster_size}
   - minimum samples: {min_samples}
   - supercluster: {SUPERCLUSTER}
 """)
-    messages = load_json_file(data_file)
 
     # print("🔍 Calculating embeddings...")
     # embeddings = request_embeddings([msg.get_text(MAX_TEXT_LEN) for msg in messages])
