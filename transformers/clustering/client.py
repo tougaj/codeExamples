@@ -22,6 +22,7 @@ LLM_SERVER_ADDRESS = os.getenv("LLM_SERVER", "http://127.0.0.1:8000")
 REQUEST_TIMEOUT = int(os.getenv("REQUESTS_TIMEOUT", "300"))
 min_cluster_size = int(os.getenv("MIN_CLUSTER_SIZE", "7"))
 min_samples = int(os.getenv("MIN_SAMPLES", "")) if os.getenv("MIN_SAMPLES") else None
+SUPERCLUSTER = os.getenv("SUPERCLUSTER")
 MAX_TEXT_LEN = 2000
 
 
@@ -415,7 +416,12 @@ def print_clusters(clusters: list[ClusterInfo], titles: list[str], summaries: li
 
 def main():
     data_file = get_input_filename()
-    print(f"Using data from file {data_file}")
+    print(f"""⚙️ Clustering messages using configuration:
+  - data from file: {data_file}
+  - minimum cluster size: {min_cluster_size}
+  - minimum samples: {min_samples}
+  - supercluster: {SUPERCLUSTER}
+""")
     messages = load_json_file(data_file)
 
     # print("🔍 Calculating embeddings...")
@@ -431,8 +437,7 @@ def main():
         print("🫤 No clusters exist")
         return
 
-    supercluster = os.getenv("SUPERCLUSTER")
-    titles, summaries = request_descriptions(messages=messages, clusters=clusters, max_sample_len=MAX_TEXT_LEN, supercluster=supercluster)
+    titles, summaries = request_descriptions(messages=messages, clusters=clusters, max_sample_len=MAX_TEXT_LEN, supercluster=SUPERCLUSTER)
 
     print_clusters(clusters=clusters, titles=titles, summaries=summaries, original_messages_count=len(messages))
 
