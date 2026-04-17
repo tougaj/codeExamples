@@ -390,14 +390,22 @@ def request_descriptions(
     max_sample_len: int,
     supercluster: Optional[str],
 ) -> tuple[list[str], list[str]]:
+    clusters_count = len(clusters)
+    with_summaries = clusters_count <= 15
+    if not with_summaries:
+        print(f"🧐 There's quite a bit clusters ({len(clusters)}). Only the titles will be generated.")
+
     titles = _generate_with_retry(
         partial(get_cluster_title, supercluster=supercluster),
         clusters, messages, max_sample_len,
     )
-    summaries = _generate_with_retry(
-        partial(get_cluster_summary, supercluster=supercluster),
-        clusters, messages, max_sample_len,
-    )
+    if with_summaries:
+        summaries = _generate_with_retry(
+            partial(get_cluster_summary, supercluster=supercluster),
+            clusters, messages, max_sample_len,
+        )
+    else:
+        summaries = ["" for _ in clusters]
     return titles, summaries
 
 
@@ -406,10 +414,10 @@ def print_clusters(clusters: list[ClusterInfo], titles: list[str], summaries: li
     assert clusters_count == len(titles) == len(summaries)
     for index, (cluster, title, summary) in enumerate(zip(clusters, titles, summaries), start=1):
         msg_count = len(cluster.similarity)
+        str_summary = f"\n🪅 {summary}" if summary else ""
         # виводимо результат 🖨️
         print(f"""\n📦 CLUSTER {index} of {clusters_count} (label: {cluster.label}) ({msg_count} messages, {msg_count/original_messages_count*100:.1f} %)
-🖊️ {title}
-🪅 {summary}
+🖊️ {title}{str_summary}
 
 {'-'*20}""")
 
@@ -435,8 +443,12 @@ def main():
     print("🔍 Looking up for clusters...")
     clusters = request_text_clusters(messages, min_cluster_size=min_cluster_size, min_samples=min_samples)
 
-    if len(clusters) == 0:
+    clusters_count = len(clusters)
+    if clusters_count == 0:
         print("🫤 No clusters exist")
+        return
+    elif clusters_count > 25:
+        print(f"🫤 Too many clusters ({clusters_count}). Try using different parameters.")
         return
 
     titles, summaries = request_descriptions(messages=messages, clusters=clusters, max_sample_len=MAX_TEXT_LEN, supercluster=SUPERCLUSTER)
