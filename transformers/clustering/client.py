@@ -391,7 +391,7 @@ def request_descriptions(
     supercluster: Optional[str],
 ) -> tuple[list[str], list[str]]:
     clusters_count = len(clusters)
-    with_summaries = clusters_count <= 15
+    with_summaries = clusters_count <= 20
     if not with_summaries:
         print(f"🧐 There's quite a bit clusters ({len(clusters)}). Only the titles will be generated.")
 
@@ -447,7 +447,7 @@ def main():
     if clusters_count == 0:
         print("🫤 No clusters exist")
         return
-    elif clusters_count > 25:
+    elif clusters_count > 30:
         print(f"🫤 Too many clusters ({clusters_count}). Try using different parameters.")
         return
 
