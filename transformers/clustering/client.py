@@ -1,3 +1,4 @@
+import math
 import os
 import sys
 from functools import partial
@@ -20,7 +21,7 @@ load_dotenv()
 EMBEDDING_SERVER_ADDRESS = os.getenv("EMBEDDING_SERVER", "http://127.0.0.1:8000")
 LLM_SERVER_ADDRESS = os.getenv("LLM_SERVER", "http://127.0.0.1:8000")
 REQUEST_TIMEOUT = int(os.getenv("REQUESTS_TIMEOUT", "300"))
-min_cluster_size = int(os.getenv("MIN_CLUSTER_SIZE", "7"))
+min_cluster_size = int(os.getenv("MIN_CLUSTER_SIZE", "0"))
 min_samples = int(os.getenv("MIN_SAMPLES", "")) if os.getenv("MIN_SAMPLES") else None
 SUPERCLUSTER = os.getenv("SUPERCLUSTER")
 MAX_TEXT_LEN = 2000
@@ -425,6 +426,9 @@ def print_clusters(clusters: list[ClusterInfo], titles: list[str], summaries: li
 def main():
     data_file = get_input_filename()
     messages = load_json_file(data_file)
+    global min_cluster_size
+    if min_cluster_size == 0:
+        min_cluster_size = round(math.log2(len(messages)))
 
     print(f"""⚙️ Clustering messages using configuration:
   - data from file: {data_file}
