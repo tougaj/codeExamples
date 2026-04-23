@@ -426,13 +426,14 @@ def print_clusters(clusters: list[ClusterInfo], titles: list[str], summaries: li
 def main():
     data_file = get_input_filename()
     messages = load_json_file(data_file)
+    messages_count = len(messages)
     global min_cluster_size
     if min_cluster_size == 0:
-        min_cluster_size = round(math.log2(len(messages)))
+        min_cluster_size = round(math.log2(messages_count) if messages_count <= 1024 else messages_count/100)
 
     print(f"""⚙️ Clustering messages using configuration:
   - data from file: {data_file}
-  - messages count: {len(messages)}
+  - messages count: {messages_count}
   - minimum cluster size: {min_cluster_size}
   - minimum samples: {min_samples}
   - supercluster: {SUPERCLUSTER}
@@ -457,7 +458,7 @@ def main():
 
     titles, summaries = request_descriptions(messages=messages, clusters=clusters, max_sample_len=MAX_TEXT_LEN, supercluster=SUPERCLUSTER)
 
-    print_clusters(clusters=clusters, titles=titles, summaries=summaries, original_messages_count=len(messages))
+    print_clusters(clusters=clusters, titles=titles, summaries=summaries, original_messages_count=messages_count)
 
 
 if __name__ == "__main__":
