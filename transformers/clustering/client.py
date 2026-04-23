@@ -2,6 +2,7 @@ import math
 import os
 import sys
 from functools import partial
+from importlib.metadata import distributions
 from typing import Callable, Optional
 
 import numpy as np
@@ -413,6 +414,7 @@ def request_descriptions(
 def print_clusters(clusters: list[ClusterInfo], titles: list[str], summaries: list[str], original_messages_count: int):
     clusters_count = len(clusters)
     assert clusters_count == len(titles) == len(summaries)
+    distribution: list[tuple[str, int]] = []
     for index, (cluster, title, summary) in enumerate(zip(clusters, titles, summaries), start=1):
         msg_count = len(cluster.similarity)
         str_summary = f"\n🪅 {summary}" if summary else ""
@@ -421,6 +423,47 @@ def print_clusters(clusters: list[ClusterInfo], titles: list[str], summaries: li
 🖊️ {title}{str_summary}
 
 {'-'*20}""")
+        distribution.append((title, msg_count))
+    print_message_distribution(distribution, total=original_messages_count)
+
+
+def truncate(text: str, max_len: int) -> str:
+    if len(text) <= max_len:
+        return text
+    return text[:max_len - 1] + "…"
+
+
+def print_message_distribution(
+    data: list[tuple[str, int]],
+    total: int,
+    bar_width: int = 30,
+    name_width: int = 30,
+) -> None:
+    if not data or total <= 0:
+        print("Немає даних для відображення.")
+        return
+
+    print()
+    for name, count in data:
+        label = truncate(name, name_width)
+        pct = count / total * 100
+        filled = round(pct / 100 * bar_width)
+        bar = "█" * filled + "░" * (bar_width - filled)
+        print(f"  {label:<{name_width}}  {bar}  {count:>6} ({pct:5.1f}%)")
+
+    accounted = sum(count for _, count in data)
+    other = total - accounted
+    if other > 0:
+        pct = other / total * 100
+        filled = round(pct / 100 * bar_width)
+        bar = "█" * filled + "░" * (bar_width - filled)
+        label = truncate("Інші", name_width)
+        print(f"  {label:<{name_width}}  {bar}  {other:>6} ({pct:5.1f}%)")
+
+    print()
+    total_label = truncate("Разом", name_width)
+    print(f"  {total_label:<{name_width}}  {'─' * bar_width}  {total:>6} (100.0%)")
+    print()
 
 
 def main():
