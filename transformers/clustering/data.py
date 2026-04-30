@@ -2,6 +2,7 @@ import json
 from pprint import pprint
 
 from interfaces import RawMessage
+from server.models import ClusterInfo
 
 messages = [
     "На Дніпропетровщині та Запоріжжі частково відновлюють світло: яка зараз ситуація в регіонах",
@@ -47,6 +48,23 @@ def load_json_file(file_path: str):
     if errors_count != 0:
         print(f"⚠️ Errors count: {errors_count}")
     return messages
+
+
+def save_to_json_file(clusters: list[ClusterInfo], titles: list[str], summaries: list[str], file_path="local.clusters.json"):
+    assert len(clusters) == len(titles) == len(summaries)
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.write(json.dumps(
+            [
+                {
+                    **cluster.model_dump(mode="json"),
+                    "title": title,
+                    "summary": summary
+                } for cluster, title, summary in zip(clusters, titles, summaries)
+            ],
+            ensure_ascii=False,
+            indent=2)
+        )
+    print(f"💽 Clusters' data have been saved into file {file_path}")
 
 
 if __name__ == "__main__":

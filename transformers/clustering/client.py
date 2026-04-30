@@ -10,7 +10,7 @@ import requests
 from dotenv import load_dotenv
 from pydantic import TypeAdapter
 
-from data import load_json_file
+from data import load_json_file, save_to_json_file
 from interfaces import (BatchResponse, ChatRequest, MessageId, RawMessage,
                         SamplingParamsRequest)
 from server.models import (ClusterInfo, ClusteringRequest,
@@ -503,6 +503,7 @@ def main():
 
     titles, summaries = request_descriptions(messages=messages, clusters=clusters, max_sample_len=MAX_TEXT_LEN, supercluster=SUPERCLUSTER)
 
+    save_to_json_file(clusters, titles, summaries)
     print_clusters(clusters=clusters, titles=titles, summaries=summaries, original_messages_count=messages_count)
 
 
