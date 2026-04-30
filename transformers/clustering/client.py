@@ -466,13 +466,23 @@ def print_message_distribution(
     print()
 
 
+def estimate_min_cluster_size(messages_count: int) -> int:
+    if messages_count <= 1024:
+        min_cluster_size = math.log2(messages_count)
+    elif messages_count <= 2048:
+        min_cluster_size = messages_count/100
+    else:
+        min_cluster_size = messages_count/133
+    return math.floor(min_cluster_size)
+
+
 def main():
     data_file = get_input_filename()
     messages = load_json_file(data_file)
     messages_count = len(messages)
     global min_cluster_size, min_samples
     if min_cluster_size == 0:
-        min_cluster_size = math.floor(math.log2(messages_count) if messages_count <= 1024 else messages_count/100)
+        min_cluster_size = estimate_min_cluster_size(messages_count)
     if min_samples is None:
         min_samples = round(min_cluster_size/2)
 
